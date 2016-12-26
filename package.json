@@ -1,0 +1,41 @@
+{
+  "name": "webext-options-sync",
+  "version": "0.5.0",
+  "description": "Helps you manage and autosave your extension's options.",
+  "license": "MIT",
+  "repository": "bfred-it/webext-options-sync",
+  "author": "Federico Brigante <github@bfred.it> (bfred.it)",
+  "keywords": [
+    "browser",
+    "extension",
+    "options",
+    "sync",
+    "webext",
+    "chrome",
+    "firefox"
+  ],
+  "files": [
+    "optdom.js",
+    "optman.js"
+  ],
+  "scripts": {
+    "watch": "onchange '*.js' --initial -- xo --fix",
+    "test": "xo"
+  },
+  "xo": {
+    "envs": [
+      "browser",
+      "webextensions"
+    ],
+    "rules": {
+      "comma-dangle": [
+        0,
+        "only-multiline"
+      ]
+    }
+  },
+  "devDependencies": {
+    "onchange": "^3.2.0",
+    "xo": "^0.17.1"
+  }
+}
