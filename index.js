@@ -97,6 +97,6 @@ class OptMan {
 	}
 }
 
-if (typeof exports === 'object') {
-	exports.OptMan = OptMan;
+if (typeof module === 'object') {
+	module.exports = OptMan;
 }
