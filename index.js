@@ -11,7 +11,7 @@ class OptSync {
 
 		chrome.runtime.onInstalled.addListener(reason => {
 			console.info('Extension event:', reason);
-			this.getAll((options = {}) => {
+			this.getAll().then((options = {}) => {
 				console.info('Existing options:', options);
 				if (this.setup.migrations.length > 0) {
 					console.info('Running', this.setup.migrations.length, 'migrations');
@@ -40,7 +40,7 @@ class OptSync {
 	}
 
 	syncForm(form) {
-		this.getAll(options => OptSync._applyToForm(options, form));
+		this.getAll().then(options => OptSync._applyToForm(options, form));
 		form.addEventListener('input', e => this._handleFormUpdates(e));
 		form.addEventListener('change', e => this._handleFormUpdates(e));
 	}
