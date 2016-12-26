@@ -31,7 +31,7 @@ Access your saved options from `content.js` or `background.js` with:
 
 ```js
 /* globals OptSync */
-new OptSync().getAll(options => {
+new OptSync().getAll().then(options => {
 	console.log('The user’s options are', options);
 	if(options.color) {
 		document.body.style.color = color;
