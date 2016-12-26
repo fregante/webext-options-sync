@@ -23,8 +23,39 @@ If you're using a bundler:
 import OptSync from 'webext-options-sync';
 ```
 
-
 ## Usage
+
+### Options access
+
+Access your saved options from `content.js` or `background.js` with:
+
+```js
+/* globals OptSync */
+new OptSync().getAll(options => {
+	console.log('The user’s options are', options);
+	if(options.color) {
+		document.body.style.color = color;
+	}
+});
+```
+
+And don't forget to include `webext-options-sync` in your manifest.json:
+
+```json
+{
+	"content_scripts": [
+	    {
+	        "matches": [
+	            "https://www.google.com*",
+	        ],
+	        "js": [
+	            "node_modules/webext-options-sync/index.js",
+	            "content.js"
+	        ]
+	    }
+	]
+}
+```
 
 ### Defaults definition
 
