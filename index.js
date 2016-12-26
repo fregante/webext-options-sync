@@ -1,4 +1,4 @@
-class OptMan {
+class OptSync {
 	constructor(storageName = 'options') {
 		this.storageName = storageName;
 	}
@@ -40,7 +40,7 @@ class OptMan {
 	}
 
 	syncForm(form) {
-		this.getAll(options => OptMan._applyToForm(options, form));
+		this.getAll(options => OptSync._applyToForm(options, form));
 		form.addEventListener('input', e => this._handleFormUpdates(e));
 		form.addEventListener('change', e => this._handleFormUpdates(e));
 	}
@@ -98,5 +98,5 @@ class OptMan {
 }
 
 if (typeof module === 'object') {
-	module.exports = OptMan;
+	module.exports = OptSync;
 }

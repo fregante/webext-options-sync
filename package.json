@@ -15,8 +15,7 @@
     "firefox"
   ],
   "files": [
-    "optdom.js",
-    "optman.js"
+    "index.js"
   ],
   "scripts": {
     "watch": "onchange '*.js' --initial -- xo --fix",
