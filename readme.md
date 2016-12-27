@@ -117,12 +117,12 @@ new OptSync().define({
 				delete savedOptions.colour;
 			}
 		},
-		OptSync.migrationRemoveUnused
+		OptSync.migrations.removeUnused
 	]
 });
 ```
 
-Notice `OptSync.migrationRemoveUnused`: it's a helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
+Notice `OptSync.migrations.removeUnused`: it's a helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
 
 ## API
 

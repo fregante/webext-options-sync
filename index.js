@@ -99,15 +99,17 @@ class OptSync {
 			[name]: value,
 		});
 	}
+}
 
-	static migrationRemoveUnused(options, defaults) {
+OptSync.prototype.migrations = {
+	removeUnused(options, defaults) {
 		for (let key of Object.keys(options)) {
 			if (!(key in defaults)) {
 				delete options[key];
 			}
 		}
 	}
-}
+};
 
 if (typeof module === 'object') {
 	module.exports = OptSync;
