@@ -4,23 +4,28 @@ class OptSync {
 		this.storage = chrome.storage.sync || chrome.storage.local;
 	}
 
-	define(setup) {
-		this.setup = Object.assign({
+	define(defs) {
+		defs = Object.assign({
 			defaults: {},
 			migrations: [],
-		}, setup);
+		}, defs);
 
-		chrome.runtime.onInstalled.addListener(reason => {
-			console.info('Extension event:', reason);
-			this.getAll().then((options = {}) => {
-				console.info('Existing options:', options);
-				if (this.setup.migrations.length > 0) {
-					console.info('Running', this.setup.migrations.length, 'migrations');
-					this.setup.migrations.forEach(migrate => migrate(options, this.setup.defaults));
-				}
-				const newOptions = Object.assign(this.setup.defaults, options);
-				this.setAll(newOptions);
-			});
+		if (chrome.runtime.onInstalled) {
+			chrome.runtime.onInstalled.addListener(() => this._applyDefinition(defs));
+		} else {
+			this._applyDefinition(defs);
+		}
+	}
+
+	_applyDefinition(defs) {
+		this.getAll().then(options => {
+			console.info('Existing options:', options);
+			if (defs.migrations.length > 0) {
+				console.info('Running', defs.migrations.length, 'migrations');
+				defs.migrations.forEach(migrate => migrate(options, defs.defaults));
+			}
+			const newOptions = Object.assign(defs.defaults, options);
+			this.setAll(newOptions);
 		});
 	}
 
