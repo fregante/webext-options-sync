@@ -32,7 +32,7 @@ class OptSync {
 	getAll() {
 		return new Promise(resolve => {
 			this.storage.get(this.storageName,
-				keys => resolve(keys[this.storageName])
+				keys => resolve(keys[this.storageName] || {})
 			);
 		});
 	}
