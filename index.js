@@ -96,7 +96,7 @@ class OptSync {
 	}
 
 	static migrationRemoveUnused(options, defaults) {
-		for (const key of Object.keys(options)) {
+		for (let key of Object.keys(options)) {
 			if (!(key in defaults)) {
 				delete options[key];
 			}
