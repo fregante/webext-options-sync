@@ -101,7 +101,7 @@ class OptSync {
 	}
 }
 
-OptSync.prototype.migrations = {
+OptSync.migrations = {
 	removeUnused(options, defaults) {
 		for (let key of Object.keys(options)) {
 			if (!(key in defaults)) {
