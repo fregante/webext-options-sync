@@ -73,7 +73,7 @@ new OptSync().define({
 });
 ```
 
-Include it directly in manifest.json as a background script together with a file with the definitions:
+Include it in `manifest.json` as a background script together with `webext-options-sync`
 
 ```json
 {
