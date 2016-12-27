@@ -39,6 +39,12 @@ class OptSync {
 		});
 	}
 
+	set(newOptions) {
+		return this.getAll().then(options => {
+			this.setAll(Object.assign(options, newOptions));
+		});
+	}
+
 	syncForm(form) {
 		this.getAll().then(options => OptSync._applyToForm(options, form));
 		form.addEventListener('input', e => this._handleFormUpdates(e));
@@ -83,7 +89,7 @@ class OptSync {
 			default: break;
 		}
 		console.info('Saving option', el.name, 'to', value);
-		this.setAll({
+		this.set({
 			[name]: value,
 		});
 	}
