@@ -1,6 +1,7 @@
 class OptSync {
 	constructor(storageName = 'options') {
 		this.storageName = storageName;
+		this.storage = chrome.storage.sync || chrome.storage.local;
 	}
 
 	define(setup) {
@@ -25,7 +26,7 @@ class OptSync {
 
 	getAll() {
 		return new Promise(resolve => {
-			chrome.storage.sync.get(this.storageName,
+			this.storage.get(this.storageName,
 				keys => resolve(keys[this.storageName])
 			);
 		});
@@ -33,7 +34,7 @@ class OptSync {
 
 	setAll(newOptions) {
 		return new Promise(resolve => {
-			chrome.storage.sync.set({
+			this.storage.set({
 				[this.storageName]: newOptions,
 			}, resolve);
 		});
