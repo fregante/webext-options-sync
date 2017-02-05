@@ -1,3 +1,5 @@
+//https://github.com/bfred-it/webext-options-sync
+
 class OptSync {
 	constructor(storageName = 'options') {
 		this.storageName = storageName;

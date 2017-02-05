@@ -14,8 +14,9 @@
     "chrome",
     "firefox"
   ],
+  "main": "webext-options-sync.js",
   "files": [
-    "index.js"
+    "webext-options-sync.js"
   ],
   "scripts": {
     "watch": "onchange '*.js' --initial -- xo --fix",
