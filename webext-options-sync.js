@@ -1,4 +1,4 @@
-//https://github.com/bfred-it/webext-options-sync
+// https://github.com/bfred-it/webext-options-sync
 
 class OptSync {
 	constructor(storageName = 'options') {
@@ -108,7 +108,7 @@ class OptSync {
 
 OptSync.migrations = {
 	removeUnused(options, defaults) {
-		for (let key of Object.keys(options)) {
+		for (const key of Object.keys(options)) {
 			if (!(key in defaults)) {
 				delete options[key];
 			}
