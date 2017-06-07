@@ -91,6 +91,9 @@ class OptSync {
 		const name = el.name;
 		let value = el.value;
 		switch (el.type) {
+			case 'select-one':
+				value = el.options[el.selectedIndex].value;
+				break;
 			case 'checkbox':
 				value = el.checked;
 				break;
