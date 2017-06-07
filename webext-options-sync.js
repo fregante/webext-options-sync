@@ -61,23 +61,24 @@ class OptSync {
 
 	static _applyToForm(options, form) {
 		Object.keys(options).forEach(name => {
-			const els = form.querySelectorAll(`[name="${name}"]`);
-			if (els.length > 0) {
+			const options = form.querySelectorAll(`[name="${name}"]`);
+			const [field] = options;
+			if (field) {
 				console.info('Set option', name, 'to', options[name]);
-				switch (els[0].type) {
+				switch (field.type) {
 					case 'checkbox':
-						els[0].checked = options[name];
+						field.checked = options[name];
 						break;
 					case 'radio': {
-						const selected = Array.from(els)
+						const [selected] = Array.from(options)
 						.filter(el => el.value === options[name]);
-						if (selected.length > 0) {
-							selected[0].checked = true;
+						if (selected) {
+							selected.checked = true;
 						}
 						break;
 					}
 					default:
-						els[0].value = options[name];
+						field.value = options[name];
 						break;
 				}
 			} else {
