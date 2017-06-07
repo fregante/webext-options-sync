@@ -60,7 +60,7 @@ class OptSync {
 	}
 
 	static _applyToForm(options, form) {
-		Object.keys(options).forEach(name => {
+		for (const name of Object.keys(options)) {
 			const options = form.querySelectorAll(`[name="${name}"]`);
 			const [field] = options;
 			if (field) {
@@ -84,7 +84,7 @@ class OptSync {
 			} else {
 				console.warn('Stored option {', name, ':', options[name], '} was not found on the page');
 			}
-		});
+		}
 	}
 
 	_handleFormUpdates(e) {
