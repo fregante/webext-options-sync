@@ -31,12 +31,21 @@ class OptSync {
 		});
 	}
 
+	_parseNumbers(options) {
+		for (const name of Object.keys(options)) {
+			if (options[name] === String(Number(options[name]))) {
+				options[name] = Number(options[name]);
+			}
+		}
+		return options;
+	}
+
 	getAll() {
 		return new Promise(resolve => {
 			this.storage.get(this.storageName,
 				keys => resolve(keys[this.storageName] || {})
 			);
-		});
+		}).then(this._parseNumbers);
 	}
 
 	setAll(newOptions) {
