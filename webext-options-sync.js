@@ -100,6 +100,9 @@ class OptSync {
 		const el = e.target;
 		const name = el.name;
 		let value = el.value;
+		if (!name) {
+			return;
+		}
 		switch (el.type) {
 			case 'select-one':
 				value = el.options[el.selectedIndex].value;
