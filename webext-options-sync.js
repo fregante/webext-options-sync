@@ -1,6 +1,6 @@
 // https://github.com/bfred-it/webext-options-sync
 
-class OptSync {
+class OptionsSync {
 	constructor(storageName = 'options') {
 		this.storageName = storageName;
 		this.storage = chrome.storage.sync || chrome.storage.local;
@@ -63,7 +63,7 @@ class OptSync {
 	}
 
 	syncForm(form) {
-		this.getAll().then(options => OptSync._applyToForm(options, form));
+		this.getAll().then(options => OptionsSync._applyToForm(options, form));
 		form.addEventListener('input', e => this._handleFormUpdates(e));
 		form.addEventListener('change', e => this._handleFormUpdates(e));
 	}
@@ -119,7 +119,7 @@ class OptSync {
 	}
 }
 
-OptSync.migrations = {
+OptionsSync.migrations = {
 	removeUnused(options, defaults) {
 		for (const key of Object.keys(options)) {
 			if (!(key in defaults)) {
@@ -130,5 +130,5 @@ OptSync.migrations = {
 };
 
 if (typeof module === 'object') {
-	module.exports = OptSync;
+	module.exports = OptionsSync;
 }

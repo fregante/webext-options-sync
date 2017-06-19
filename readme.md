@@ -20,7 +20,7 @@ npm install --save webext-options-sync
 If you're using a bundler:
 
 ```js
-import OptSync from 'webext-options-sync';
+import OptionsSync from 'webext-options-sync';
 ```
 
 ## Usage
@@ -30,8 +30,8 @@ import OptSync from 'webext-options-sync';
 Access your saved options from `content.js` or `background.js` with:
 
 ```js
-/* globals OptSync */
-new OptSync().getAll().then(options => {
+/* globals OptionsSync */
+new OptionsSync().getAll().then(options => {
 	console.log('The user’s options are', options);
 	if(options.color) {
 		document.body.style.color = color;
@@ -62,8 +62,8 @@ And don't forget to include `webext-options-sync` in your manifest.json:
 Create your options definition file, for example `options-init.js`:
 
 ```js
-/* globals OptSync */
-new OptSync().define({
+/* globals OptionsSync */
+new OptionsSync().define({
 	defaults: {
 		yourStringOption: 'green',
 		anyBooleans: true,
@@ -88,13 +88,13 @@ Include it in `manifest.json` as a background script together with `webext-optio
 
 ### Form autosave and autoload
 
-`OptSync` listens to any field that triggers `input` or `change` events. Option names are set via the fields' `name` attribute. Checkboxes are stored as `true`/`false`; other fields are stored as strings.
+`OptionsSync` listens to any field that triggers `input` or `change` events. Option names are set via the fields' `name` attribute. Checkboxes are stored as `true`/`false`; other fields are stored as strings.
 
 In your `options.html` file, include `webext-options-sync/index.js` and then enable the sync this way:
 
 ```js
-/* globals OptSync */
-new OptSync().syncForm(document.querySelector('form#options-form'));
+/* globals OptionsSync */
+new OptionsSync().syncForm(document.querySelector('form#options-form'));
 ```
 
 Done. Any defaults or saved options will be loaded into the form and any change will automatically be saved via `chrome.storage.sync`
@@ -104,8 +104,8 @@ Done. Any defaults or saved options will be loaded into the form and any change 
 In your `options-init.js` file, extend the call by including an array of functions, for example:
 
 ```js
-/* globals OptSync */
-new OptSync().define({
+/* globals OptionsSync */
+new OptionsSync().define({
 	defaults: {
 		color: 'red',
 	},
@@ -117,16 +117,16 @@ new OptSync().define({
 				delete savedOptions.colour;
 			}
 		},
-		OptSync.migrations.removeUnused
+		OptionsSync.migrations.removeUnused
 	]
 });
 ```
 
-Notice `OptSync.migrations.removeUnused`: it's a helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
+Notice `OptionsSync.migrations.removeUnused`: it's a helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
 
 ## API
 
-#### const opts = new OptSync([storageName])
+#### const opts = new OptionsSync([storageName])
 
 Returns an instance linked to the chosen storage. 
 
