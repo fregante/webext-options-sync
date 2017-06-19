@@ -63,6 +63,9 @@ class OptionsSync {
 	}
 
 	syncForm(form) {
+		if (typeof form === 'string') {
+			form = document.querySelector(form);
+		}
 		this.getAll().then(options => OptionsSync._applyToForm(options, form));
 		form.addEventListener('input', e => this._handleFormUpdates(e));
 		form.addEventListener('change', e => this._handleFormUpdates(e));

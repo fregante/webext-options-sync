@@ -194,9 +194,9 @@ Any defaults or saved options will be loaded into the `<form>` and any change wi
 
 ##### form
 
-Type: `form dom element`
+Type: `form dom element`, `string`
 
-It's the `<form>` that needs to be synchronized. The form fields' `name` attributes will have to match the option names.
+It's the `<form>` that needs to be synchronized or a CSS selector (one element). The form fields' `name` attributes will have to match the option names.
 
 ## Related
 
