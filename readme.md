@@ -99,6 +99,25 @@ new OptionsSync().syncForm(document.querySelector('form#options-form'));
 
 Done. Any defaults or saved options will be loaded into the form and any change will automatically be saved via `chrome.storage.sync`
 
+#### Input validation
+
+If you define the HTML attributes `required`, `pattern` or `type` on your form elements, **`OptionsSync` will not autosave invalid fields.** For example a `type=email` field with the value `johngmail.com` is invalid and will not be saved until it becomes valid.
+
+You should inform the user of invalid fields, possibly via CSS by using the `:invalid` selector:
+
+``` css
+/* Style the element */
+input:invalid {
+	color: red;
+	border: 1px solid red;
+}
+
+/* Or display a custom error message */
+input:invalid ~ .error-message {
+	display: block;
+}
+```
+
 ### Migrations
 
 In your `options-init.js` file, extend the call by including an array of functions, for example:
@@ -123,25 +142,6 @@ new OptionsSync().define({
 ```
 
 Notice `OptionsSync.migrations.removeUnused`: it's a helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
-
-### Input validation
-
-Inputs are validated by default, invalid inputs are **not saved**. You might always need to provide the user a way to recognize invalid inputs.
-
-Example using `:invalid` CSS selector.
-
-``` css
-/* Style the element */
-input:invalid {
-	color: red;
-	border: 1px solid red;
-}
-
-/* Or display a custom error message */
-input:invalid ~ .error-message {
-	display: block;
-}
-```
 
 ## API
 
