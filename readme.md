@@ -101,9 +101,9 @@ Done. Any defaults or saved options will be loaded into the form and any change 
 
 #### Input validation
 
-If you define the HTML attributes `required`, `pattern` or `type` on your form elements, **`OptionsSync` will not autosave invalid fields.** For example a `type=email` field with the value `johngmail.com` is invalid and will not be saved until it becomes valid.
+If your form fields have any [validation attributes](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/Constraint_validation#Validation-related_attributes) they will not be saved until they become valid.
 
-You should inform the user of invalid fields, possibly via CSS by using the `:invalid` selector:
+Since autosave and validation is silent, you should inform the user of invalid fields, possibly via CSS by using the `:invalid` selector:
 
 ``` css
 /* Style the element */
