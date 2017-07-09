@@ -124,6 +124,25 @@ new OptionsSync().define({
 
 Notice `OptionsSync.migrations.removeUnused`: it's a helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
 
+### Input validation
+
+Inputs are validated by default, invalid inputs are **not saved**. You might always need to provide the user a way to recognize invalid inputs.
+
+Example using `:invalid` CSS selector.
+
+``` css
+/* Style the element */
+input:invalid {
+	color: red;
+	border: 1px solid red;
+}
+
+/* Or display a custom error message */
+input:invalid ~ .error-message {
+	display: block;
+}
+```
+
 ## API
 
 #### const opts = new OptionsSync([storageName])
