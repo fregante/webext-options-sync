@@ -11,9 +11,9 @@ class OptionsSync {
 			migrations: [],
 		}, defs);
 
-		if (chrome.runtime.onInstalled) {
+		if (chrome.runtime.onInstalled) { // In background script
 			chrome.runtime.onInstalled.addListener(() => this._applyDefinition(defs));
-		} else {
+		} else { // In content script, discouraged
 			this._applyDefinition(defs);
 		}
 	}
