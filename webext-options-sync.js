@@ -19,16 +19,17 @@ class OptionsSync {
 		}
 	}
 
-	_applyDefinition(defs) {
-		this.getAll().then(options => {
-			console.info('Existing options:', options);
-			if (defs.migrations.length > 0) {
-				console.info('Running', defs.migrations.length, 'migrations');
-				defs.migrations.forEach(migrate => migrate(options, defs.defaults));
-			}
-			const newOptions = Object.assign(defs.defaults, options);
-			this.setAll(newOptions);
-		});
+	async _applyDefinition(defs) {
+		const options = await this.getAll();
+
+		console.info('Existing options:', options);
+		if (defs.migrations.length > 0) {
+			console.info('Running', defs.migrations.length, 'migrations');
+			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
+		}
+
+		const newOptions = Object.assign(defs.defaults, options);
+		this.setAll(newOptions);
 	}
 
 	_parseNumbers(options) {
@@ -56,10 +57,9 @@ class OptionsSync {
 		});
 	}
 
-	set(newOptions) {
-		return this.getAll().then(options => {
-			this.setAll(Object.assign(options, newOptions));
-		});
+	async set(newOptions) {
+		const options = await this.getAll();
+		this.setAll(Object.assign(options, newOptions));
 	}
 
 	syncForm(form) {
