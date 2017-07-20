@@ -81,8 +81,7 @@ class OptionsSync {
 						field.checked = options[name];
 						break;
 					case 'radio': {
-						const [selected] = Array.from(els)
-						.filter(el => el.value === options[name]);
+						const [selected] = [...els].filter(el => el.value === options[name]);
 						if (selected) {
 							selected.checked = true;
 						}
@@ -98,14 +97,10 @@ class OptionsSync {
 		}
 	}
 
-	_handleFormUpdates(e) {
-		const el = e.target;
+	_handleFormUpdates({target: el}) {
 		const name = el.name;
 		let value = el.value;
-		if (!name) {
-			return;
-		}
-		if (!el.validity.valid) {
+		if (!name || !el.validity.valid) {
 			return;
 		}
 		switch (el.type) {
