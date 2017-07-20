@@ -3,7 +3,6 @@
 class OptionsSync {
 	constructor(storageName = 'options') {
 		this.storageName = storageName;
-		this.storage = chrome.storage.sync || chrome.storage.local;
 	}
 
 	define(defs) {
@@ -43,7 +42,7 @@ class OptionsSync {
 
 	getAll() {
 		return new Promise(resolve => {
-			this.storage.get(this.storageName,
+			chrome.storage.sync.get(this.storageName,
 				keys => resolve(keys[this.storageName] || {})
 			);
 		}).then(this._parseNumbers);
@@ -51,7 +50,7 @@ class OptionsSync {
 
 	setAll(newOptions) {
 		return new Promise(resolve => {
-			this.storage.set({
+			chrome.storage.sync.set({
 				[this.storageName]: newOptions,
 			}, resolve);
 		});
