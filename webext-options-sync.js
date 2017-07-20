@@ -106,6 +106,9 @@ class OptionsSync {
 		if (!name) {
 			return;
 		}
+		if (!el.validity.valid) {
+			return;
+		}
 		switch (el.type) {
 			case 'select-one':
 				value = el.options[el.selectedIndex].value;
