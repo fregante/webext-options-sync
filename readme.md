@@ -23,6 +23,8 @@ If you're using a bundler:
 import OptionsSync from 'webext-options-sync';
 ```
 
+Or just include the file `webext-options-sync.js` in your `manifest.json`.
+
 ## Usage
 
 ### Options access
@@ -49,7 +51,7 @@ And don't forget to include `webext-options-sync` in your manifest.json:
 	            "https://www.google.com*",
 	        ],
 	        "js": [
-	            "node_modules/webext-options-sync/index.js",
+	            "webext-options-sync.js",
 	            "content.js"
 	        ]
 	    }
@@ -79,7 +81,7 @@ Include it in `manifest.json` as a background script together with `webext-optio
 {
     "background": {
         "scripts": [
-            "node_modules/webext-options-sync/index.js",
+            "webext-options-sync.js",
             "options-init.js"
         ]
     }
@@ -90,7 +92,7 @@ Include it in `manifest.json` as a background script together with `webext-optio
 
 `OptionsSync` listens to any field that triggers `input` or `change` events. Option names are set via the fields' `name` attribute. Checkboxes are stored as `true`/`false`; other fields are stored as strings.
 
-In your `options.html` file, include `webext-options-sync/index.js` and then enable the sync this way:
+In your `options.html` file, include `webext-options-sync.js` and then enable the sync this way:
 
 ```js
 /* globals OptionsSync */
