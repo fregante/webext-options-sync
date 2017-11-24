@@ -1,8 +1,9 @@
 // https://github.com/bfred-it/webext-options-sync
 
 class OptionsSync {
-	constructor(storageName = 'options') {
+	constructor(storageName = 'options', type = 'sync') {
 		this.storageName = storageName;
+		this.storageType = type;
 	}
 
 	define(defs) {
@@ -42,7 +43,7 @@ class OptionsSync {
 
 	getAll() {
 		return new Promise(resolve => {
-			chrome.storage.sync.get(this.storageName,
+			chrome.storage[this.storageType].get(this.storageName,
 				keys => resolve(keys[this.storageName] || {})
 			);
 		}).then(this._parseNumbers);
@@ -50,7 +51,7 @@ class OptionsSync {
 
 	setAll(newOptions) {
 		return new Promise(resolve => {
-			chrome.storage.sync.set({
+			chrome.storage[this.storageType].set({
 				[this.storageName]: newOptions,
 			}, resolve);
 		});
