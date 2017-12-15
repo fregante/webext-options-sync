@@ -31,6 +31,8 @@ Or just include the file `webext-options-sync.js` in your `manifest.json`.
 
 Access your saved options from `content.js` or `background.js` with:
 
+<details>
+
 ```js
 /* globals OptionsSync */
 new OptionsSync().getAll().then(options => {
@@ -59,9 +61,13 @@ And don't forget to include `webext-options-sync` in your manifest.json:
 }
 ```
 
+</details>
+
 ### Defaults definition
 
 Create your options definition file, for example `options-init.js`:
+
+<details>
 
 ```js
 /* globals OptionsSync */
@@ -88,9 +94,13 @@ Include it in `manifest.json` as a background script together with `webext-optio
 }
 ```
 
+</details>
+
 ### Form autosave and autoload
 
 `OptionsSync` listens to any field that triggers `input` or `change` events. Option names are set via the fields' `name` attribute. Checkboxes are stored as `true`/`false`; other fields are stored as strings.
+
+<details>
 
 In your `options.html` file, include `webext-options-sync.js` and then enable the sync this way:
 
@@ -101,9 +111,13 @@ new OptionsSync().syncForm(document.querySelector('form#options-form'));
 
 Done. Any defaults or saved options will be loaded into the form and any change will automatically be saved via `chrome.storage.sync`
 
+</details>
+
 #### Input validation
 
 If your form fields have any [validation attributes](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/Constraint_validation#Validation-related_attributes) they will not be saved until they become valid.
+
+<details>
 
 Since autosave and validation is silent, you should inform the user of invalid fields, possibly via CSS by using the `:invalid` selector:
 
@@ -120,7 +134,11 @@ input:invalid ~ .error-message {
 }
 ```
 
+</details>
+
 ### Migrations
+
+<details>
 
 In your `options-init.js` file, extend the call by including an array of functions, for example:
 
@@ -144,6 +162,8 @@ new OptionsSync().define({
 ```
 
 Notice `OptionsSync.migrations.removeUnused`: it's a helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
+
+</details>
 
 ## API
 
