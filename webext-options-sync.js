@@ -19,16 +19,15 @@ class OptionsSync {
 	}
 
 	async _applyDefinition(defs) {
-		const options = await this.getAll();
+		const options = Object.assign(defs.defaults, await this.getAll());
 
-		console.info('Existing options:', options);
+		console.info('Current options:', options);
 		if (defs.migrations.length > 0) {
 			console.info('Running', defs.migrations.length, 'migrations');
 			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
 		}
 
-		const newOptions = Object.assign(defs.defaults, options);
-		this.setAll(newOptions);
+		this.setAll(options);
 	}
 
 	_parseNumbers(options) {
