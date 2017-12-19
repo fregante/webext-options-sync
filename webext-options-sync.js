@@ -128,6 +128,15 @@ OptionsSync.migrations = {
 	}
 };
 
+class OptionsSyncElement extends HTMLElement {
+	constructor() {
+		super();
+		new OptionsSync(this.getAttribute('storageName') || undefined).syncForm(this);
+	}
+}
+
+customElements.define('options-sync', OptionsSyncElement);
+
 if (typeof module === 'object') {
 	module.exports = OptionsSync;
 }
