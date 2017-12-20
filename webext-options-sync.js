@@ -69,6 +69,17 @@ class OptionsSync {
 		this.getAll().then(options => OptionsSync._applyToForm(options, form));
 		form.addEventListener('input', e => this._handleFormUpdates(e));
 		form.addEventListener('change', e => this._handleFormUpdates(e));
+		chrome.storage.onChanged.addListener((changes, namespace) => {
+			if (namespace === 'sync') {
+				for (const key of Object.keys(changes)) {
+					const {newValue} = changes[key];
+					if (key === this.storageName) {
+						OptionsSync._applyToForm(newValue, form);
+						return;
+					}
+				}
+			}
+		});
 	}
 
 	static _applyToForm(options, form) {
