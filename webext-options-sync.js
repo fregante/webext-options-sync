@@ -135,7 +135,9 @@ class OptionsSyncElement extends HTMLElement {
 	}
 }
 
-customElements.define('options-sync', OptionsSyncElement);
+try {
+	customElements.define('options-sync', OptionsSyncElement);
+} catch (err) {/* */}
 
 if (typeof module === 'object') {
 	module.exports = OptionsSync;
