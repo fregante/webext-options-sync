@@ -21,11 +21,13 @@ class OptionsSync {
 	async _applyDefinition(defs) {
 		const options = Object.assign(defs.defaults, await this.getAll());
 
+		console.group('Appling definitions');
 		console.info('Current options:', options);
 		if (defs.migrations.length > 0) {
 			console.info('Running', defs.migrations.length, 'migrations');
 			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
 		}
+		console.groupEnd();
 
 		this.setAll(options);
 	}
@@ -70,11 +72,12 @@ class OptionsSync {
 	}
 
 	static _applyToForm(options, form) {
+		console.group('Updating form');
 		for (const name of Object.keys(options)) {
 			const els = form.querySelectorAll(`[name="${name}"]`);
 			const [field] = els;
 			if (field) {
-				console.info('Set option', name, 'to', options[name]);
+				console.info(name, ':', options[name]);
 				switch (field.type) {
 					case 'checkbox':
 						field.checked = options[name];
@@ -94,6 +97,7 @@ class OptionsSync {
 				console.warn('Stored option {', name, ':', options[name], '} was not found on the page');
 			}
 		}
+		console.groupEnd();
 	}
 
 	_handleFormUpdates({target: el}) {
