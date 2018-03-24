@@ -19,7 +19,7 @@ class OptionsSync {
 	}
 
 	async _applyDefinition(defs) {
-		const options = Object.assign(defs.defaults, await this.getAll());
+		const options = Object.assign({}, defs.defaults, await this.getAll());
 
 		console.group('Appling definitions');
 		console.info('Current options:', options);
