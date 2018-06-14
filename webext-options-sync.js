@@ -143,16 +143,18 @@ OptionsSync.migrations = {
 	}
 };
 
-class OptionsSyncElement extends HTMLElement {
-	constructor() {
-		super();
-		new OptionsSync(this.getAttribute('storageName') || undefined).syncForm(this);
+if (typeof HTMLElement !== 'undefined') {
+	class OptionsSyncElement extends HTMLElement {
+		constructor() {
+			super();
+			new OptionsSync(this.getAttribute('storageName') || undefined).syncForm(this);
+		}
 	}
+	try {
+		customElements.define('options-sync', OptionsSyncElement);
+	} catch (err) {/* */}
 }
 
-try {
-	customElements.define('options-sync', OptionsSyncElement);
-} catch (err) {/* */}
 
 if (typeof module === 'object') {
 	module.exports = OptionsSync;
