@@ -112,14 +112,14 @@ class OptionsSync {
 	}
 
 	_handleFormUpdates({target: el}) {
-		const name = el.name;
-		let value = el.value;
+		const {name} = el;
+		let {value} = el;
 		if (!name || !el.validity.valid) {
 			return;
 		}
 		switch (el.type) {
 			case 'select-one':
-				value = el.options[el.selectedIndex].value;
+				value = el.options[el.selectedIndex].value; // eslint-disable-line prefer-destructuring
 				break;
 			case 'checkbox':
 				value = el.checked;
@@ -154,7 +154,6 @@ if (typeof HTMLElement !== 'undefined') {
 		customElements.define('options-sync', OptionsSyncElement);
 	} catch (err) {/* */}
 }
-
 
 if (typeof module === 'object') {
 	module.exports = OptionsSync;
