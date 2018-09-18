@@ -152,7 +152,7 @@ if (typeof HTMLElement !== 'undefined') {
 	}
 	try {
 		customElements.define('options-sync', OptionsSyncElement);
-	} catch (err) {/* */}
+	} catch (error) {/* */}
 }
 
 if (typeof module === 'object') {
