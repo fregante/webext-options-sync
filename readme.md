@@ -119,7 +119,7 @@ In alternative you can put your fields in a custom`<options-sync>` element inste
 </options-sync>
 ```
 
-<strong>Warning:</strong> Custom Elements are [not supported by Firefox yet.](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Status_in_Firefox)
+<strong>Warning:</strong> Custom Elements are supported by Firefox 63+ (November 2018)
 
 </details>
 
