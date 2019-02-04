@@ -14,9 +14,11 @@
     "chrome",
     "firefox"
   ],
+  "types": "index.d.ts",
   "main": "webext-options-sync.js",
   "files": [
-    "webext-options-sync.js"
+    "webext-options-sync.js",
+    "index.d.ts"
   ],
   "scripts": {
     "watch": "onchange '*.js' --initial -- xo --fix",
