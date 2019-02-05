@@ -28,16 +28,13 @@ export interface DefineOptions {
 	migrations: ExtensionUpdateHandler[];
 }
 
-/**
- * Returns an instance linked to the chosen storage.
- */
 export default class OptionsSync {
 	/**
-	 * Configuration to determine where options are stored.
+	 * @constructor Returns an instance linked to the chosen storage.
 	 *
-	 * @param [config={storageName='options'}]
+	 * @param [config={storageName='options'}] Configuration to determine where options are stored.
 	 */
-	constructor(config: {storageName: string });
+	constructor(config?: {storageName: string });
 
 	static migrations: {
 		/**
