@@ -1,8 +1,13 @@
 /**
+ * A map of options as strings or booleans. The keys will have to match the form fields' `name` attributes.
+ */
+type Options = Record<string, string | boolean>;
+
+/**
  * Handler signature for when an extension updates.
  */
 export interface ExtensionUpdateHandler {
-	(savedOptions: Record<string, string | boolean>, defaults: Record<string, string | boolean>): void;
+	(savedOptions: Options, defaults: Options): void;
 }
 
 /**
@@ -24,7 +29,7 @@ export interface ExtensionUpdateHandler {
  * }
  */
 export interface DefineOptions {
-	defaults: Record<string, string | boolean>;
+	defaults: Options;
 	/**
 	 * A list of functions to call when the extension is updated.
 	 */
@@ -65,16 +70,16 @@ export default class OptionsSync {
 	/**
 	 * Overrides **all** the options stored with your `options`.
 	 *
-	 * @param {Record<string, string | boolean>} newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
+	 * @param {Options} newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	 */
-	setAll: (newOptions: Record<string, string | boolean>) => Promise<void>;
+	setAll: (newOptions: Options) => Promise<void>;
 
 	/**
 	 * Merges new options with the existing stored options.
 	 *
-	 * @param {Record<string, string | boolean>} newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
+	 * @param {Options} newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	 */
-	set: (newOptions: Record<string, string | boolean>) => Promise<void>;
+	set: (newOptions: Options) => Promise<void>;
 
 	/**
 	 * Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved via `chrome.storage.sync`.
