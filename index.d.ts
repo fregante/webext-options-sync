@@ -14,13 +14,13 @@ declare module 'webext-options-sync' {
 			removeUnused: () => void;
 		}
 
-		getAll: <T>() => T;
+		getAll: <T>() => Promise<T>;
 
 		setAll: (newOptions: unknown) => Promise<void>;
 
 		set: (newOptions: unknown) => Promise<void>;
 
-		syncForm: (selector: string) => void;
+		syncForm: (selector: string|HTMLFormElement) => void;
 
 		define: (options: DefineOptions) => void;
 	}
