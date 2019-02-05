@@ -1,11 +1,6 @@
 declare module 'webext-options-sync' {
-	interface DefineOptions {
-		defaults: {
-			disabledFeatures: string;
-			customCSS: string;
-			personalToken: string;
-			logging: boolean;
-		};
+	export interface DefineOptions {
+		defaults: Record<string, string|boolean>;
 		migrations: [(options: {disabledFeatures: string}) => void, () => void];
 	}
 
@@ -16,9 +11,9 @@ declare module 'webext-options-sync' {
 
 		getAll: <T>() => Promise<T>;
 
-		setAll: (newOptions: unknown) => Promise<void>;
+		setAll: (newOptions: Record<string, string|boolean>) => Promise<void>;
 
-		set: (newOptions: unknown) => Promise<void>;
+		set: (newOptions: Record<string, string|boolean>) => Promise<void>;
 
 		syncForm: (selector: string|HTMLFormElement) => void;
 
