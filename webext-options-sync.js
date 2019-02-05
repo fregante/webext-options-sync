@@ -126,7 +126,7 @@ class OptionsSync {
 
 		switch (el.type) {
 			case 'select-one':
-				value = el.options[el.selectedIndex].value; // eslint-disable-line prefer-destructuring
+				value = el.options[el.selectedIndex].value;
 				break;
 			case 'checkbox':
 				value = el.checked;
