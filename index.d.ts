@@ -1,7 +1,7 @@
 /**
  * A map of options as strings or booleans. The keys will have to match the form fields' `name` attributes.
  */
-type Options = Record<string, string | boolean>;
+type Options = Record<string, string | number | boolean>;
 
 /**
  * Handler signature for when an extension updates.
