@@ -6,7 +6,7 @@ type Options = Record<string, string | boolean>;
 /**
  * Handler signature for when an extension updates.
  */
-export interface ExtensionUpdateHandler {
+export interface Migration {
 	(savedOptions: Options, defaults: Options): void;
 }
 
@@ -17,7 +17,7 @@ export interface ExtensionUpdateHandler {
  * 	// Recommended
  * 	defaults: {
  * 		color: 'blue'
- *	},
+ * 	},
  * 	// Optional
  * 	migrations: [
  * 		savedOptions => {
@@ -28,12 +28,12 @@ export interface ExtensionUpdateHandler {
  * 	],
  * }
  */
-export interface DefineOptions {
+export interface Definitions {
 	defaults: Options;
 	/**
 	 * A list of functions to call when the extension is updated.
 	 */
-	migrations: ExtensionUpdateHandler[];
+	migrations: Migration[];
 }
 
 export default class OptionsSync {
@@ -84,10 +84,10 @@ export default class OptionsSync {
 	/**
 	 * Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved via `chrome.storage.sync`.
 	 *
-	 * @param {string | HTMLFormElement} selector - The `<form>` that needs to be synchronized or a CSS selector (one element).
+	 * @param {HTMLElementTagNameMap | HTMLFormElement} selector - The `<form>` that needs to be synchronized or a CSS selector (one element).
 	 * The form fields' `name` attributes will have to match the option names.
 	 */
-	syncForm: (selector: string | HTMLFormElement) => void;
+	syncForm: (selector: HTMLElementTagNameMap | HTMLFormElement) => void;
 
 	/**
 	 * To be used in the background only. This is used to initiate the options. It's not required but it's recommended as a way to define which options the extension supports.
@@ -102,5 +102,5 @@ export default class OptionsSync {
 	 *	 }
 	 * });
 	*/
-	define: (options: DefineOptions) => void;
+	define: (options: Definitions) => void;
 }
