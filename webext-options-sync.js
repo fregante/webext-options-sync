@@ -27,6 +27,7 @@ class OptionsSync {
 			console.info('Running', defs.migrations.length, 'migrations');
 			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
 		}
+
 		console.groupEnd();
 
 		this.setAll(options);
@@ -38,6 +39,7 @@ class OptionsSync {
 				options[name] = Number(options[name]);
 			}
 		}
+
 		return options;
 	}
 
@@ -66,6 +68,7 @@ class OptionsSync {
 		if (typeof form === 'string') {
 			form = document.querySelector(form);
 		}
+
 		this.getAll().then(options => OptionsSync._applyToForm(options, form));
 		form.addEventListener('input', e => this._handleFormUpdates(e));
 		form.addEventListener('change', e => this._handleFormUpdates(e));
@@ -98,8 +101,10 @@ class OptionsSync {
 						if (selected) {
 							selected.checked = true;
 						}
+
 						break;
 					}
+
 					default:
 						field.value = options[name];
 						break;
@@ -108,6 +113,7 @@ class OptionsSync {
 				console.warn('Stored option {', name, ':', options[name], '} was not found on the page');
 			}
 		}
+
 		console.groupEnd();
 	}
 
@@ -117,6 +123,7 @@ class OptionsSync {
 		if (!name || !el.validity.valid) {
 			return;
 		}
+
 		switch (el.type) {
 			case 'select-one':
 				value = el.options[el.selectedIndex].value; // eslint-disable-line prefer-destructuring
@@ -126,6 +133,7 @@ class OptionsSync {
 				break;
 			default: break;
 		}
+
 		console.info('Saving option', el.name, 'to', value);
 		this.set({
 			[name]: value,
