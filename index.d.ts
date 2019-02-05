@@ -29,11 +29,14 @@ export interface DefineOptions {
 }
 
 /**
- * Listens to any field that triggers `input` or `change` events.
- * Option names are set via the fields' `name` attribute.
- * Checkboxes are stored as `true`/`false`; other fields are stored as strings.
+ * Returns an instance linked to the chosen storage.
  */
 export default class OptionsSync {
+	/**
+	 * Configuration to determine where options are stored.
+	 *
+	 * @param [config={storageName='options'}]
+	 */
 	constructor(config: {storageName: string });
 
 	static migrations: {
