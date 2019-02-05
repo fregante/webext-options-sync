@@ -84,10 +84,10 @@ export default class OptionsSync {
 	/**
 	 * Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved via `chrome.storage.sync`.
 	 *
-	 * @param {HTMLElementTagNameMap | HTMLFormElement} selector - The `<form>` that needs to be synchronized or a CSS selector (one element).
+	 * @param {string | HTMLElementTagNameMap | HTMLFormElement} selector - The `<form>` that needs to be synchronized or a CSS selector (one element).
 	 * The form fields' `name` attributes will have to match the option names.
 	 */
-	syncForm: (selector: HTMLElementTagNameMap | HTMLFormElement) => void;
+	syncForm: (selector: string | HTMLElementTagNameMap | HTMLFormElement) => void;
 
 	/**
 	 * To be used in the background only. This is used to initiate the options. It's not required but it's recommended as a way to define which options the extension supports.
