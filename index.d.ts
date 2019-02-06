@@ -65,7 +65,7 @@ export default class OptionsSync {
 	 * 	}
 	 * });
 	 */
-	getAll: <T>() => Promise<T>;
+	getAll: () => Promise<Options>;
 
 	/**
 	 * Overrides **all** the options stored with your `options`.
