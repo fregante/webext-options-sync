@@ -88,13 +88,23 @@ class OptionsSync {
 	static _applyToForm(options, form) {
 		console.group('Updating form');
 		for (const name of Object.keys(options)) {
-			const els = form.querySelectorAll(`[name="${name}"]`);
+			const els = form.querySelectorAll(`[name="${CSS.escape(name)}"]`);
 			const [field] = els;
 			if (field) {
 				console.info(name, ':', options[name]);
 				switch (field.type) {
 					case 'checkbox':
-						field.checked = options[name];
+						if (typeof options[name] === 'boolean') {
+							field.checked = options[name];
+						} else {
+							const values = options[name].split('\u001C');
+							for (const checkbox of els) {
+								if (values.includes(checkbox.value)) {
+									checkbox.checked = true;
+								}
+							}
+						}
+
 						break;
 					case 'radio': {
 						const [selected] = [...els].filter(el => el.value === options[name]);
@@ -129,7 +139,13 @@ class OptionsSync {
 				value = el.options[el.selectedIndex].value;
 				break;
 			case 'checkbox':
-				value = el.checked;
+				if (el.getAttribute('value')) {
+					const selector = `[name="${CSS.escape(name)}"]:checked`;
+					value = [].map.call(document.querySelectorAll(selector), el => el.value).join('\u001C');
+				} else {
+					value = el.checked;
+				}
+
 				break;
 			default: break;
 		}
