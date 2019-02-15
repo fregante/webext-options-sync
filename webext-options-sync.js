@@ -141,7 +141,7 @@ class OptionsSync {
 			case 'checkbox':
 				if (el.getAttribute('value')) {
 					const selector = `[name="${CSS.escape(name)}"]:checked`;
-					value = [].map.call(document.querySelectorAll(selector), el => el.value).join('\u001C');
+					value = [...document.querySelectorAll(selector)].map(el => el.value).join('\u001C');
 				} else {
 					value = el.checked;
 				}
