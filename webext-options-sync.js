@@ -109,6 +109,8 @@ class OptionsSync {
 						field.value = options[name];
 						break;
 				}
+
+				field.dispatchEvent(new InputEvent('input'));
 			} else {
 				console.warn('Stored option {', name, ':', options[name], '} was not found on the page');
 			}
