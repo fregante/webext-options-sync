@@ -1,6 +1,6 @@
 {
   "name": "webext-options-sync",
-  "version": "0.15.4",
+  "version": "0.15.5",
   "description": "Helps you manage and autosave your extension's options.",
   "license": "MIT",
   "repository": "bfred-it/webext-options-sync",
