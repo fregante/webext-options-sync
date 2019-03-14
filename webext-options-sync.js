@@ -70,8 +70,8 @@ class OptionsSync {
 		}
 
 		this.getAll().then(options => OptionsSync._applyToForm(options, form));
-		form.addEventListener('input', e => this._handleFormUpdates(e));
-		form.addEventListener('change', e => this._handleFormUpdates(e));
+		form.addEventListener('input', e => this._handleFormUpdatesDebounced(e));
+		form.addEventListener('change', e => this._handleFormUpdatesDebounced(e));
 		chrome.storage.onChanged.addListener((changes, namespace) => {
 			if (namespace === 'sync') {
 				for (const key of Object.keys(changes)) {
@@ -119,7 +119,18 @@ class OptionsSync {
 		console.groupEnd();
 	}
 
-	_handleFormUpdates({target: el}) {
+	_handleFormUpdatesDebounced({target: el}) {
+		if (this.timer) {
+			clearTimeout(this.timer);
+		}
+
+		this.timer = setTimeout(() => {
+			this._handleFormUpdates(el);
+			this.timer = undefined;
+		}, 100);
+	}
+
+	_handleFormUpdates(el) {
 		const {name} = el;
 		let {value} = el;
 		if (!name || !el.validity.valid) {
