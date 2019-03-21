@@ -1,8 +1,15 @@
 // https://github.com/bfred-it/webext-options-sync
 
 class OptionsSync {
-	constructor(storageName = 'options') {
-		this.storageName = storageName;
+	constructor(options = {}) {
+		this.storageName = options.storageName || 'options';
+		if (options.logging === false) {
+			this._log = () => {};
+		}
+	}
+
+	_log(method, ...args) {
+		console[method](...args);
 	}
 
 	define(defs) {
@@ -21,14 +28,14 @@ class OptionsSync {
 	async _applyDefinition(defs) {
 		const options = Object.assign({}, defs.defaults, await this.getAll());
 
-		console.group('Appling definitions');
-		console.info('Current options:', options);
+		this._log('group', 'Appling definitions');
+		this._log('info', 'Current options:', options);
 		if (defs.migrations.length > 0) {
-			console.info('Running', defs.migrations.length, 'migrations');
+			this._log('info', 'Running', defs.migrations.length, 'migrations');
 			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
 		}
 
-		console.groupEnd();
+		this._log('groupEnd');
 
 		this.setAll(options);
 	}
@@ -69,7 +76,7 @@ class OptionsSync {
 			form = document.querySelector(form);
 		}
 
-		this.getAll().then(options => OptionsSync._applyToForm(options, form));
+		this.getAll().then(options => this._applyToForm(options, form));
 		form.addEventListener('input', e => this._handleFormUpdatesDebounced(e));
 		form.addEventListener('change', e => this._handleFormUpdatesDebounced(e));
 		chrome.storage.onChanged.addListener((changes, namespace) => {
@@ -77,7 +84,7 @@ class OptionsSync {
 				for (const key of Object.keys(changes)) {
 					const {newValue} = changes[key];
 					if (key === this.storageName) {
-						OptionsSync._applyToForm(newValue, form);
+						this._applyToForm(newValue, form);
 						return;
 					}
 				}
@@ -85,13 +92,13 @@ class OptionsSync {
 		});
 	}
 
-	static _applyToForm(options, form) {
-		console.group('Updating form');
+	_applyToForm(options, form) {
+		this._log('group', 'Updating form');
 		for (const name of Object.keys(options)) {
 			const els = form.querySelectorAll(`[name="${name}"]`);
 			const [field] = els;
 			if (field) {
-				console.info(name, ':', options[name]);
+				this._log('info', name, ':', options[name]);
 				switch (field.type) {
 					case 'checkbox':
 						field.checked = options[name];
@@ -112,11 +119,11 @@ class OptionsSync {
 
 				field.dispatchEvent(new InputEvent('input'));
 			} else {
-				console.warn('Stored option {', name, ':', options[name], '} was not found on the page');
+				this._log('warn', 'Stored option {', name, ':', options[name], '} was not found on the page');
 			}
 		}
 
-		console.groupEnd();
+		this._log('groupEnd');
 	}
 
 	_handleFormUpdatesDebounced({target: el}) {
@@ -147,7 +154,7 @@ class OptionsSync {
 			default: break;
 		}
 
-		console.info('Saving option', el.name, 'to', value);
+		this._log('info', 'Saving option', el.name, 'to', value);
 		this.set({
 			[name]: value,
 		});
