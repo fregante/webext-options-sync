@@ -2,6 +2,12 @@
 
 class OptionsSync {
 	constructor(options = {}) {
+		if (typeof options === 'string') {
+			options = {
+				storageName: options
+			};
+		}
+
 		this.storageName = options.storageName || 'options';
 		if (options.logging === false) {
 			this._log = () => {};
