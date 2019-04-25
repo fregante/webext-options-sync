@@ -177,16 +177,23 @@ Notice `OptionsSync.migrations.removeUnused`: it's a helper method that removes 
 
 ## API
 
-#### const opts = new OptionsSync([storageName])
+#### const opts = new OptionsSync([options])
 
-Returns an instance linked to the chosen storage. 
+Returns an instance linked to the chosen storage.
 
 ##### storageName
 
 Type: `string`  
-Default: `options`
+Default: `'options'`
 
 The key used to store data in `chrome.storage.sync`
+
+##### logging
+
+Type: `boolean`  
+Default: `true`
+
+Determines whether info and warnings (on sync, updating form, etc.) should be logged to the console or not. Recommended when used in content scripts.
 
 #### opts.define(setup)
 
