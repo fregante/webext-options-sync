@@ -177,16 +177,18 @@ OptionsSync.migrations = {
 	}
 };
 
-if (typeof HTMLElement !== 'undefined') {
+if (typeof HTMLElement !== 'undefined' && typeof customElements !== 'undefined') {
 	class OptionsSyncElement extends HTMLElement {
 		constructor() {
 			super();
-			new OptionsSync(this.getAttribute('storageName') || undefined).syncForm(this);
+			new OptionsSync({
+				storageName: this.getAttribute('storageName') || undefined,
+				logging: this.getAttribute('logging') || undefined
+			}).syncForm(this);
 		}
 	}
-	try {
-		customElements.define('options-sync', OptionsSyncElement);
-	} catch (error) {/* */}
+
+	customElements.define('options-sync', OptionsSyncElement);
 }
 
 if (typeof module === 'object') {
