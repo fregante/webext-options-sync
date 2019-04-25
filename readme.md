@@ -184,7 +184,7 @@ Returns an instance linked to the chosen storage.
 ##### storageName
 
 Type: `string`  
-Default: `options`
+Default: `'options'`
 
 The key used to store data in `chrome.storage.sync`
 
