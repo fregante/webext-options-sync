@@ -42,7 +42,7 @@ export default class OptionsSync {
 	 *
 	 * @param [config={storageName='options'}] - Configuration to determine where options are stored.
 	 */
-	constructor(config?: {storageName: string});
+	constructor(config?: {storageName: string, logging: true});
 
 	static migrations: {
 		/**
