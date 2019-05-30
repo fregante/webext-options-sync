@@ -27,6 +27,9 @@
     "watch": "tsc --watch"
   },
   "xo": {
+    "ignores": [
+      "webext-options-sync.js"
+    ],
     "extensions": [
       "ts"
     ],
