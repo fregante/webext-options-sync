@@ -199,7 +199,7 @@ class OptionsSync {
 	_applyToForm(options: Options, form: HTMLFormElement): void {
 		this._log('group', 'Updating form');
 		for (const name of Object.keys(options)) {
-			const els = form.querySelectorAll<HTMLInputElement>(`[name="${name}"]`);
+			const els = form.querySelectorAll<HTMLInputElement>(`[name="${CSS.escape(name)}"]`);
 			const [field] = els;
 			if (field) {
 				this._log('info', name, ':', options[name]);
