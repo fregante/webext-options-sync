@@ -2,7 +2,7 @@
 	"extends": "@sindresorhus/tsconfig",
 	"compilerOptions": {
 		"outDir": ".",
-		"target": "es2015"
+		"target": "es2018"
 	},
 	"files": [
 		"source/webext-options-sync.ts"
