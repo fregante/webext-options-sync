@@ -10,7 +10,6 @@ A map of options as strings or booleans. The keys will have to match the form fi
 */
 export type Options = Record<string, string | number | boolean>;
 
-
 /*
 Handler signature for when an extension updates.
 */
@@ -44,13 +43,15 @@ export interface Definitions {
 }
 
 class OptionsSync {
-	storageName: string;
-	private _timer?: NodeJS.Timeout;
-	static migrations: {
+	static public migrations: {
 		removeUnused: Migration;
-	}
+	};
 
-/**
+	storageName: string;
+
+	private _timer?: NodeJS.Timeout;
+
+	/**
 @constructor Returns an instance linked to the chosen storage.
 @param [config={storageName='options'}] - Configuration to determine where options are stored.
 */
@@ -69,7 +70,7 @@ class OptionsSync {
 		this._handleFormUpdatesDebounced = this._handleFormUpdatesDebounced.bind(this);
 	}
 
-	_log(method: keyof Console, ...args: any[]) {
+	_log(method: keyof Console, ...args: any[]): void {
 		console[method](...args);
 	}
 
@@ -96,7 +97,7 @@ class OptionsSync {
 		}
 	}
 
-	async _applyDefinition(defs: Definitions) {
+	async _applyDefinition(defs: Definitions): void {
 		const options = {...defs.defaults, ...await this.getAll()};
 
 		this._log('group', 'Appling definitions');
@@ -112,7 +113,7 @@ class OptionsSync {
 		this.setAll(options);
 	}
 
-	_parseNumbers(options: Options) {
+	_parseNumbers(options: Options): Options {
 		for (const name of Object.keys(options)) {
 			if (options[name] === String(Number(options[name]))) {
 				options[name] = Number(options[name]);
@@ -195,7 +196,7 @@ class OptionsSync {
 		this._applyToForm(await this.getAll(), form);
 	}
 
-	_applyToForm(options: Options, form: HTMLFormElement) {
+	_applyToForm(options: Options, form: HTMLFormElement): void {
 		this._log('group', 'Updating form');
 		for (const name of Object.keys(options)) {
 			const els = form.querySelectorAll<HTMLInputElement>(`[name="${name}"]`);
@@ -229,7 +230,7 @@ class OptionsSync {
 		this._log('groupEnd');
 	}
 
-	_handleFormUpdatesDebounced(event: Event) {
+	_handleFormUpdatesDebounced(event: Event): void {
 		if (this._timer) {
 			clearTimeout(this._timer);
 		}
@@ -240,7 +241,7 @@ class OptionsSync {
 		}, 100);
 	}
 
-	_handleFormUpdates(el: HTMLFormElement) {
+	_handleFormUpdates(el: HTMLFormElement): void {
 		const {name} = el;
 		let {value} = el;
 		if (!name || !el.validity.valid) {
