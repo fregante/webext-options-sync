@@ -97,7 +97,7 @@ class OptionsSync {
 		}
 	}
 
-	async _applyDefinition(defs: Definitions): void {
+	async _applyDefinition(defs: Definitions): Promise<void> {
 		const options = {...defs.defaults, ...await this.getAll()};
 
 		this._log('group', 'Appling definitions');
