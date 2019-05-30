@@ -41,6 +41,7 @@ class OptionsSync {
 			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
 		}
 
+		this._log('info', 'Migrated options:', options);
 		this._log('groupEnd');
 
 		this.setAll(options);
