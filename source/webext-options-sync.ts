@@ -43,7 +43,7 @@ export interface Definitions {
 }
 
 class OptionsSync {
-	static public migrations: {
+	public static migrations: {
 		removeUnused: Migration;
 	};
 

@@ -8,3 +8,4 @@ Thumbs.db
 *.log
 logs
 *.map
+webext-options-sync.d.ts
