@@ -1,3 +1,5 @@
+import {isBackgroundPage} from 'webext-detect-page';
+
 declare namespace OptionsSync {
 	interface ModuleOptions {
 		storageName?: string;
@@ -100,10 +102,8 @@ class OptionsSync {
 		defs = {defaults: {},
 			migrations: [], ...defs};
 
-		if (chrome.runtime.onInstalled) { // In background script
+		if (isBackgroundPage()) {
 			chrome.runtime.onInstalled.addListener(() => this._applyDefinition(defs));
-		} else { // In content script, discouraged
-			this._applyDefinition(defs);
 		}
 	}
 

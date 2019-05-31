@@ -212,7 +212,22 @@ A map of default options as strings or booleans. The keys will have to match the
 
 Type: `array`
 
-A list of functions to call when the extension is updated. The function will have this signature: `(savedOptions, defaults)`. In this function, alter the `savedOptions`. Don't return anything.
+A list of functions to run in the `background` when the extension is updated. Example:
+
+```js
+{
+	migrations: [
+		(savedOptions, defaults) => {
+			// Change the `savedOptions`
+			if(savedOptions.oldStuff) {
+				delete savedOptions.oldStuff
+			}
+
+			// No return needed
+		}
+	],
+}
+		```
 
 ###### storageName
 

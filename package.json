@@ -60,5 +60,8 @@
     "tsify": "^4.0.1",
     "typescript": "^3.5.1",
     "xo": "*"
+  },
+  "dependencies": {
+    "webext-detect-page": "^0.9.1"
   }
 }
