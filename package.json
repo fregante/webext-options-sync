@@ -24,7 +24,7 @@
     "prepublish-only": "run-p --silent build",
     "build:comment": "echo '// https://github.com/bfred-it/webext-options-sync\n'",
     "build:standalone": "browserify source/index.ts --standalone OptionsSync -p tsify",
-    "build": "tsc && run-s build:* > webext-options-sync.js",
+    "build": "tsc && run-s build:* --silent > webext-options-sync.js",
     "watch": "tsc --watch"
   },
   "xo": {
