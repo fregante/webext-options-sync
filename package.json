@@ -22,7 +22,7 @@
     "test": "run-p --silent build test:*",
     "test:lint": "xo",
     "prepublish-only": "run-p --silent build",
-    "build": "tsc && rollup -c",
+    "build": "tsc && browserify source/index.ts --standalone OptionsSync -p tsify > webext-options-sync.js",
     "watch": "tsc --watch"
   },
   "xo": {
@@ -57,13 +57,11 @@
     "@types/chrome": "0.0.86",
     "@types/dom-inputevent": "^1.0.4",
     "@typescript-eslint/eslint-plugin": "^1.9.0",
+    "browserify": "^16.2.3",
     "eslint-config-xo-typescript": "^0.12.0",
     "npm-run-all": "^4.1.5",
-    "rollup": "^1.12.5",
-    "rollup-plugin-typescript": "^1.0.1",
-    "tape": "^4.10.2",
-    "tape-run": "^6.0.0",
-    "typescript": "^3.5.0",
+    "tsify": "^4.0.1",
+    "typescript": "^3.5.1",
     "xo": "*"
   }
 }
