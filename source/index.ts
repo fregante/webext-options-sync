@@ -57,6 +57,7 @@ class OptionsSync {
 	};
 
 	storageName: string;
+	defaults: OptionsSync.Options;
 
 	private _timer?: NodeJS.Timeout;
 
@@ -74,6 +75,7 @@ class OptionsSync {
 		};
 
 		this.storageName = fullOptions.storageName;
+		this.defaults = fullOptions.defaults;
 
 		if (fullOptions.logging === false) {
 			this._log = () => {};
