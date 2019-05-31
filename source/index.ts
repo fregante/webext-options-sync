@@ -42,18 +42,10 @@ declare namespace OptionsSync {
 	}
 }
 
+// eslint-disable-next-line no-redeclare
 class OptionsSync {
-	public static migrations = {
-		/**
-		Helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
-		*/
-		removeUnused(options: OptionsSync.Options, defaults: OptionsSync.Options) {
-			for (const key of Object.keys(options)) {
-				if (!(key in defaults)) {
-					delete options[key];
-				}
-			}
-		}
+	public static migrations: {
+		removeUnused: OptionsSync.Migration;
 	};
 
 	storageName: string;
@@ -162,7 +154,7 @@ class OptionsSync {
 	setAll(newOptions: OptionsSync.Options): Promise<void> {
 		return new Promise(resolve => {
 			chrome.storage.sync.set({
-				[this.storageName]: newOptions
+				[this.storageName]: newOptions,
 			}, resolve);
 		});
 	}
@@ -269,10 +261,23 @@ class OptionsSync {
 
 		this._log('info', 'Saving option', el.name, 'to', value);
 		this.set({
-			[name]: value
+			[name]: value,
 		});
 	}
 }
+
+OptionsSync.migrations = {
+	/**
+	Helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
+	*/
+	removeUnused(options: OptionsSync.Options, defaults: OptionsSync.Options) {
+		for (const key of Object.keys(options)) {
+			if (!(key in defaults)) {
+				delete options[key];
+			}
+		}
+	}
+};
 
 if (typeof HTMLElement !== 'undefined' && typeof customElements !== 'undefined') {
 	class OptionsSyncElement extends HTMLFormElement {

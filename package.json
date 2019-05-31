@@ -40,7 +40,10 @@
     "overrides": [
       {
         "files": "**/*.ts",
-        "extends": "xo-typescript"
+        "extends": "xo-typescript",
+        "rules": {
+          "@typescript-eslint/no-namespace": 0
+        }
       }
     ]
   },
