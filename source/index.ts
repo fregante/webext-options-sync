@@ -1,12 +1,9 @@
 import {isBackgroundPage} from 'webext-detect-page';
 
 declare namespace OptionsSync {
-	interface ModuleOptions {
+	interface Settings {
 		storageName?: string;
 		logging?: boolean;
-	}
-
-	interface Definitions {
 		defaults: Options;
 		/**
 		 * A list of functions to call when the extension is updated.
@@ -67,16 +64,23 @@ class OptionsSync {
 	@constructor Returns an instance linked to the chosen storage.
 	@param options - Configuration to determine where options are stored.
 	*/
-	constructor(options: OptionsSync.ModuleOptions & Partial<OptionsSync.Definitions> = {}) {
-		if (typeof options === 'string') {
-			options = {
-				storageName: options
-			};
+	constructor(options: Partial<OptionsSync.Settings>) {
+		const fullOptions = {
+			storageName: 'options',
+			defaults: {},
+			migrations: [],
+			logging: true,
+			...options
+		};
+
+		this.storageName = fullOptions.storageName;
+
+		if (fullOptions.logging === false) {
+			this._log = () => {};
 		}
 
-		this.storageName = options.storageName || 'options';
-		if (options.logging === false) {
-			this._log = () => {};
+		if (isBackgroundPage()) {
+			chrome.runtime.onInstalled.addListener(() => this._applyDefinition(fullOptions));
 		}
 
 		this._handleFormUpdatesDebounced = this._handleFormUpdatesDebounced.bind(this);
@@ -86,28 +90,7 @@ class OptionsSync {
 		console[method](...args);
 	}
 
-	/**
-	To be used in the background only. This is used to initiate the options. It's not required but it's recommended as a way to define which options the extension supports.
-	@example
-
-	new OptionsSync().define({
-		defaults: {
-			yourStringOption: 'green',
-			anyBooleans: true,
-			numbersAreFine: 9001
-		}
-	});
-	*/
-	define(defs: OptionsSync.Definitions): void {
-		defs = {defaults: {},
-			migrations: [], ...defs};
-
-		if (isBackgroundPage()) {
-			chrome.runtime.onInstalled.addListener(() => this._applyDefinition(defs));
-		}
-	}
-
-	async _applyDefinition(defs: OptionsSync.Definitions): Promise<void> {
+	async _applyDefinition(defs: OptionsSync.Settings): Promise<void> {
 		const options = {...defs.defaults, ...await this.getAll()};
 
 		this._log('group', 'Appling definitions');
