@@ -4,6 +4,14 @@ declare namespace OptionsSync {
 		logging?: boolean;
 	}
 
+	interface Definitions {
+		defaults: Options;
+		/**
+		 * A list of functions to call when the extension is updated.
+		 */
+		migrations: Migration[];
+	}
+
 	/**
 	A map of options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
@@ -32,14 +40,6 @@ declare namespace OptionsSync {
 		],
 	}
 	*/
-
-	interface Definitions {
-		defaults: Options;
-		/**
-		 * A list of functions to call when the extension is updated.
-		 */
-		migrations: Migration[];
-	}
 }
 
 // eslint-disable-next-line no-redeclare
@@ -65,7 +65,7 @@ class OptionsSync {
 	@constructor Returns an instance linked to the chosen storage.
 	@param options - Configuration to determine where options are stored.
 	*/
-	constructor(options: OptionsSync.ModuleOptions = {}) {
+	constructor(options: OptionsSync.ModuleOptions & Partial<OptionsSync.Definitions> = {}) {
 		if (typeof options === 'string') {
 			options = {
 				storageName: options
@@ -112,7 +112,7 @@ class OptionsSync {
 
 		this._log('group', 'Appling definitions');
 		this._log('info', 'Current options:', options);
-		if (defs.migrations.length > 0) {
+		if (defs.migrations && defs.migrations.length > 0) {
 			this._log('info', 'Running', defs.migrations.length, 'migrations');
 			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
 		}

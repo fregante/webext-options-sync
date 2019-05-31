@@ -71,7 +71,7 @@ Create your options definition file, for example `options-init.js`:
 
 ```js
 /* globals OptionsSync */
-new OptionsSync().define({
+new OptionsSync({
 	defaults: {
 		yourStringOption: 'green',
 		anyBooleans: true,
@@ -111,7 +111,7 @@ new OptionsSync().syncForm(document.querySelector('form#options-form'));
 
 Done. Any defaults or saved options will be loaded into the form and any change will automatically be saved via `chrome.storage.sync`
 
-In alternative you can put your fields in a custom`<options-sync>` element instead of `<form>` and they'll be automatically synchronized. You can specify the `storageName` via attribute, like: 
+In alternative you can put your fields in a custom`<options-sync>` element instead of `<form>` and they'll be automatically synchronized. You can specify the `storageName` via attribute, like:
 
 ```html
 <options-sync storageName="my-options">
@@ -119,7 +119,7 @@ In alternative you can put your fields in a custom`<options-sync>` element inste
 </options-sync>
 ```
 
-<strong>Warning:</strong> Custom Elements are supported by Firefox 63+ (November 2018)
+<strong>Warning:</strong> Custom Elements are only supported by Firefox 63+ (November 2018)
 
 </details>
 
@@ -154,7 +154,7 @@ In your `options-init.js` file, extend the call by including an array of functio
 
 ```js
 /* globals OptionsSync */
-new OptionsSync().define({
+new OptionsSync({
 	defaults: {
 		color: 'red',
 	},
@@ -177,39 +177,19 @@ Notice `OptionsSync.migrations.removeUnused`: it's a helper method that removes 
 
 ## API
 
-#### const opts = new OptionsSync([options])
-
-Returns an instance linked to the chosen storage.
-
-##### storageName
-
-Type: `string`  
-Default: `'options'`
-
-The key used to store data in `chrome.storage.sync`
-
-##### logging
-
-Type: `boolean`  
-Default: `true`
-
-Determines whether info and warnings (on sync, updating form, etc.) should be logged to the console or not. Recommended when used in content scripts.
-
-#### opts.define(setup)
-
-To be used in the background only, this is used to initiate the options. It's not required but it's recommended as a way to define which options the extension supports.
+#### const optionsStorage = new OptionsSync([setup])
 
 ##### setup
 
 Type: `object`
 
-It should follow this format:
+Optional. It should follow this format:
 
 ```js
 {
 	defaults: { // recommended
 		color: 'blue'
-	}, 
+	},
 	migrations: [ // optional
 		savedOptions => {
 			if(savedOptions.oldStuff) {
@@ -219,6 +199,8 @@ It should follow this format:
 	],
 }
 ```
+
+Returns an instance linked to the chosen storage.
 
 ###### defaults
 
@@ -231,6 +213,20 @@ A map of default options as strings or booleans. The keys will have to match the
 Type: `array`
 
 A list of functions to call when the extension is updated. The function will have this signature: `(savedOptions, defaults)`. In this function, alter the `savedOptions`. Don't return anything.
+
+###### storageName
+
+Type: `string`
+Default: `'options'`
+
+The key used to store data in `chrome.storage.sync`
+
+###### logging
+
+Type: `boolean`
+Default: `true`
+
+Whether info and warnings (on sync, updating form, etc.) should be logged to the console or not.
 
 #### opts.getAll()
 
