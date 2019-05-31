@@ -1,50 +1,51 @@
-// https://github.com/bfred-it/webext-options-sync
+declare namespace OptionsSync {
+	interface ModuleOptions {
+		storageName?: string;
+		logging?: boolean;
+	}
 
-interface ModuleOptions {
-	storageName?: string;
-	logging?: boolean;
-}
-
-/**
-A map of options as strings or booleans. The keys will have to match the form fields' `name` attributes.
-*/
-export type Options = Record<string, string | number | boolean>;
-
-/*
-Handler signature for when an extension updates.
-*/
-export type Migration = (savedOptions: Options, defaults: Options) => void;
-
-/**
-@example
-
-{
-	// Recommended
-	defaults: {
-		color: 'blue'
-	},
-	// Optional
-	migrations: [
-		savedOptions => {
-			if (savedOptions.oldStuff) {
-				delete savedOptions.oldStuff;
-			}
-		}
-	],
-}
-*/
-
-export interface Definitions {
-	defaults: Options;
 	/**
-	 * A list of functions to call when the extension is updated.
-	 */
-	migrations: Migration[];
+	A map of options as strings or booleans. The keys will have to match the form fields' `name` attributes.
+	*/
+	type Options = Record<string, string | number | boolean>;
+
+	/*
+	Handler signature for when an extension updates.
+	*/
+	type Migration = (savedOptions: Options, defaults: Options) => void;
+
+	/**
+	@example
+
+	{
+		// Recommended
+		defaults: {
+			color: 'blue'
+		},
+		// Optional
+		migrations: [
+			savedOptions => {
+				if (savedOptions.oldStuff) {
+					delete savedOptions.oldStuff;
+				}
+			}
+		],
+	}
+	*/
+
+	interface Definitions {
+		defaults: Options;
+		/**
+		 * A list of functions to call when the extension is updated.
+		 */
+		migrations: Migration[];
+	}
 }
 
+// eslint-disable-next-line no-redeclare
 class OptionsSync {
 	public static migrations: {
-		removeUnused: Migration;
+		removeUnused: OptionsSync.Migration;
 	};
 
 	storageName: string;
@@ -52,10 +53,10 @@ class OptionsSync {
 	private _timer?: NodeJS.Timeout;
 
 	/**
-@constructor Returns an instance linked to the chosen storage.
-@param [config={storageName='options'}] - Configuration to determine where options are stored.
-*/
-	constructor(options: ModuleOptions = {}) {
+	@constructor Returns an instance linked to the chosen storage.
+	@param options - Configuration to determine where options are stored.
+	*/
+	constructor(options: OptionsSync.ModuleOptions = {}) {
 		if (typeof options === 'string') {
 			options = {
 				storageName: options
@@ -86,7 +87,7 @@ class OptionsSync {
 		}
 	});
 	*/
-	define(defs: Definitions): void {
+	define(defs: OptionsSync.Definitions): void {
 		defs = {defaults: {},
 			migrations: [], ...defs};
 
@@ -97,7 +98,7 @@ class OptionsSync {
 		}
 	}
 
-	async _applyDefinition(defs: Definitions): Promise<void> {
+	async _applyDefinition(defs: OptionsSync.Definitions): Promise<void> {
 		const options = {...defs.defaults, ...await this.getAll()};
 
 		this._log('group', 'Appling definitions');
@@ -113,7 +114,7 @@ class OptionsSync {
 		this.setAll(options);
 	}
 
-	_parseNumbers(options: Options): Options {
+	_parseNumbers(options: OptionsSync.Options): OptionsSync.Options {
 		for (const name of Object.keys(options)) {
 			if (options[name] === String(Number(options[name]))) {
 				options[name] = Number(options[name]);
@@ -137,8 +138,8 @@ class OptionsSync {
 		}
 	});
 	*/
-	getAll(): Promise<Options> {
-		return new Promise<Options>(resolve => {
+	getAll(): Promise<OptionsSync.Options> {
+		return new Promise<OptionsSync.Options>(resolve => {
 			chrome.storage.sync.get(this.storageName,
 				keys => resolve(keys[this.storageName] || {})
 			);
@@ -148,9 +149,9 @@ class OptionsSync {
 	/**
 	Overrides **all** the options stored with your `options`.
 
-	@param {Options} newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
+	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	setAll(newOptions: Options): Promise<void> {
+	setAll(newOptions: OptionsSync.Options): Promise<void> {
 		return new Promise(resolve => {
 			chrome.storage.sync.set({
 				[this.storageName]: newOptions,
@@ -161,9 +162,9 @@ class OptionsSync {
 	/**
 	Merges new options with the existing stored options.
 
-	@param {Options} newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
+	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	async set(newOptions: Options): Promise<void> {
+	async set(newOptions: OptionsSync.Options): Promise<void> {
 		const options = await this.getAll();
 		this.setAll(Object.assign(options, newOptions));
 	}
@@ -171,7 +172,7 @@ class OptionsSync {
 	/**
 	Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved via `chrome.storage.sync`.
 
-	@param {string | HTMLElementTagNameMap | HTMLFormElement} selector - The `<form>` that needs to be synchronized or a CSS selector (one element).
+	@param selector - The `<form>` that needs to be synchronized or a CSS selector (one element).
 	The form fields' `name` attributes will have to match the option names.
 	*/
 	async syncForm(form: string | HTMLFormElement): Promise<void> {
@@ -196,7 +197,7 @@ class OptionsSync {
 		this._applyToForm(await this.getAll(), form);
 	}
 
-	_applyToForm(options: Options, form: HTMLFormElement): void {
+	_applyToForm(options: OptionsSync.Options, form: HTMLFormElement): void {
 		this._log('group', 'Updating form');
 		for (const name of Object.keys(options)) {
 			const els = form.querySelectorAll<HTMLInputElement>(`[name="${CSS.escape(name)}"]`);
@@ -269,7 +270,7 @@ OptionsSync.migrations = {
 	/**
 	Helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
 	*/
-	removeUnused(options: Options, defaults: Options) {
+	removeUnused(options: OptionsSync.Options, defaults: OptionsSync.Options) {
 		for (const key of Object.keys(options)) {
 			if (!(key in defaults)) {
 				delete options[key];
@@ -292,6 +293,4 @@ if (typeof HTMLElement !== 'undefined' && typeof customElements !== 'undefined')
 	customElements.define('options-sync', OptionsSyncElement);
 }
 
-if (typeof module === 'object') {
-	module.exports = OptionsSync;
-}
+export = OptionsSync;

@@ -5,6 +5,6 @@
 		"target": "es2018"
 	},
 	"files": [
-		"source/webext-options-sync.ts"
+		"source/index.ts"
 	]
 }

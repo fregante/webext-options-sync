@@ -14,16 +14,15 @@
     "chrome",
     "firefox"
   ],
-  "main": "webext-options-sync.js",
   "files": [
-    "webext-options-sync.js",
+    "index.js",
     "index.d.ts"
   ],
   "scripts": {
     "test": "run-p --silent build test:*",
     "test:lint": "xo",
-    "prepublish-only": "tsc",
-    "build": "tsc",
+    "prepublish-only": "run-p --silent build",
+    "build": "tsc && rollup -c",
     "watch": "tsc --watch"
   },
   "xo": {
@@ -46,7 +45,10 @@
     "overrides": [
       {
         "files": "**/*.ts",
-        "extends": "xo-typescript"
+        "extends": "xo-typescript",
+        "rules": {
+          "@typescript-eslint/no-namespace": 0
+        }
       }
     ]
   },
@@ -57,7 +59,11 @@
     "@typescript-eslint/eslint-plugin": "^1.9.0",
     "eslint-config-xo-typescript": "^0.12.0",
     "npm-run-all": "^4.1.5",
-    "typescript": "^3.5.1",
+    "rollup": "^1.12.5",
+    "rollup-plugin-typescript": "^1.0.1",
+    "tape": "^4.10.2",
+    "tape-run": "^6.0.0",
+    "typescript": "^3.5.0",
     "xo": "*"
   }
 }
