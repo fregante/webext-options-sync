@@ -1,0 +1,10 @@
+{
+	"extends": "@sindresorhus/tsconfig",
+	"compilerOptions": {
+		"outDir": ".",
+		"target": "es2018"
+	},
+	"files": [
+		"source/index.ts"
+	]
+}

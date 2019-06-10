@@ -7,3 +7,6 @@ Thumbs.db
 *.bak
 *.log
 logs
+*.map
+index.js
+index.d.ts
