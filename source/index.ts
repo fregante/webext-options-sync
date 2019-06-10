@@ -66,9 +66,9 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	@param options - Configuration to determine where options are stored.
 	*/
 	constructor(options: Partial<OptionsSync.Settings<TOptions>>) {
-		const fullOptions = {
+		const fullOptions: OptionsSync.Settings<TOptions> = {
 			storageName: 'options',
-			defaults: {} as TOptions,
+			defaults: {},
 			migrations: [],
 			logging: true,
 			...options
