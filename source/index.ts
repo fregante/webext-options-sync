@@ -1,10 +1,10 @@
 import {isBackgroundPage} from 'webext-detect-page';
 
 declare namespace OptionsSync {
-	interface Settings {
+	interface Settings<TOptions extends Options> {
 		storageName?: string;
 		logging?: boolean;
-		defaults: Options;
+		defaults: TOptions;
 		/**
 		 * A list of functions to call when the extension is updated.
 		 */
@@ -41,8 +41,7 @@ declare namespace OptionsSync {
 	*/
 }
 
-// eslint-disable-next-line no-redeclare
-class OptionsSync {
+class OptionsSync<TOptions extends OptionsSync.Options> {
 	public static migrations = {
 		/**
 		Helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
@@ -57,6 +56,7 @@ class OptionsSync {
 	};
 
 	storageName: string;
+
 	defaults: OptionsSync.Options;
 
 	private _timer?: NodeJS.Timeout;
@@ -65,10 +65,10 @@ class OptionsSync {
 	@constructor Returns an instance linked to the chosen storage.
 	@param options - Configuration to determine where options are stored.
 	*/
-	constructor(options: Partial<OptionsSync.Settings>) {
+	constructor(options: Partial<OptionsSync.Settings<TOptions>>) {
 		const fullOptions = {
 			storageName: 'options',
-			defaults: {},
+			defaults: {} as TOptions,
 			migrations: [],
 			logging: true,
 			...options
@@ -92,7 +92,7 @@ class OptionsSync {
 		console[method](...args);
 	}
 
-	async _applyDefinition(defs: OptionsSync.Settings): Promise<void> {
+	async _applyDefinition(defs: OptionsSync.Settings<TOptions>): Promise<void> {
 		const options = {...defs.defaults, ...await this.getAll()};
 
 		this._log('group', 'Appling definitions');
@@ -148,7 +148,7 @@ class OptionsSync {
 	setAll(newOptions: OptionsSync.Options): Promise<void> {
 		return new Promise(resolve => {
 			chrome.storage.sync.set({
-				[this.storageName]: newOptions,
+				[this.storageName]: newOptions
 			}, resolve);
 		});
 	}
@@ -255,7 +255,7 @@ class OptionsSync {
 
 		this._log('info', 'Saving option', el.name, 'to', value);
 		this.set({
-			[name]: value,
+			[name]: value
 		});
 	}
 }
