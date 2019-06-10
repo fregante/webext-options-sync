@@ -42,7 +42,6 @@ declare namespace OptionsSync {
 	}
 }
 
-// eslint-disable-next-line no-redeclare
 class OptionsSync {
 	public static migrations = {
 		/**
@@ -163,7 +162,7 @@ class OptionsSync {
 	setAll(newOptions: OptionsSync.Options): Promise<void> {
 		return new Promise(resolve => {
 			chrome.storage.sync.set({
-				[this.storageName]: newOptions,
+				[this.storageName]: newOptions
 			}, resolve);
 		});
 	}
@@ -270,7 +269,7 @@ class OptionsSync {
 
 		this._log('info', 'Saving option', el.name, 'to', value);
 		this.set({
-			[name]: value,
+			[name]: value
 		});
 	}
 }

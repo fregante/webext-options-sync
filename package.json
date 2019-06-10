@@ -19,12 +19,11 @@
     "index.d.ts"
   ],
   "scripts": {
-    "test": "run-p --silent build test:*",
-    "test:lint": "xo",
+    "test": "xo && tsc",
     "prepublish-only": "run-p --silent build",
     "build:comment": "echo '// https://github.com/bfred-it/webext-options-sync\n'",
-    "build:standalone": "browserify source/index.ts --standalone OptionsSync -p tsify",
-    "build": "tsc && run-s build:* --silent > webext-options-sync.js",
+    "build:standalone": "browserify source/index.ts --standalone OptionsSync -p tsify -p browser-pack-flat",
+    "build": "tsc --emitDeclarationOnly && run-s build:* --silent > webext-options-sync.js",
     "watch": "tsc --watch"
   },
   "xo": {
@@ -38,29 +37,22 @@
       "browser",
       "webextensions"
     ],
-    "rules": {
-      "comma-dangle": [
-        0,
-        "only-multiline"
-      ]
-    },
     "overrides": [
       {
         "files": "**/*.ts",
-        "extends": "xo-typescript",
-        "rules": {
-          "@typescript-eslint/no-namespace": 0
-        }
+        "extends": "xo-typescript"
       }
     ]
   },
   "devDependencies": {
-    "@sindresorhus/tsconfig": "^0.3.0",
+    "@sindresorhus/tsconfig": "^0.4.0",
     "@types/chrome": "0.0.86",
     "@types/dom-inputevent": "^1.0.4",
     "@typescript-eslint/eslint-plugin": "^1.9.0",
+    "@typescript-eslint/parser": "^1.10.2",
+    "browser-pack-flat": "^3.4.2",
     "browserify": "^16.2.3",
-    "eslint-config-xo-typescript": "^0.12.0",
+    "eslint-config-xo-typescript": "^0.14.0",
     "npm-run-all": "^4.1.5",
     "tsify": "^4.0.1",
     "typescript": "^3.5.1",
