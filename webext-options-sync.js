@@ -39,9 +39,10 @@ class OptionsSync {
     */
     constructor(options) {
         const fullOptions = {
-            storageName: 'options',
+            // https://github.com/bfred-it/webext-options-sync/pull/21#issuecomment-500314074
             // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
             defaults: {},
+            storageName: 'options',
             migrations: [],
             logging: true,
             ...options
@@ -74,6 +75,7 @@ class OptionsSync {
     _parseNumbers(options) {
         for (const name of Object.keys(options)) {
             if (options[name] === String(Number(options[name]))) {
+                // @ts-ignore it will be dropped in #13
                 options[name] = Number(options[name]);
             }
         }

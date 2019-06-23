@@ -59,7 +59,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 
 	storageName: string;
 
-	defaults: OptionsSync.Options;
+	defaults: TOptions;
 
 	private _timer?: NodeJS.Timeout;
 
@@ -67,11 +67,12 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	@constructor Returns an instance linked to the chosen storage.
 	@param options - Configuration to determine where options are stored.
 	*/
-	constructor(options: OptionsSync.Settings<TOptions>) {
+	constructor(options?: OptionsSync.Settings<TOptions>) {
 		const fullOptions: Required<OptionsSync.Settings<TOptions>> = {
-			storageName: 'options',
+			// https://github.com/bfred-it/webext-options-sync/pull/21#issuecomment-500314074
 			// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
-			defaults: {} as TOptions, // https://github.com/bfred-it/webext-options-sync/pull/21#issuecomment-500314074
+			defaults: {} as TOptions,
+			storageName: 'options',
 			migrations: [],
 			logging: true,
 			...options
@@ -111,9 +112,10 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this.setAll(options);
 	}
 
-	_parseNumbers(options: OptionsSync.Options): OptionsSync.Options {
+	_parseNumbers(options: TOptions): TOptions {
 		for (const name of Object.keys(options)) {
 			if (options[name] === String(Number(options[name]))) {
+				// @ts-ignore it will be dropped in #13
 				options[name] = Number(options[name]);
 			}
 		}
@@ -135,8 +137,8 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		}
 	});
 	*/
-	getAll(): Promise<OptionsSync.Options> {
-		return new Promise<OptionsSync.Options>(resolve => {
+	getAll(): Promise<TOptions> {
+		return new Promise<TOptions>(resolve => {
 			chrome.storage.sync.get(this.storageName,
 				keys => resolve(keys[this.storageName] || {})
 			);
@@ -148,7 +150,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	setAll(newOptions: OptionsSync.Options): Promise<void> {
+	setAll(newOptions: TOptions): Promise<void> {
 		return new Promise(resolve => {
 			chrome.storage.sync.set({
 				[this.storageName]: newOptions
@@ -161,7 +163,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	async set(newOptions: OptionsSync.Options): Promise<void> {
+	async set(newOptions: TOptions): Promise<void> {
 		const options = await this.getAll();
 		this.setAll(Object.assign(options, newOptions));
 	}
@@ -194,7 +196,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this._applyToForm(await this.getAll(), form);
 	}
 
-	_applyToForm(options: OptionsSync.Options, form: HTMLFormElement): void {
+	_applyToForm(options: TOptions, form: HTMLFormElement): void {
 		this._log('group', 'Updating form');
 		for (const name of Object.keys(options)) {
 			const els = form.querySelectorAll<HTMLInputElement>(`[name="${CSS.escape(name)}"]`);
@@ -259,7 +261,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this._log('info', 'Saving option', el.name, 'to', value);
 		this.set({
 			[name]: value
-		});
+		} as TOptions);
 	}
 }
 
