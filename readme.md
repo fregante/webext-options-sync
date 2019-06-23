@@ -111,16 +111,6 @@ new OptionsSync().syncForm(document.querySelector('form#options-form'));
 
 Done. Any defaults or saved options will be loaded into the form and any change will automatically be saved via `chrome.storage.sync`
 
-In alternative you can put your fields in a custom`<options-sync>` element instead of `<form>` and they'll be automatically synchronized. You can specify the `storageName` via attribute, like:
-
-```html
-<options-sync storageName="my-options">
-    <input type="color" name="color">
-</options-sync>
-```
-
-<strong>Warning:</strong> Custom Elements are only supported by Firefox 63+ (November 2018)
-
 </details>
 
 #### Input validation

@@ -265,18 +265,4 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	}
 }
 
-if (typeof HTMLElement !== 'undefined' && typeof customElements !== 'undefined') {
-	class OptionsSyncElement extends HTMLFormElement {
-		constructor() {
-			super();
-			new OptionsSync({
-				storageName: this.getAttribute('storageName') || undefined,
-				logging: Boolean(this.getAttribute('logging')) // Boolean attribute, if it's there it's true
-			}).syncForm(this);
-		}
-	}
-
-	customElements.define('options-sync', OptionsSyncElement);
-}
-
 export = OptionsSync;
