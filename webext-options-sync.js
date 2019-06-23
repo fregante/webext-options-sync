@@ -1,54 +1,69 @@
 // https://github.com/bfred-it/webext-options-sync
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.OptionsSync = f()}})(function(){var define,module,exports;
+var _$webextDetectPage_1 = {};
 "use strict";
+// https://github.com/bfred-it/webext-detect-page
+Object.defineProperty(_$webextDetectPage_1, "__esModule", { value: true });
+function isBackgroundPage() {
+    return location.pathname === '/_generated_background_page.html' &&
+        !location.protocol.startsWith('http') &&
+        Boolean(typeof chrome === 'object' && chrome.runtime);
+}
+_$webextDetectPage_1.isBackgroundPage = isBackgroundPage;
+function isContentScript() {
+    return location.protocol.startsWith('http') &&
+        Boolean(typeof chrome === 'object' && chrome.runtime);
+}
+_$webextDetectPage_1.isContentScript = isContentScript;
+function isOptionsPage() {
+    if (typeof chrome !== 'object' || !chrome.runtime) {
+        return false;
+    }
+    const { options_ui } = chrome.runtime.getManifest();
+    if (typeof options_ui !== 'object' || typeof options_ui.page !== 'string') {
+        return false;
+    }
+    const url = new URL(options_ui.page, location.origin);
+    return url.pathname === location.pathname &&
+        url.origin === location.origin;
+}
+_$webextDetectPage_1.isOptionsPage = isOptionsPage;
+//# sourceMappingURL=index.js.map
+"use strict";
+/* removed: const _$webextDetectPage_1 = require("webext-detect-page"); */;
 class OptionsSync {
     /**
     @constructor Returns an instance linked to the chosen storage.
     @param options - Configuration to determine where options are stored.
     */
-    constructor(options = {}) {
-        if (typeof options === 'string') {
-            options = {
-                storageName: options
-            };
-        }
-        this.storageName = options.storageName || 'options';
-        if (options.logging === false) {
+    constructor(options) {
+        const fullOptions = {
+            storageName: 'options',
+            // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
+            defaults: {},
+            migrations: [],
+            logging: true,
+            ...options
+        };
+        this.storageName = fullOptions.storageName;
+        this.defaults = fullOptions.defaults;
+        if (fullOptions.logging === false) {
             this._log = () => { };
+        }
+        if (_$webextDetectPage_1.isBackgroundPage()) {
+            chrome.runtime.onInstalled.addListener(() => this._applyDefinition(fullOptions));
         }
         this._handleFormUpdatesDebounced = this._handleFormUpdatesDebounced.bind(this);
     }
     _log(method, ...args) {
         console[method](...args);
     }
-    /**
-    To be used in the background only. This is used to initiate the options. It's not required but it's recommended as a way to define which options the extension supports.
-    @example
-
-    new OptionsSync().define({
-        defaults: {
-            yourStringOption: 'green',
-            anyBooleans: true,
-            numbersAreFine: 9001
-        }
-    });
-    */
-    define(defs) {
-        defs = { defaults: {},
-            migrations: [], ...defs };
-        if (chrome.runtime.onInstalled) { // In background script
-            chrome.runtime.onInstalled.addListener(() => this._applyDefinition(defs));
-        }
-        else { // In content script, discouraged
-            this._applyDefinition(defs);
-        }
-    }
     async _applyDefinition(defs) {
         const options = { ...defs.defaults, ...await this.getAll() };
         this._log('group', 'Appling definitions');
         this._log('info', 'Current options:', options);
-        if (defs.migrations.length > 0) {
+        if (defs.migrations && defs.migrations.length > 0) {
             this._log('info', 'Running', defs.migrations.length, 'migrations');
             defs.migrations.forEach(migrate => migrate(options, defs.defaults));
         }
@@ -213,9 +228,9 @@ if (typeof HTMLElement !== 'undefined' && typeof customElements !== 'undefined')
     }
     customElements.define('options-sync', OptionsSyncElement);
 }
-var _$OptionsSync_1 = OptionsSync;
+var _$OptionsSync_2 = OptionsSync;
 
-return _$OptionsSync_1;
+return _$OptionsSync_2;
 
 });
 

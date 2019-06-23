@@ -1,18 +1,27 @@
+import {isBackgroundPage} from 'webext-detect-page';
+
 declare namespace OptionsSync {
-	interface ModuleOptions {
+	interface Settings<TOptions extends Options> {
 		storageName?: string;
 		logging?: boolean;
+		defaults?: TOptions;
+		/**
+		 * A list of functions to call when the extension is updated.
+		 */
+		migrations?: Array<Migration<TOptions>>;
 	}
 
 	/**
 	A map of options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	type Options = Record<string, string | number | boolean>;
+	interface Options {
+		[key: string]: string | number | boolean;
+	}
 
 	/*
 	Handler signature for when an extension updates.
 	*/
-	type Migration = (savedOptions: Options, defaults: Options) => void;
+	type Migration<TOptions extends Options> = (savedOptions: TOptions, defaults: TOptions) => void;
 
 	/**
 	@example
@@ -32,17 +41,9 @@ declare namespace OptionsSync {
 		],
 	}
 	*/
-
-	interface Definitions {
-		defaults: Options;
-		/**
-		 * A list of functions to call when the extension is updated.
-		 */
-		migrations: Migration[];
-	}
 }
 
-class OptionsSync {
+class OptionsSync<TOptions extends OptionsSync.Options> {
 	public static migrations = {
 		/**
 		Helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
@@ -58,22 +59,33 @@ class OptionsSync {
 
 	storageName: string;
 
+	defaults: OptionsSync.Options;
+
 	private _timer?: NodeJS.Timeout;
 
 	/**
 	@constructor Returns an instance linked to the chosen storage.
 	@param options - Configuration to determine where options are stored.
 	*/
-	constructor(options: OptionsSync.ModuleOptions = {}) {
-		if (typeof options === 'string') {
-			options = {
-				storageName: options
-			};
+	constructor(options: OptionsSync.Settings<TOptions>) {
+		const fullOptions: Required<OptionsSync.Settings<TOptions>> = {
+			storageName: 'options',
+			// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
+			defaults: {} as TOptions, // https://github.com/bfred-it/webext-options-sync/pull/21#issuecomment-500314074
+			migrations: [],
+			logging: true,
+			...options
+		};
+
+		this.storageName = fullOptions.storageName;
+		this.defaults = fullOptions.defaults;
+
+		if (fullOptions.logging === false) {
+			this._log = () => {};
 		}
 
-		this.storageName = options.storageName || 'options';
-		if (options.logging === false) {
-			this._log = () => {};
+		if (isBackgroundPage()) {
+			chrome.runtime.onInstalled.addListener(() => this._applyDefinition(fullOptions));
 		}
 
 		this._handleFormUpdatesDebounced = this._handleFormUpdatesDebounced.bind(this);
@@ -83,35 +95,12 @@ class OptionsSync {
 		console[method](...args);
 	}
 
-	/**
-	To be used in the background only. This is used to initiate the options. It's not required but it's recommended as a way to define which options the extension supports.
-	@example
-
-	new OptionsSync().define({
-		defaults: {
-			yourStringOption: 'green',
-			anyBooleans: true,
-			numbersAreFine: 9001
-		}
-	});
-	*/
-	define(defs: OptionsSync.Definitions): void {
-		defs = {defaults: {},
-			migrations: [], ...defs};
-
-		if (chrome.runtime.onInstalled) { // In background script
-			chrome.runtime.onInstalled.addListener(() => this._applyDefinition(defs));
-		} else { // In content script, discouraged
-			this._applyDefinition(defs);
-		}
-	}
-
-	async _applyDefinition(defs: OptionsSync.Definitions): Promise<void> {
+	async _applyDefinition(defs: Required<OptionsSync.Settings<TOptions>>): Promise<void> {
 		const options = {...defs.defaults, ...await this.getAll()};
 
 		this._log('group', 'Appling definitions');
 		this._log('info', 'Current options:', options);
-		if (defs.migrations.length > 0) {
+		if (defs.migrations && defs.migrations.length > 0) {
 			this._log('info', 'Running', defs.migrations.length, 'migrations');
 			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
 		}
