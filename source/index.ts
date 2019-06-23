@@ -4,22 +4,24 @@ declare namespace OptionsSync {
 	interface Settings<TOptions extends Options> {
 		storageName?: string;
 		logging?: boolean;
-		defaults: TOptions;
+		defaults?: TOptions;
 		/**
 		 * A list of functions to call when the extension is updated.
 		 */
-		migrations: Migration[];
+		migrations?: Array<Migration<TOptions>>;
 	}
 
 	/**
 	A map of options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	type Options = Record<string, string | number | boolean>;
+	interface Options {
+		[key: string]: string | number | boolean;
+	}
 
 	/*
 	Handler signature for when an extension updates.
 	*/
-	type Migration = (savedOptions: Options, defaults: Options) => void;
+	type Migration<TOptions extends Options> = (savedOptions: TOptions, defaults: TOptions) => void;
 
 	/**
 	@example
@@ -65,10 +67,11 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	@constructor Returns an instance linked to the chosen storage.
 	@param options - Configuration to determine where options are stored.
 	*/
-	constructor(options: Partial<OptionsSync.Settings<TOptions>>) {
-		const fullOptions: OptionsSync.Settings<TOptions> = {
+	constructor(options: OptionsSync.Settings<TOptions>) {
+		const fullOptions: Required<OptionsSync.Settings<TOptions>> = {
 			storageName: 'options',
-			defaults: {},
+			// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
+			defaults: {} as TOptions, // https://github.com/bfred-it/webext-options-sync/pull/21#issuecomment-500314074
 			migrations: [],
 			logging: true,
 			...options
@@ -92,7 +95,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		console[method](...args);
 	}
 
-	async _applyDefinition(defs: OptionsSync.Settings<TOptions>): Promise<void> {
+	async _applyDefinition(defs: Required<OptionsSync.Settings<TOptions>>): Promise<void> {
 		const options = {...defs.defaults, ...await this.getAll()};
 
 		this._log('group', 'Appling definitions');
