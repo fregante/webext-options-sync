@@ -195,25 +195,23 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	The form fields' `name` attributes will have to match the option names.
 	*/
 	async syncForm(form: string | HTMLFormElement): Promise<void> {
-		if (typeof form === 'string') {
-			form = document.querySelector<HTMLFormElement>(form)!;
-		}
+		const element = form instanceof HTMLFormElement ?
+			form :
+			document.querySelector<HTMLFormElement>(form)!;
 
-		form.addEventListener('input', this._handleFormUpdatesDebounced);
-		form.addEventListener('change', this._handleFormUpdatesDebounced);
+		element.addEventListener('input', this._handleFormUpdatesDebounced);
+		element.addEventListener('change', this._handleFormUpdatesDebounced);
 		chrome.storage.onChanged.addListener((changes, namespace) => {
-			if (namespace === 'sync') {
-				for (const key of Object.keys(changes)) {
-					const {newValue} = changes[key];
-					if (key === this.storageName) {
-						this._applyToForm(newValue, form as HTMLFormElement);
-						return;
-					}
-				}
+			if (
+				namespace === 'sync' &&
+				changes[this.storageName] &&
+				!element.contains(document.activeElement) // Avoid applying changes while the user is editing a field
+			) {
+				this._applyToForm(changes[this.storageName].newValue, element);
 			}
 		});
 
-		this._applyToForm(await this.getAll(), form);
+		this._applyToForm(await this.getAll(), element);
 	}
 
 	_applyToForm(options: TOptions, form: HTMLFormElement): void {
