@@ -167,7 +167,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	*/
 	async setAll(newOptions: TOptions): Promise<void> {
 		return new Promise((resolve, reject) => {
-			chrome.storage.sync.get({
+			chrome.storage.sync.set({
 				[this.storageName]: newOptions
 			}, () => {
 				if (chrome.runtime.lastError) {
@@ -248,13 +248,13 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this._log('groupEnd');
 	}
 
-	_handleFormUpdatesDebounced(event: Event): void {
+	_handleFormUpdatesDebounced({target}: Event): void {
 		if (this._timer) {
 			clearTimeout(this._timer);
 		}
 
 		this._timer = setTimeout(() => {
-			this._handleFormUpdates(event.currentTarget as HTMLFormElement);
+			this._handleFormUpdates(target as HTMLFormElement);
 			this._timer = undefined;
 		}, 600);
 	}
