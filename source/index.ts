@@ -86,7 +86,14 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		}
 
 		if (isBackgroundPage()) {
-			chrome.runtime.onInstalled.addListener(() => this._applyDefinition(fullOptions));
+			chrome.management.getSelf(({installType}) => {
+				// Chrome doesn't run `onInstalled` when launching the browser with a pre-loaded development extension #25
+				if (installType === 'development') {
+					this._applyDefinition(fullOptions);
+				} else {
+					chrome.runtime.onInstalled.addListener(() => this._applyDefinition(fullOptions));
+				}
+			});
 		}
 
 		this._handleFormUpdatesDebounced = this._handleFormUpdatesDebounced.bind(this);
