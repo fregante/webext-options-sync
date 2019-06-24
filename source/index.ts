@@ -144,12 +144,20 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		}
 	});
 	*/
-	getAll(): Promise<TOptions> {
-		return new Promise<TOptions>(resolve => {
-			chrome.storage.sync.get(this.storageName,
-				keys => resolve(keys[this.storageName] || {})
-			);
-		}).then(this._parseNumbers);
+	async getAll(): Promise<TOptions> {
+		const keys = await new Promise<Record<string, TOptions>>((resolve, reject) => {
+			chrome.storage.sync.get({
+				[this.storageName]: this.defaults
+			}, result => {
+				if (chrome.runtime.lastError) {
+					reject(chrome.runtime.lastError);
+				} else {
+					resolve(result);
+				}
+			});
+		});
+
+		return this._parseNumbers(keys[this.storageName]);
 	}
 
 	/**
@@ -157,11 +165,17 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	setAll(newOptions: TOptions): Promise<void> {
-		return new Promise(resolve => {
-			chrome.storage.sync.set({
+	async setAll(newOptions: TOptions): Promise<void> {
+		return new Promise((resolve, reject) => {
+			chrome.storage.sync.get({
 				[this.storageName]: newOptions
-			}, resolve);
+			}, () => {
+				if (chrome.runtime.lastError) {
+					reject(chrome.runtime.lastError);
+				} else {
+					resolve();
+				}
+			});
 		});
 	}
 
@@ -171,8 +185,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
 	async set(newOptions: TOptions): Promise<void> {
-		const options = await this.getAll();
-		this.setAll(Object.assign(options, newOptions));
+		return this.setAll({...await this.getAll(), ...newOptions});
 	}
 
 	/**
