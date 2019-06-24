@@ -1,4 +1,6 @@
 import {isBackgroundPage} from 'webext-detect-page';
+// @ts-ignore
+import {serialize, deserialize} from 'dom-form-serializer';
 
 declare namespace OptionsSync {
 	interface Settings<TOptions extends Options> {
@@ -119,17 +121,6 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this.setAll(options);
 	}
 
-	_parseNumbers(options: TOptions): TOptions {
-		for (const name of Object.keys(options)) {
-			if (options[name] === String(Number(options[name]))) {
-				// @ts-ignore it will be dropped in #13
-				options[name] = Number(options[name]);
-			}
-		}
-
-		return options;
-	}
-
 	/**
 	Retrieves all the options stored.
 
@@ -157,7 +148,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 			});
 		});
 
-		return this._parseNumbers(keys[this.storageName]);
+		return keys[this.storageName];
 	}
 
 	/**
@@ -207,79 +198,22 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 				changes[this.storageName] &&
 				!element.contains(document.activeElement) // Avoid applying changes while the user is editing a field
 			) {
-				this._applyToForm(changes[this.storageName].newValue, element);
+				deserialize(element, changes[this.storageName].newValue);
 			}
 		});
 
-		this._applyToForm(await this.getAll(), element);
+		deserialize(element, await this.getAll());
 	}
 
-	_applyToForm(options: TOptions, form: HTMLFormElement): void {
-		this._log('group', 'Updating form');
-		for (const name of Object.keys(options)) {
-			const els = form.querySelectorAll<HTMLInputElement>(`[name="${CSS.escape(name)}"]`);
-			const [field] = els;
-			if (field) {
-				this._log('info', name, ':', options[name]);
-				switch (field.type) {
-					case 'checkbox':
-						field.checked = options[name] as boolean;
-						break;
-					case 'radio': {
-						const [selected] = [...els].filter(el => el.value === options[name]);
-						if (selected) {
-							selected.checked = true;
-						}
-
-						break;
-					}
-
-					default:
-						field.value = options[name] as string;
-						break;
-				}
-
-				field.dispatchEvent(new InputEvent('input'));
-			} else {
-				this._log('warn', 'Stored option {', name, ':', options[name], '} was not found on the page');
-			}
-		}
-
-		this._log('groupEnd');
-	}
-
-	_handleFormUpdatesDebounced({target}: Event): void {
+	_handleFormUpdatesDebounced({currentTarget}: Event): void {
 		if (this._timer) {
 			clearTimeout(this._timer);
 		}
 
 		this._timer = setTimeout(() => {
-			this._handleFormUpdates(target as HTMLFormElement);
+			this.set(serialize(currentTarget));
 			this._timer = undefined;
 		}, 600);
-	}
-
-	_handleFormUpdates(el: HTMLFormElement): void {
-		const {name} = el;
-		let {value} = el;
-		if (!name || !el.validity.valid) {
-			return;
-		}
-
-		switch (el.type) {
-			case 'select-one':
-				value = el.options[el.selectedIndex].value;
-				break;
-			case 'checkbox':
-				value = el.checked;
-				break;
-			default: break;
-		}
-
-		this._log('info', 'Saving option', el.name, 'to', value);
-		this.set({
-			[name]: value
-		} as TOptions);
 	}
 }
 

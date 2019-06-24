@@ -59,6 +59,7 @@
     "xo": "*"
   },
   "dependencies": {
+    "dom-form-serializer": "^1.0.7",
     "webext-detect-page": "^0.9.1"
   }
 }
