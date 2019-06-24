@@ -256,7 +256,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this._timer = setTimeout(() => {
 			this._handleFormUpdates(event.currentTarget as HTMLFormElement);
 			this._timer = undefined;
-		}, 100);
+		}, 600);
 	}
 
 	_handleFormUpdates(el: HTMLFormElement): void {
