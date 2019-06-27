@@ -165,7 +165,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	async setAll(newOptions: TOptions): Promise<void> {
+	async setAll(newOptions: Partial<TOptions>): Promise<void> {
 		return new Promise((resolve, reject) => {
 			chrome.storage.sync.set({
 				[this.storageName]: newOptions
@@ -184,7 +184,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	async set(newOptions: Partial<TOptions>): Promise<void> {
+	async set(newOptions: TOptions): Promise<void> {
 		return this.setAll({...await this.getAll(), ...newOptions});
 	}
 
