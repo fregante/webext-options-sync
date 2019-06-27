@@ -37,6 +37,9 @@
       "browser",
       "webextensions"
     ],
+    "rules": {
+      "import/no-unresolved": "warn"
+    },
     "overrides": [
       {
         "files": "**/*.ts",
