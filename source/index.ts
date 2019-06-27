@@ -261,7 +261,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	}
 
 	_handleFormUpdates(el: HTMLFormElement): void {
-		const {name} = el;
+		const {name}: {name: keyof TOptions} = el;
 		let {value} = el;
 		if (!name || !el.validity.valid) {
 			return;
@@ -278,9 +278,10 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		}
 
 		this._log('info', 'Saving option', el.name, 'to', value);
+		// @ts-ignore `name` should be a keyof TOptions but it's a plain string, so it fails
 		this.set({
 			[name]: value
-		} as TOptions);
+		});
 	}
 }
 
