@@ -37,6 +37,9 @@
       "browser",
       "webextensions"
     ],
+    "rules": {
+      "import/no-unresolved": "warn"
+    },
     "overrides": [
       {
         "files": "**/*.ts",
@@ -59,6 +62,7 @@
     "xo": "*"
   },
   "dependencies": {
+    "type-fest": "^0.5.2",
     "webext-detect-page": "^0.9.1"
   }
 }
