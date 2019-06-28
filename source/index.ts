@@ -62,7 +62,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 
 	defaults: TOptions;
 
-	private _timer?: NodeJS.Timeout;
+	private _timer?: ReturnType<typeof setTimeout>;
 
 	/**
 	@constructor Returns an instance linked to the chosen storage.
