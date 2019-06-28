@@ -259,7 +259,11 @@ It's the `<form>` that needs to be synchronized or a CSS selector (one element).
 
 ## Related
 
-* [`webext-inject-on-install`](https://github.com/bfred-it/webext-inject-on-install): Automatically add content scripts to existing tabs when your extension is installed
+* [`webext-options-sync`](https://github.com/bfred-it/webext-options-sync): Helps you manage and autosave your extension's options.
+* [`webext-detect-page`](https://github.com/bfred-it/webext-detect-page): Detects where the current browser extension code is being run.
+* [`webext-dynamic-content-scripts`](https://github.com/bfred-it/webext-dynamic-content-scripts): Automatically inject your `content_scripts` on custom domains.
+* [`webext-content-script-ping`](https://github.com/bfred-it/webext-content-script-ping): One-file interface to detect whether your content scripts have loaded.
+* [`webext-domain-permission-toggle`](https://github.com/bfred-it/webext-domain-permission-toggle): Browser-action context menu to request permission for the current tab.
 * [`Awesome WebExtensions`](https://github.com/bfred-it/Awesome-WebExtensions): A curated list of awesome resources for Web Extensions development
 
 ## License
