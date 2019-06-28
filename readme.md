@@ -13,19 +13,33 @@ Main features:
 
 ## Install
 
+You can just download the [standalone bundle](https://packd.bfred-it.now.sh/webext-options-sync@latest?name=OptionsSync) (it might take a minute to download) and include the file in your `manifest.json`, or:
+
 ```sh
 npm install --save webext-options-sync
 ```
-
-If you're using a bundler:
 
 ```js
 import OptionsSync from 'webext-options-sync';
 ```
 
-Or just include the file `webext-options-sync.js` in your `manifest.json`.
+```js
+const OptionsSync = require('webext-options-sync');
+```
+
 
 ## Usage
+
+This module requires the `storage` permission:
+
+```json
+// manifest.json
+{
+  "permissions": [
+    "storage"
+  ]
+}
+```
 
 ### Options access
 
@@ -260,7 +274,7 @@ It's the `<form>` that needs to be synchronized or a CSS selector (one element).
 ## Related
 
 * [webext-storage-cache](https://github.com/bfred-it/webext-storage-cache) - Map-like promised cache storage with expiration.
-* [webext-domain-permission-toggle](https://github.com/bfred-it/webext-domain-permission-toggle) - Browser-action context menu to request permission for the current tab. 
+* [webext-domain-permission-toggle](https://github.com/bfred-it/webext-domain-permission-toggle) - Browser-action context menu to request permission for the current tab.
 * [webext-dynamic-content-scripts](https://github.com/bfred-it/webext-dynamic-content-scripts) - Automatically inject your `content_scripts` on custom domains.
 * [webext-detect-page](https://github.com/bfred-it/webext-detect-page) - Detects where the current browser extension code is being run.
 * [webext-content-script-ping](https://github.com/bfred-it/webext-content-script-ping) - One-file interface to detect whether your content script have loaded.
