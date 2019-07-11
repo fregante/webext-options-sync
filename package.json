@@ -2,45 +2,49 @@
   "name": "webext-options-sync",
   "version": "0.21.1",
   "description": "Helps you manage and autosave your extension's options.",
-  "license": "MIT",
-  "repository": "bfred-it/webext-options-sync",
-  "author": "Federico Brigante <github@bfred.it> (bfred.it)",
   "keywords": [
     "browser",
+    "chrome",
     "extension",
+    "firefox",
     "options",
     "sync",
-    "webext",
-    "chrome",
-    "firefox"
+    "webext"
   ],
+  "repository": "bfred-it/webext-options-sync",
+  "license": "MIT",
+  "author": "Federico Brigante <github@bfred.it> (bfred.it)",
   "files": [
     "index.js",
     "index.d.ts"
   ],
   "scripts": {
-    "test": "xo && tsc",
-    "prepublish-only": "tsc",
     "build": "tsc",
+    "prepublish-only": "tsc",
+    "test": "xo && tsc",
     "watch": "tsc --watch"
   },
   "xo": {
-    "extensions": [
-      "ts"
-    ],
     "envs": [
       "browser",
       "webextensions"
     ],
-    "rules": {
-      "import/no-unresolved": "warn"
-    },
+    "extensions": [
+      "ts"
+    ],
     "overrides": [
       {
         "files": "**/*.ts",
         "extends": "xo-typescript"
       }
-    ]
+    ],
+    "rules": {
+      "import/no-unresolved": "warn"
+    }
+  },
+  "dependencies": {
+    "type-fest": "^0.5.2",
+    "webext-detect-page": "^0.9.1"
   },
   "devDependencies": {
     "@sindresorhus/tsconfig": "^0.4.0",
@@ -51,9 +55,5 @@
     "eslint-config-xo-typescript": "^0.14.0",
     "typescript": "^3.5.2",
     "xo": "*"
-  },
-  "dependencies": {
-    "type-fest": "^0.5.2",
-    "webext-detect-page": "^0.9.1"
   }
 }
