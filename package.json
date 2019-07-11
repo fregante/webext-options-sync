@@ -1,6 +1,6 @@
 {
   "name": "webext-options-sync",
-  "version": "0.21.1",
+  "version": "0.21.2",
   "description": "Helps you manage and autosave your extension's options.",
   "keywords": [
     "browser",
