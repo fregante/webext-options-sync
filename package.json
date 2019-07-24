@@ -11,9 +11,9 @@
     "sync",
     "webext"
   ],
-  "repository": "bfred-it/webext-options-sync",
+  "repository": "fregante/webext-options-sync",
   "license": "MIT",
-  "author": "Federico Brigante <github@bfred.it> (bfred.it)",
+  "author": "Federico Brigante <opensource@bfred.it> (bfred.it)",
   "files": [
     "index.js",
     "index.d.ts"

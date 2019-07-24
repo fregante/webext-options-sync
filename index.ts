@@ -70,7 +70,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	*/
 	constructor(options?: OptionsSync.Settings<TOptions>) {
 		const fullOptions: Required<OptionsSync.Settings<TOptions>> = {
-			// https://github.com/bfred-it/webext-options-sync/pull/21#issuecomment-500314074
+			// https://github.com/fregante/webext-options-sync/pull/21#issuecomment-500314074
 			// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
 			defaults: {} as TOptions,
 			storageName: 'options',
