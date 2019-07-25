@@ -176,7 +176,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	async set(newOptions: RequireAtLeastOne<TOptions>): Promise<void> {
+	async set(newOptions: Partial<TOptions>): Promise<void> {
 		return this.setAll({...await this.getAll(), ...newOptions});
 	}
 
@@ -211,11 +211,12 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 			clearTimeout(this._timer);
 		}
 
-		this._timer = setTimeout(() => {
-			const options = serialize(currentTarget, {
+		this._timer = setTimeout(async () => {
+			// Parse form into object, except invalid fields
+			const options: TOptions = serialize(currentTarget, {
 				exclude: [...document.querySelectorAll<HTMLInputElement>('[name]:invalid')].map(field => field.name)
 			});
-			this.set(options);
+			await this.set(options);
 			currentTarget!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 				bubbles: true
 			}));
