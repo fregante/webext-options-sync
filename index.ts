@@ -89,7 +89,9 @@ class OptionsSync<TOptions extends Options> {
 				if (installType === 'development') {
 					this._applyDefinition(fullOptions);
 				} else {
-					chrome.runtime.onInstalled.addListener(() => this._applyDefinition(fullOptions));
+					chrome.runtime.onInstalled.addListener(() => {
+						this._applyDefinition(fullOptions);
+					});
 				}
 			});
 		}

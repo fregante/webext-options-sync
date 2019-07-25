@@ -44,7 +44,7 @@
     }
   },
   "dependencies": {
-    "webext-detect-page": "^0.9.1"
+    "webext-detect-page": "^1.0.2"
   },
   "devDependencies": {
     "@sindresorhus/tsconfig": "^0.4.0",
@@ -52,7 +52,7 @@
     "@types/dom-inputevent": "^1.0.5",
     "@typescript-eslint/eslint-plugin": "^1.9.0",
     "@typescript-eslint/parser": "^1.10.2",
-    "eslint-config-xo-typescript": "^0.14.0",
+    "eslint-config-xo-typescript": "^0.15.0",
     "typescript": "^3.5.2",
     "xo": "*"
   },
