@@ -1,3 +1,4 @@
+import {RequireAtLeastOne} from 'type-fest';
 import {isBackgroundPage} from 'webext-detect-page';
 // @ts-ignore
 import {serialize, deserialize} from 'dom-form-serializer';
@@ -63,7 +64,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 
 	defaults: TOptions;
 
-	private _timer?: NodeJS.Timeout;
+	private _timer?: ReturnType<typeof setTimeout>;
 
 	/**
 	@constructor Returns an instance linked to the chosen storage.
@@ -71,7 +72,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	*/
 	constructor(options?: OptionsSync.Settings<TOptions>) {
 		const fullOptions: Required<OptionsSync.Settings<TOptions>> = {
-			// https://github.com/bfred-it/webext-options-sync/pull/21#issuecomment-500314074
+			// https://github.com/fregante/webext-options-sync/pull/21#issuecomment-500314074
 			// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
 			defaults: {} as TOptions,
 			storageName: 'options',
@@ -101,11 +102,11 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this._handleFormUpdatesDebounced = this._handleFormUpdatesDebounced.bind(this);
 	}
 
-	_log(method: keyof Console, ...args: any[]): void {
+	private _log(method: keyof Console, ...args: any[]): void {
 		console[method](...args);
 	}
 
-	async _applyDefinition(defs: Required<OptionsSync.Settings<TOptions>>): Promise<void> {
+	private async _applyDefinition(defs: Required<OptionsSync.Settings<TOptions>>): Promise<void> {
 		const options = {...defs.defaults, ...await this.getAll()};
 
 		this._log('group', 'Appling definitions');
@@ -175,7 +176,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	async set(newOptions: TOptions): Promise<void> {
+	async set(newOptions: RequireAtLeastOne<TOptions>): Promise<void> {
 		return this.setAll({...await this.getAll(), ...newOptions});
 	}
 
@@ -205,13 +206,16 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		deserialize(element, await this.getAll());
 	}
 
-	_handleFormUpdatesDebounced({currentTarget}: Event): void {
+	private _handleFormUpdatesDebounced({currentTarget}: Event): void {
 		if (this._timer) {
 			clearTimeout(this._timer);
 		}
 
 		this._timer = setTimeout(() => {
 			this.set(serialize(currentTarget));
+			currentTarget!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
+				bubbles: true
+			}));
 			this._timer = undefined;
 		}, 600);
 	}

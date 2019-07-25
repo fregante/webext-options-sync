@@ -5,6 +5,6 @@
 		"target": "es2018"
 	},
 	"files": [
-		"source/index.ts"
+		"index.ts"
 	]
 }

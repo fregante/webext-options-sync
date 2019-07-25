@@ -1,9 +1,6 @@
-# webext-options-sync
+# webext-options-sync [![Travis build status](https://api.travis-ci.org/fregante/webext-options-sync.svg?branch=master)](https://travis-ci.org/fregante/webext-options-sync) [![npm version](https://img.shields.io/npm/v/webext-options-sync.svg)](https://www.npmjs.com/package/webext-options-sync)
 
 > Helps you manage and autosave your extension's options.
-
-[![Travis build status](https://api.travis-ci.org/bfred-it/webext-options-sync.svg?branch=master)](https://travis-ci.org/bfred-it/webext-options-sync)
-[![npm version](https://img.shields.io/npm/v/webext-options-sync.svg)](https://www.npmjs.com/package/webext-options-sync)
 
 Main features:
 
@@ -13,105 +10,137 @@ Main features:
 
 ## Install
 
+You can just download the [standalone bundle](https://packd.fregante.now.sh/webext-options-sync@latest?name=OptionsSync) (it might take a minute to download) and include the file in your `manifest.json`, or:
+
 ```sh
 npm install --save webext-options-sync
 ```
-
-If you're using a bundler:
 
 ```js
 import OptionsSync from 'webext-options-sync';
 ```
 
-Or just include the file `webext-options-sync.js` in your `manifest.json`.
-
 ## Usage
 
-### Options access
-
-Access your saved options from `content.js` or `background.js` with:
-
-<details>
-
-```js
-/* globals OptionsSync */
-new OptionsSync().getAll().then(options => {
-	console.log('The user’s options are', options);
-	if(options.color) {
-		document.body.style.color = color;
-	}
-});
-```
-
-And don't forget to include `webext-options-sync` in your manifest.json:
+This module requires the `storage` permission in `manifest.json`:
 
 ```json
 {
+	"name": "My Cool Extension",
+	"permissions": [
+		"storage"
+ 	]
+}
+```
+
+### Simple usage
+
+You can set and get your options from any context (background, content script, etc):
+
+```js
+/* global OptionsSync */
+const optionsStorage = new OptionsSync();
+
+await optionsStorage.set('showStars', 10);
+
+const options = await optionsStorage.getAll();
+// {showStars: 10}
+```
+
+### Advanced usage
+
+It's suggested to create an `options-storage.js` file with your defaults and possible migrations, and import it where needed:
+
+```js
+/* global OptionsSync */
+window.optionsStorage = new OptionsSync({
+	defaults: {
+		colorString: 'green',
+		anyBooleans: true,
+		numbersAreFine: 9001,
+	},
+
+	// List of functions that are called when the extension is updated
+	migrations: [
+		(savedOptions, currentDefaults) => {
+			// Perhaps it was renamed
+			if (savedOptions.colour) {
+				savedOptions.color = savedOptions.colour;
+				delete savedOptions.colour;
+			}
+		},
+
+		// Integrated utility that drops any properties that don't appear in the defaults
+		OptionsSync.migrations.removeUnused
+	]
+});
+```
+
+Include this file as a background script: it's where the `defaults` are set for the first time and where the `migrations` are run. This example also includes it in the content script, if you need it there:
+
+```json
+{
+	"background": {
+		"scripts": [
+			"webext-options-sync.js",
+			"options-storage.js",
+			"background.js"
+		]
+	},
 	"content_scripts": [
-	    {
-	        "matches": [
-	            "https://www.google.com*",
-	        ],
-	        "js": [
-	            "webext-options-sync.js",
-	            "content.js"
-	        ]
-	    }
+		{
+			"matches": [
+				"https://www.google.com/*",
+			],
+			"js": [
+				"webext-options-sync.js",
+				"options-storage.js",
+				"content.js"
+			]
+		}
 	]
 }
 ```
 
-</details>
-
-### Defaults definition
-
-Create your options definition file, for example `options-init.js`:
-
-<details>
+Then you can use it this way from the `background` or `content.js`:
 
 ```js
-/* globals OptionsSync */
-new OptionsSync({
-	defaults: {
-		yourStringOption: 'green',
-		anyBooleans: true,
-		numbersAreFine: 9001
-		// Open an issue to discuss more complex fields like multiselects
-	}
-});
-```
-
-Include it in `manifest.json` as a background script together with `webext-options-sync`
-
-```json
-{
-    "background": {
-        "scripts": [
-            "webext-options-sync.js",
-            "options-init.js"
-        ]
-    }
+/* global optionsStorage */
+async function init () {
+	const {colorString} = await optionsStorage.getAll();
+	document.body.style.background = colorString;
 }
+
+init();
 ```
 
-</details>
+And also enable autosaving in your options page:
+
+```html
+<!-- Your options.html -->
+<form>
+	<label>Color: <input name="colorString"/></label><br>
+	<label>Show: <input type="checkbox" name="anyBooleans"/></label><br>
+	<label>Stars: <input name="numbersAreFine"/></label><br>
+</form>
+
+<script src="webext-options-sync.js"></script>
+<script src="options-storage.js"></script>
+<script src="options.js"></script>
+```
+
+```js
+// Your options.js file
+/* global optionsStorage */
+
+optionsStorage.syncForm(document.querySelector('form'));
+```
 
 ### Form autosave and autoload
 
 `OptionsSync` listens to any field that triggers `input` or `change` events. Option names are set via the fields' `name` attribute. Checkboxes are stored as `true`/`false`; other fields are stored as strings.
 
-<details>
-
-In your `options.html` file, include `webext-options-sync.js` and then enable the sync this way:
-
-```js
-/* globals OptionsSync */
-new OptionsSync().syncForm(document.querySelector('form#options-form'));
-```
-
-Done. Any defaults or saved options will be loaded into the form and any change will automatically be saved via `chrome.storage.sync`
-
-</details>
+Any defaults or saved options will be loaded into the form and any change will automatically be saved via `chrome.storage.sync`.
 
 #### Input validation
 
@@ -133,35 +162,6 @@ input:invalid ~ .error-message {
 	display: block;
 }
 ```
-
-</details>
-
-### Migrations
-
-<details>
-
-In your `options-init.js` file, extend the call by including an array of functions, for example:
-
-```js
-/* globals OptionsSync */
-new OptionsSync({
-	defaults: {
-		color: 'red',
-	},
-	migrations: [
-		(savedOptions, currentDefaults) => {
-			// perhaps it was renamed
-			if(savedOptions.colour) {
-				savedOptions.color = savedOptions.colour;
-				delete savedOptions.colour;
-			}
-		},
-		OptionsSync.migrations.removeUnused
-	]
-});
-```
-
-Notice `OptionsSync.migrations.removeUnused`: it's a helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
 
 </details>
 
@@ -196,7 +196,7 @@ Returns an instance linked to the chosen storage.
 
 Type: `object`
 
-A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
+A map of default options as strings or booleans. The keys will have to match the options form fields' `name` attributes.
 
 ###### migrations
 
@@ -214,7 +214,10 @@ A list of functions to run in the `background` when the extension is updated. Ex
 			}
 
 			// No return needed
-		}
+		},
+		
+		// Integrated utility that drops any properties that don't appear in the defaults
+		OptionsSync.migrations.removeUnused
 	],
 }
 ```
@@ -239,7 +242,11 @@ This returns a Promise that will resolve with **all** the options stored, as an 
 
 #### opts.setAll(options)
 
-This will override **all** the options stored with your `options`
+This will override **all** the options stored with your `options`.
+
+#### opts.set(options)
+
+This will merge the existing options with the object provided.
 
 ##### options
 
@@ -253,15 +260,19 @@ Any defaults or saved options will be loaded into the `<form>` and any change wi
 
 ##### form
 
-Type: `form dom element`, `string`
+Type: `HTMLFormElement`, `string`
 
 It's the `<form>` that needs to be synchronized or a CSS selector (one element). The form fields' `name` attributes will have to match the option names.
 
 ## Related
 
-* [`webext-inject-on-install`](https://github.com/bfred-it/webext-inject-on-install): Automatically add content scripts to existing tabs when your extension is installed
-* [`Awesome WebExtensions`](https://github.com/bfred-it/Awesome-WebExtensions): A curated list of awesome resources for Web Extensions development
+* [webext-storage-cache](https://github.com/fregante/webext-storage-cache) - Map-like promised cache storage with expiration.
+* [webext-domain-permission-toggle](https://github.com/fregante/webext-domain-permission-toggle) - Browser-action context menu to request permission for the current tab.
+* [webext-dynamic-content-scripts](https://github.com/fregante/webext-dynamic-content-scripts) - Automatically inject your `content_scripts` on custom domains.
+* [webext-detect-page](https://github.com/fregante/webext-detect-page) - Detects where the current browser extension code is being run.
+* [webext-content-script-ping](https://github.com/fregante/webext-content-script-ping) - One-file interface to detect whether your content script have loaded.
+* [`Awesome WebExtensions`](https://github.com/fregante/Awesome-WebExtensions): A curated list of awesome resources for Web Extensions development
 
 ## License
 
-MIT © Federico Brigante — [Twitter](http://twitter.com/bfred_it)
+MIT © [Federico Brigante](https://bfred.it)
