@@ -1,4 +1,3 @@
-import {RequireAtLeastOne} from 'type-fest';
 import {isBackgroundPage} from 'webext-detect-page';
 
 interface Settings<TOptions extends Options> {
@@ -162,7 +161,7 @@ class OptionsSync<TOptions extends Options> {
 
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	async set(newOptions: RequireAtLeastOne<TOptions>): Promise<void> {
+	async set(newOptions: Partial<TOptions>): Promise<void> {
 		return this.setAll({...await this.getAll(), ...newOptions});
 	}
 
