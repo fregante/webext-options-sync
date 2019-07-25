@@ -212,7 +212,10 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		}
 
 		this._timer = setTimeout(() => {
-			this.set(serialize(currentTarget));
+			const options = serialize(currentTarget, {
+				exclude: [...document.querySelectorAll<HTMLInputElement>('[name]:invalid')].map(field => field.name)
+			});
+			this.set(options);
 			currentTarget!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 				bubbles: true
 			}));
