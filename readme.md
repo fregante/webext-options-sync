@@ -41,7 +41,7 @@ You can set and get your options from any context (background, content script, e
 /* global OptionsSync */
 const optionsStorage = new OptionsSync();
 
-await optionsStorage.set('showStars', 10);
+await optionsStorage.set({showStars: 10});
 
 const options = await optionsStorage.getAll();
 // {showStars: 10}
