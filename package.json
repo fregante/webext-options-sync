@@ -18,6 +18,7 @@
     "index.js",
     "index.d.ts"
   ],
+  "module": "index.js",
   "scripts": {
     "build": "tsc",
     "prepublish-only": "tsc",
@@ -55,5 +56,6 @@
     "eslint-config-xo-typescript": "^0.14.0",
     "typescript": "^3.5.2",
     "xo": "*"
-  }
+  },
+  "type": "module"
 }

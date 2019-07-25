@@ -288,4 +288,4 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	}
 }
 
-export = OptionsSync;
+export default OptionsSync;
