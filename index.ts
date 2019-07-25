@@ -1,4 +1,3 @@
-import {RequireAtLeastOne} from 'type-fest';
 import {isBackgroundPage} from 'webext-detect-page';
 // @ts-ignore
 import {serialize, deserialize} from 'dom-form-serializer';
@@ -102,26 +101,6 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this._handleFormUpdatesDebounced = this._handleFormUpdatesDebounced.bind(this);
 	}
 
-	private _log(method: keyof Console, ...args: any[]): void {
-		console[method](...args);
-	}
-
-	private async _applyDefinition(defs: Required<OptionsSync.Settings<TOptions>>): Promise<void> {
-		const options = {...defs.defaults, ...await this.getAll()};
-
-		this._log('group', 'Appling definitions');
-		this._log('info', 'Current options:', options);
-		if (defs.migrations && defs.migrations.length > 0) {
-			this._log('info', 'Running', defs.migrations.length, 'migrations');
-			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
-		}
-
-		this._log('info', 'Migrated options:', options);
-		this._log('groupEnd');
-
-		this.setAll(options);
-	}
-
 	/**
 	Retrieves all the options stored.
 
@@ -206,6 +185,26 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		deserialize(element, await this.getAll());
 	}
 
+	private _log(method: keyof Console, ...args: any[]): void {
+		console[method](...args);
+	}
+
+	private async _applyDefinition(defs: Required<OptionsSync.Settings<TOptions>>): Promise<void> {
+		const options = {...defs.defaults, ...await this.getAll()};
+
+		this._log('group', 'Appling definitions');
+		this._log('info', 'Current options:', options);
+		if (defs.migrations && defs.migrations.length > 0) {
+			this._log('info', 'Running', defs.migrations.length, 'migrations');
+			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
+		}
+
+		this._log('info', 'Migrated options:', options);
+		this._log('groupEnd');
+
+		this.setAll(options);
+	}
+
 	private _handleFormUpdatesDebounced({currentTarget}: Event): void {
 		if (this._timer) {
 			clearTimeout(this._timer);
@@ -216,6 +215,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 			const options: TOptions = serialize(currentTarget, {
 				exclude: [...document.querySelectorAll<HTMLInputElement>('[name]:invalid')].map(field => field.name)
 			});
+
 			await this.set(options);
 			currentTarget!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 				bubbles: true
