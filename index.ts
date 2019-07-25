@@ -100,11 +100,11 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this._handleFormUpdatesDebounced = this._handleFormUpdatesDebounced.bind(this);
 	}
 
-	_log(method: keyof Console, ...args: any[]): void {
+	private _log(method: keyof Console, ...args: any[]): void {
 		console[method](...args);
 	}
 
-	async _applyDefinition(defs: Required<OptionsSync.Settings<TOptions>>): Promise<void> {
+	private async _applyDefinition(defs: Required<OptionsSync.Settings<TOptions>>): Promise<void> {
 		const options = {...defs.defaults, ...await this.getAll()};
 
 		this._log('group', 'Appling definitions');
@@ -120,7 +120,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this.setAll(options);
 	}
 
-	_parseNumbers(options: TOptions): TOptions {
+	private _parseNumbers(options: TOptions): TOptions {
 		for (const name of Object.keys(options)) {
 			if (options[name] === String(Number(options[name]))) {
 				// @ts-ignore it will be dropped in #13
@@ -215,7 +215,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this._applyToForm(await this.getAll(), element);
 	}
 
-	_applyToForm(options: TOptions, form: HTMLFormElement): void {
+	private _applyToForm(options: TOptions, form: HTMLFormElement): void {
 		this._log('group', 'Updating form');
 		for (const name of Object.keys(options)) {
 			const els = form.querySelectorAll<HTMLInputElement>(`[name="${CSS.escape(name)}"]`);
@@ -249,7 +249,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this._log('groupEnd');
 	}
 
-	_handleFormUpdatesDebounced({target}: Event): void {
+	private _handleFormUpdatesDebounced({target}: Event): void {
 		if (this._timer) {
 			clearTimeout(this._timer);
 		}
@@ -260,7 +260,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		}, 600);
 	}
 
-	_handleFormUpdates(el: HTMLFormElement): void {
+	private _handleFormUpdates(el: HTMLFormElement): void {
 		const {name}: {name: keyof TOptions} = el;
 		let {value} = el;
 		if (!name || !el.validity.valid) {
