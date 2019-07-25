@@ -2,55 +2,53 @@ import {isBackgroundPage} from 'webext-detect-page';
 // @ts-ignore
 import {serialize, deserialize} from 'dom-form-serializer';
 
-declare namespace OptionsSync {
-	interface Settings<TOptions extends Options> {
-		storageName?: string;
-		logging?: boolean;
-		defaults?: TOptions;
-		/**
-		 * A list of functions to call when the extension is updated.
-		 */
-		migrations?: Array<Migration<TOptions>>;
-	}
-
+interface Settings<TOptions extends Options> {
+	storageName?: string;
+	logging?: boolean;
+	defaults?: TOptions;
 	/**
-	A map of options as strings or booleans. The keys will have to match the form fields' `name` attributes.
-	*/
-	interface Options {
-		[key: string]: string | number | boolean;
-	}
-
-	/*
-	Handler signature for when an extension updates.
-	*/
-	type Migration<TOptions extends Options> = (savedOptions: TOptions, defaults: TOptions) => void;
-
-	/**
-	@example
-
-	{
-		// Recommended
-		defaults: {
-			color: 'blue'
-		},
-		// Optional
-		migrations: [
-			savedOptions => {
-				if (savedOptions.oldStuff) {
-					delete savedOptions.oldStuff;
-				}
-			}
-		],
-	}
-	*/
+	 * A list of functions to call when the extension is updated.
+	 */
+	migrations?: Array<Migration<TOptions>>;
 }
 
-class OptionsSync<TOptions extends OptionsSync.Options> {
+/**
+A map of options as strings or booleans. The keys will have to match the form fields' `name` attributes.
+*/
+interface Options {
+	[key: string]: string | number | boolean;
+}
+
+/*
+Handler signature for when an extension updates.
+*/
+type Migration<TOptions extends Options> = (savedOptions: TOptions, defaults: TOptions) => void;
+
+/**
+@example
+
+{
+	// Recommended
+	defaults: {
+		color: 'blue'
+	},
+	// Optional
+	migrations: [
+		savedOptions => {
+			if (savedOptions.oldStuff) {
+				delete savedOptions.oldStuff;
+			}
+		}
+	],
+}
+*/
+
+class OptionsSync<TOptions extends Options> {
 	public static migrations = {
 		/**
 		Helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
 		*/
-		removeUnused(options: OptionsSync.Options, defaults: OptionsSync.Options) {
+		removeUnused(options: Options, defaults: Options) {
 			for (const key of Object.keys(options)) {
 				if (!(key in defaults)) {
 					delete options[key];
@@ -69,8 +67,8 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	@constructor Returns an instance linked to the chosen storage.
 	@param options - Configuration to determine where options are stored.
 	*/
-	constructor(options?: OptionsSync.Settings<TOptions>) {
-		const fullOptions: Required<OptionsSync.Settings<TOptions>> = {
+	constructor(options?: Settings<TOptions>) {
+		const fullOptions: Required<Settings<TOptions>> = {
 			// https://github.com/fregante/webext-options-sync/pull/21#issuecomment-500314074
 			// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
 			defaults: {} as TOptions,
@@ -196,7 +194,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		console[method](...args);
 	}
 
-	private async _applyDefinition(defs: Required<OptionsSync.Settings<TOptions>>): Promise<void> {
+	private async _applyDefinition(defs: Required<Settings<TOptions>>): Promise<void> {
 		const options = {...defs.defaults, ...await this.getAll()};
 
 		this._log('group', 'Appling definitions');
@@ -232,4 +230,4 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	}
 }
 
-export = OptionsSync;
+export default OptionsSync;
