@@ -100,37 +100,6 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this._handleFormUpdatesDebounced = this._handleFormUpdatesDebounced.bind(this);
 	}
 
-	private _log(method: keyof Console, ...args: any[]): void {
-		console[method](...args);
-	}
-
-	private async _applyDefinition(defs: Required<OptionsSync.Settings<TOptions>>): Promise<void> {
-		const options = {...defs.defaults, ...await this.getAll()};
-
-		this._log('group', 'Appling definitions');
-		this._log('info', 'Current options:', options);
-		if (defs.migrations && defs.migrations.length > 0) {
-			this._log('info', 'Running', defs.migrations.length, 'migrations');
-			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
-		}
-
-		this._log('info', 'Migrated options:', options);
-		this._log('groupEnd');
-
-		this.setAll(options);
-	}
-
-	private _parseNumbers(options: TOptions): TOptions {
-		for (const name of Object.keys(options)) {
-			if (options[name] === String(Number(options[name]))) {
-				// @ts-ignore it will be dropped in #13
-				options[name] = Number(options[name]);
-			}
-		}
-
-		return options;
-	}
-
 	/**
 	Retrieves all the options stored.
 
@@ -285,6 +254,37 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 		this.set({
 			[name]: value
 		});
+	}
+
+	private _log(method: keyof Console, ...args: any[]): void {
+		console[method](...args);
+	}
+
+	private async _applyDefinition(defs: Required<OptionsSync.Settings<TOptions>>): Promise<void> {
+		const options = {...defs.defaults, ...await this.getAll()};
+
+		this._log('group', 'Appling definitions');
+		this._log('info', 'Current options:', options);
+		if (defs.migrations && defs.migrations.length > 0) {
+			this._log('info', 'Running', defs.migrations.length, 'migrations');
+			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
+		}
+
+		this._log('info', 'Migrated options:', options);
+		this._log('groupEnd');
+
+		this.setAll(options);
+	}
+
+	private _parseNumbers(options: TOptions): TOptions {
+		for (const name of Object.keys(options)) {
+			if (options[name] === String(Number(options[name]))) {
+				// @ts-ignore it will be dropped in #13
+				options[name] = Number(options[name]);
+			}
+		}
+
+		return options;
 	}
 }
 
