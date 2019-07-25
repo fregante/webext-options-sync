@@ -246,6 +246,9 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 			}
 		}
 
+		form.dispatchEvent(new CustomEvent('options-sync:form-synced', {
+			bubbles: true
+		}));
 		this._log('groupEnd');
 	}
 
