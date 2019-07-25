@@ -128,7 +128,7 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 			});
 		});
 
-		return keys[this.storageName];
+		return {...this.defaults, ...keys[this.storageName]};
 	}
 
 	/**
@@ -137,6 +137,13 @@ class OptionsSync<TOptions extends OptionsSync.Options> {
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
 	async setAll(newOptions: TOptions): Promise<void> {
+		// Don't store defaults, they'll be merged at runtime
+		for (const [key, value] of Object.entries(newOptions)) {
+			if (this.defaults[key] === value) {
+				delete newOptions[key];
+			}
+		}
+
 		return new Promise((resolve, reject) => {
 			chrome.storage.sync.set({
 				[this.storageName]: newOptions
