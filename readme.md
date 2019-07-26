@@ -20,7 +20,7 @@ npm install --save webext-options-sync
 import OptionsSync from 'webext-options-sync';
 ```
 
-If you are new to creating browser extensions, you should take a look at [browser-extension-template](https://github.com/notlmn/browser-extension-template) for bootstrapping your new extension.
+The [browser-extension-template](https://github.com/notlmn/browser-extension-template) repo includes a complete setup with ES Modules, based on the advanced usage below.
 
 ## Usage
 
