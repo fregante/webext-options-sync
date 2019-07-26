@@ -1,4 +1,5 @@
 import {isBackgroundPage} from 'webext-detect-page';
+import {serialize, deserialize} from 'dom-form-serializer';
 
 interface Settings<TOptions extends Options> {
 	storageName?: string;
@@ -126,10 +127,7 @@ class OptionsSync<TOptions extends Options> {
 			});
 		});
 
-		return this._parseNumbers({
-			...this.defaults,
-			...keys[this.storageName]
-		});
+		return {...this.defaults, ...keys[this.storageName]};
 	}
 
 	/**
@@ -186,83 +184,11 @@ class OptionsSync<TOptions extends Options> {
 				changes[this.storageName] &&
 				!element.contains(document.activeElement) // Avoid applying changes while the user is editing a field
 			) {
-				this._applyToForm(changes[this.storageName].newValue, element);
+				deserialize(element, changes[this.storageName].newValue);
 			}
 		});
 
-		this._applyToForm(await this.getAll(), element);
-	}
-
-	private _applyToForm(options: TOptions, form: HTMLFormElement): void {
-		this._log('group', 'Updating form');
-		for (const name of Object.keys(options)) {
-			const els = form.querySelectorAll<HTMLInputElement>(`[name="${CSS.escape(name)}"]`);
-			const [field] = els;
-			if (field) {
-				this._log('info', name, ':', options[name]);
-				switch (field.type) {
-					case 'checkbox':
-						field.checked = options[name] as boolean;
-						break;
-					case 'radio': {
-						const [selected] = [...els].filter(el => el.value === options[name]);
-						if (selected) {
-							selected.checked = true;
-						}
-
-						break;
-					}
-
-					default:
-						field.value = options[name] as string;
-						break;
-				}
-
-				field.dispatchEvent(new InputEvent('input'));
-			} else {
-				this._log('warn', 'Stored option {', name, ':', options[name], '} was not found on the page');
-			}
-		}
-
-		form.dispatchEvent(new CustomEvent('options-sync:form-synced', {
-			bubbles: true
-		}));
-		this._log('groupEnd');
-	}
-
-	private _handleFormUpdatesDebounced({target}: Event): void {
-		if (this._timer) {
-			clearTimeout(this._timer);
-		}
-
-		this._timer = setTimeout(() => {
-			this._handleFormUpdates(target as HTMLFormElement);
-			this._timer = undefined;
-		}, 600);
-	}
-
-	private _handleFormUpdates(el: HTMLFormElement): void {
-		const {name}: {name: keyof TOptions} = el;
-		let {value} = el;
-		if (!name || !el.validity.valid) {
-			return;
-		}
-
-		switch (el.type) {
-			case 'select-one':
-				value = el.options[el.selectedIndex].value;
-				break;
-			case 'checkbox':
-				value = el.checked;
-				break;
-			default: break;
-		}
-
-		this._log('info', 'Saving option', el.name, 'to', value);
-		// @ts-ignore `name` should be a keyof TOptions but it's a plain string, so it fails
-		this.set({
-			[name]: value
-		});
+		deserialize(element, await this.getAll());
 	}
 
 	private _log(method: keyof Console, ...args: any[]): void {
@@ -285,15 +211,23 @@ class OptionsSync<TOptions extends Options> {
 		this.setAll(options);
 	}
 
-	private _parseNumbers(options: TOptions): TOptions {
-		for (const name of Object.keys(options)) {
-			if (options[name] === String(Number(options[name]))) {
-				// @ts-ignore it will be dropped in #13
-				options[name] = Number(options[name]);
-			}
+	private _handleFormUpdatesDebounced({currentTarget}: Event): void {
+		if (this._timer) {
+			clearTimeout(this._timer);
 		}
 
-		return options;
+		this._timer = setTimeout(async () => {
+			// Parse form into object, except invalid fields
+			const options: TOptions = serialize(currentTarget as HTMLFormElement, {
+				exclude: [...document.querySelectorAll<HTMLInputElement>('[name]:invalid')].map(field => field.name)
+			});
+
+			await this.set(options);
+			currentTarget!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
+				bubbles: true
+			}));
+			this._timer = undefined;
+		}, 600);
 	}
 }
 
