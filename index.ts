@@ -1,5 +1,4 @@
 import {isBackgroundPage} from 'webext-detect-page';
-// @ts-ignore
 import {serialize, deserialize} from 'dom-form-serializer';
 
 interface Settings<TOptions extends Options> {
@@ -219,7 +218,7 @@ class OptionsSync<TOptions extends Options> {
 
 		this._timer = setTimeout(async () => {
 			// Parse form into object, except invalid fields
-			const options: TOptions = serialize(currentTarget, {
+			const options: TOptions = serialize(currentTarget as HTMLFormElement, {
 				exclude: [...document.querySelectorAll<HTMLInputElement>('[name]:invalid')].map(field => field.name)
 			});
 

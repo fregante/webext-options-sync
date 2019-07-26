@@ -6,6 +6,7 @@
 		"module": "es2015"
 	},
 	"files": [
-		"index.ts"
+		"globals.d.ts",
+		"index.ts",
 	]
 }
