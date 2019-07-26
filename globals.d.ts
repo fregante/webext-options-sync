@@ -1,5 +1,4 @@
 declare module 'dom-form-serializer' {
-
 	export function serialize (
 		element: HTMLFormElement,
 		options: {
