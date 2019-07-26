@@ -20,6 +20,8 @@ npm install --save webext-options-sync
 import OptionsSync from 'webext-options-sync';
 ```
 
+The [browser-extension-template](https://github.com/notlmn/browser-extension-template) repo includes a complete setup with ES Modules, based on the advanced usage below.
+
 ## Usage
 
 This module requires the `storage` permission in `manifest.json`:
