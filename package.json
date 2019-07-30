@@ -39,7 +39,8 @@
       }
     ],
     "rules": {
-      "import/no-unresolved": "warn"
+      "import/no-unresolved": "warn",
+      "import/no-unassigned-import": "off"
     }
   },
   "dependencies": {

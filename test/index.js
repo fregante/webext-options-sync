@@ -5,6 +5,7 @@ import OptionsSync from '..';
 function flattenInstance(setup) {
 	return JSON.parse(JSON.stringify(setup));
 }
+
 const defaultSetup = {
 	defaults: {},
 	storageName: 'options'
@@ -79,8 +80,8 @@ test('getAll merges saved options with defaults', async t => {
 });
 
 test('setAll', async t => {
-	let storage = new OptionsSync();
-	let newOptions = {
+	const storage = new OptionsSync();
+	const newOptions = {
 		name: 'Rico',
 		people: 3
 	};
@@ -92,8 +93,8 @@ test('setAll', async t => {
 });
 
 test('setAll skips defaults', async t => {
-	let storage = new OptionsSync(simpleSetup);
-	let newOptions = {
+	const storage = new OptionsSync(simpleSetup);
+	const newOptions = {
 		name: 'Rico',
 		people: 3
 	};
