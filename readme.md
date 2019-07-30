@@ -140,9 +140,9 @@ optionsStorage.syncForm(document.querySelector('form'));
 
 ### Form autosave and autoload
 
-`OptionsSync` listens to any field that triggers `input` or `change` events. Option names are set via the fields' `name` attribute. Checkboxes are stored as `true`/`false`; other fields are stored as strings.
+When using the `syncForm` method, `OptionsSync` will serialize the form using [dom-form-serializer](https://github.com/jefersondaniel/dom-form-serializer), which uses the `name` attribute as `key` for your options. Refer to its readme for more info on the structure of the data.
 
-Any defaults or saved options will be loaded into the form and any change will automatically be saved via `chrome.storage.sync`.
+Any changes to the form are immediately saved into `chrome.storage.sync` via `input` events debounced by 600ms.
 
 #### Input validation
 
@@ -217,7 +217,7 @@ A list of functions to run in the `background` when the extension is updated. Ex
 
 			// No return needed
 		},
-		
+
 		// Integrated utility that drops any properties that don't appear in the defaults
 		OptionsSync.migrations.removeUnused
 	],
@@ -238,23 +238,27 @@ Default: `true`
 
 Whether info and warnings (on sync, updating form, etc.) should be logged to the console or not.
 
-#### opts.getAll()
+#### opts.set(options)
 
-This returns a Promise that will resolve with **all** the options stored, as an object.
+This will merge the existing options with the object provided.
+
+**Note:** Any values specified in `default` are not saved into the storage, to save space, but they will still appear when using `getAll`. You just have to make sure to always specify the same `defaults` object in every context (this happens automatically in the [Advanced usage](#advanced-usage) above.)
+
+##### options
+
+Type: `object`
+Default: `{}`
+Example: `{color: red}`
+
+A map of default options as strings, booleans, numbers and anything accepted by [dom-form-serializer](https://github.com/jefersondaniel/dom-form-serializer)’s `deserialize` function.
 
 #### opts.setAll(options)
 
 This will override **all** the options stored with your `options`.
 
-#### opts.set(options)
+#### opts.getAll()
 
-This will merge the existing options with the object provided.
-
-##### options
-
-Type: `object`
-
-A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
+This returns a Promise that will resolve with all the options.
 
 #### opts.syncForm(form)
 
