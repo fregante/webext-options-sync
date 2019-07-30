@@ -2,7 +2,7 @@ import {debounce} from 'throttle-debounce';
 import {isBackgroundPage} from 'webext-detect-page';
 import {serialize, deserialize} from 'dom-form-serializer';
 
-interface Settings<TOptions extends Options> {
+interface Setup<TOptions extends Options> {
 	storageName?: string;
 	logging?: boolean;
 	defaults?: TOptions;
@@ -63,23 +63,20 @@ class OptionsSync<TOptions extends Options> {
 
 	/**
 	@constructor Returns an instance linked to the chosen storage.
-	@param options - Configuration to determine where options are stored.
+	@param setup - Configuration for `webext-options-sync`
 	*/
-	constructor(options?: Settings<TOptions>) {
-		const fullOptions: Required<Settings<TOptions>> = {
-			// https://github.com/fregante/webext-options-sync/pull/21#issuecomment-500314074
-			// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
-			defaults: {} as TOptions,
-			storageName: 'options',
-			migrations: [],
-			logging: true,
-			...options
-		};
+	constructor({
+		// `as` reason: https://github.com/fregante/webext-options-sync/pull/21#issuecomment-500314074
+		// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
+		defaults = {} as TOptions,
+		storageName = 'options',
+		migrations = [],
+		logging = true
+	}: Setup<TOptions> = {}) {
+		this.storageName = storageName;
+		this.defaults = defaults;
 
-		this.storageName = fullOptions.storageName;
-		this.defaults = fullOptions.defaults;
-
-		if (fullOptions.logging === false) {
+		if (logging === false) {
 			this._log = () => {};
 		}
 
@@ -87,10 +84,10 @@ class OptionsSync<TOptions extends Options> {
 			chrome.management.getSelf(({installType}) => {
 				// Chrome doesn't run `onInstalled` when launching the browser with a pre-loaded development extension #25
 				if (installType === 'development') {
-					this._applyDefinition(fullOptions);
+					this._runMigrations(migrations, defaults);
 				} else {
 					chrome.runtime.onInstalled.addListener(() => {
-						this._applyDefinition(fullOptions);
+						this._runMigrations(migrations, defaults);
 					});
 				}
 			});
@@ -133,12 +130,16 @@ class OptionsSync<TOptions extends Options> {
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
 	async setAll(newOptions: TOptions): Promise<void> {
+		this._log('log', 'Saving options', {...newOptions});
+
 		// Don't store defaults, they'll be merged at runtime
 		for (const [key, value] of Object.entries(newOptions)) {
 			if (this.defaults[key] === value) {
 				delete newOptions[key];
 			}
 		}
+
+		this._log('log', 'Without the default values', newOptions);
 
 		return new Promise((resolve, reject) => {
 			chrome.storage.sync.set({
@@ -191,18 +192,17 @@ class OptionsSync<TOptions extends Options> {
 		console[method](...args);
 	}
 
-	private async _applyDefinition(defs: Required<Settings<TOptions>>): Promise<void> {
-		const options = {...defs.defaults, ...await this.getAll()};
+	private async _runMigrations(migrations: Array<Migration<TOptions>>, defaults: TOptions): Promise<void> {
+		const options = {...defaults, ...await this.getAll()};
 
-		this._log('group', 'Appling definitions');
-		this._log('info', 'Current options:', options);
-		if (defs.migrations && defs.migrations.length > 0) {
-			this._log('info', 'Running', defs.migrations.length, 'migrations');
-			defs.migrations.forEach(migrate => migrate(options, defs.defaults));
+		if (migrations && migrations.length > 0) {
+			this._log('group', 'Running migrations');
+			this._log('info', 'Current options:', {...options});
+			this._log('info', migrations.length, 'migrations found');
+			migrations.forEach(migrate => migrate(options, defaults));
+			this._log('info', 'Migrated options:', options);
+			this._log('groupEnd');
 		}
-
-		this._log('info', 'Migrated options:', options);
-		this._log('groupEnd');
 
 		this.setAll(options);
 	}
