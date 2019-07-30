@@ -177,7 +177,6 @@ class OptionsSync<TOptions extends Options> {
 			document.querySelector<HTMLFormElement>(form)!;
 
 		element.addEventListener('input', this._handleFormUpdatesDebounced);
-		element.addEventListener('change', this._handleFormUpdatesDebounced);
 		chrome.storage.onChanged.addListener((changes, namespace) => {
 			if (
 				namespace === 'sync' &&
