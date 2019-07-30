@@ -1,3 +1,4 @@
+import {debounce} from 'throttle-debounce';
 import {isBackgroundPage} from 'webext-detect-page';
 import {serialize, deserialize} from 'dom-form-serializer';
 
@@ -60,8 +61,6 @@ class OptionsSync<TOptions extends Options> {
 
 	defaults: TOptions;
 
-	private _timer?: ReturnType<typeof setTimeout>;
-
 	/**
 	@constructor Returns an instance linked to the chosen storage.
 	@param options - Configuration to determine where options are stored.
@@ -96,8 +95,6 @@ class OptionsSync<TOptions extends Options> {
 				}
 			});
 		}
-
-		this._handleFormUpdatesDebounced = this._handleFormUpdatesDebounced.bind(this);
 	}
 
 	/**
@@ -176,7 +173,7 @@ class OptionsSync<TOptions extends Options> {
 			form :
 			document.querySelector<HTMLFormElement>(form)!;
 
-		element.addEventListener('input', this._handleFormUpdatesDebounced);
+		element.addEventListener('input', debounce(600, this._handleFormInput.bind(this)));
 		chrome.storage.onChanged.addListener((changes, namespace) => {
 			if (
 				namespace === 'sync' &&
@@ -210,23 +207,17 @@ class OptionsSync<TOptions extends Options> {
 		this.setAll(options);
 	}
 
-	private _handleFormUpdatesDebounced({currentTarget}: Event): void {
-		if (this._timer) {
-			clearTimeout(this._timer);
-		}
+	private async _handleFormInput({currentTarget}: Event): Promise<void> {
+		// Parse form into object, except invalid fields
+		const invalidFields = document.querySelectorAll<HTMLInputElement>('[name]:invalid');
+		const options: TOptions = serialize(currentTarget as HTMLFormElement, {
+			exclude: [...invalidFields].map(field => field.name)
+		});
 
-		this._timer = setTimeout(async () => {
-			// Parse form into object, except invalid fields
-			const options: TOptions = serialize(currentTarget as HTMLFormElement, {
-				exclude: [...document.querySelectorAll<HTMLInputElement>('[name]:invalid')].map(field => field.name)
-			});
-
-			await this.set(options);
-			currentTarget!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
-				bubbles: true
-			}));
-			this._timer = undefined;
-		}, 600);
+		await this.set(options);
+		currentTarget!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
+			bubbles: true
+		}));
 	}
 }
 

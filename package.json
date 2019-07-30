@@ -44,12 +44,14 @@
   },
   "dependencies": {
     "dom-form-serializer": "^1.0.7",
+    "throttle-debounce": "^2.1.0",
     "webext-detect-page": "^1.0.2"
   },
   "devDependencies": {
     "@sindresorhus/tsconfig": "^0.4.0",
     "@types/chrome": "0.0.86",
     "@types/dom-inputevent": "^1.0.5",
+    "@types/throttle-debounce": "^1.1.1",
     "@typescript-eslint/eslint-plugin": "^1.9.0",
     "@typescript-eslint/parser": "^1.10.2",
     "eslint-config-xo-typescript": "^0.15.0",
