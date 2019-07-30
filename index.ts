@@ -110,9 +110,7 @@ class OptionsSync<TOptions extends Options> {
 	*/
 	async getAll(): Promise<TOptions> {
 		const keys = await new Promise<Record<string, TOptions>>((resolve, reject) => {
-			chrome.storage.sync.get({
-				[this.storageName]: this.defaults
-			}, result => {
+			chrome.storage.sync.get(this.storageName, result => {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
 				} else {
