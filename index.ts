@@ -2,6 +2,23 @@ import {debounce} from 'throttle-debounce';
 import {isBackgroundPage} from 'webext-detect-page';
 import {serialize, deserialize} from 'dom-form-serializer';
 
+/**
+@example
+{
+	// Recommended
+	defaults: {
+		color: 'blue'
+	},
+	// Optional
+	migrations: [
+		savedOptions => {
+			if (savedOptions.oldStuff) {
+				delete savedOptions.oldStuff;
+			}
+		}
+	],
+}
+*/
 interface Setup<TOptions extends Options> {
 	storageName?: string;
 	logging?: boolean;
@@ -24,25 +41,6 @@ Handler signature for when an extension updates.
 */
 type Migration<TOptions extends Options> = (savedOptions: TOptions, defaults: TOptions) => void;
 
-/**
-@example
-
-{
-	// Recommended
-	defaults: {
-		color: 'blue'
-	},
-	// Optional
-	migrations: [
-		savedOptions => {
-			if (savedOptions.oldStuff) {
-				delete savedOptions.oldStuff;
-			}
-		}
-	],
-}
-*/
-
 class OptionsSync<TOptions extends Options> {
 	public static migrations = {
 		/**
@@ -58,7 +56,6 @@ class OptionsSync<TOptions extends Options> {
 	};
 
 	storageName: string;
-
 	defaults: TOptions;
 
 	/**
@@ -84,10 +81,10 @@ class OptionsSync<TOptions extends Options> {
 			chrome.management.getSelf(({installType}) => {
 				// Chrome doesn't run `onInstalled` when launching the browser with a pre-loaded development extension #25
 				if (installType === 'development') {
-					this._runMigrations(migrations, defaults);
+					this._runMigrations(migrations);
 				} else {
 					chrome.runtime.onInstalled.addListener(() => {
-						this._runMigrations(migrations, defaults);
+						this._runMigrations(migrations);
 					});
 				}
 			});
@@ -100,13 +97,12 @@ class OptionsSync<TOptions extends Options> {
 	@returns Promise that will resolve with **all** the options stored, as an object.
 
 	@example
-
-	new OptionsSync().getAll().then(options => {
-		console.log('The user’s options are', options);
-		if (options.color) {
-			document.body.style.color = color;
-		}
-	});
+	const optionsStorage = new OptionsSync();
+	const options = await optionsStorage.getAll();
+	console.log('The user’s options are', options);
+	if (options.color) {
+		document.body.style.color = color;
+	}
 	*/
 	async getAll(): Promise<TOptions> {
 		const keys = await new Promise<Record<string, TOptions>>((resolve, reject) => {
@@ -190,14 +186,14 @@ class OptionsSync<TOptions extends Options> {
 		console[method](...args);
 	}
 
-	private async _runMigrations(migrations: Array<Migration<TOptions>>, defaults: TOptions): Promise<void> {
-		const options = {...defaults, ...await this.getAll()};
+	private async _runMigrations(migrations: Array<Migration<TOptions>>): Promise<void> {
+		const options = {...this.defaults, ...await this.getAll()};
 
 		if (migrations && migrations.length > 0) {
 			this._log('group', 'Running migrations');
 			this._log('info', 'Current options:', {...options});
 			this._log('info', migrations.length, 'migrations found');
-			migrations.forEach(migrate => migrate(options, defaults));
+			migrations.forEach(migrate => migrate(options, this.defaults));
 			this._log('info', 'Migrated options:', options);
 			this._log('groupEnd');
 		}

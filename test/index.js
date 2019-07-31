@@ -80,12 +80,12 @@ test('getAll merges saved options with defaults', async t => {
 });
 
 test('setAll', async t => {
-	const storage = new OptionsSync();
 	const newOptions = {
 		name: 'Rico',
 		people: 3
 	};
 
+	const storage = new OptionsSync();
 	await storage.setAll(newOptions);
 	t.true(chrome.storage.sync.set.withArgs({
 		options: newOptions
@@ -93,14 +93,53 @@ test('setAll', async t => {
 });
 
 test('setAll skips defaults', async t => {
-	const storage = new OptionsSync(simpleSetup);
 	const newOptions = {
 		name: 'Rico',
 		people: 3
 	};
 
+	const storage = new OptionsSync(simpleSetup);
 	await storage.setAll({...newOptions, sound: true});
 	t.true(chrome.storage.sync.set.withArgs({
 		options: newOptions
 	}).calledOnce);
 });
+
+test('set merges with existing data', async t => {
+	chrome.storage.sync.get
+		.withArgs('options')
+		.yields({options: {size: 30}});
+
+	const storage = new OptionsSync();
+	await storage.set({sound: false});
+	t.true(chrome.storage.sync.set.withArgs({
+		options: {
+			size: 30,
+			sound: false
+		}
+	}).calledOnce);
+});
+
+test('migrations alter the stored options', async t => {
+	chrome.storage.sync.get
+		.withArgs('options')
+		.yields({options: {size: 30}});
+
+	const storage = new OptionsSync();
+	await storage._runMigrations([
+		savedOptions => {
+			if (typeof savedOptions.size !== 'undefined') {
+				savedOptions.minSize = savedOptions.size;
+				delete savedOptions.size;
+			}
+		}
+	]);
+	console.log('fuck you')
+
+	t.deepEqual(chrome.storage.sync.set.getCalls()[0].args[0], {
+		options: {
+			minSize: 30
+		}
+	});
+});
+

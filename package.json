@@ -39,6 +39,7 @@
       }
     ],
     "rules": {
+      "no-new": "off",
       "import/no-unresolved": "warn",
       "import/no-unassigned-import": "off"
     }
@@ -58,6 +59,7 @@
     "ava": "^2.2.0",
     "eslint-config-xo-typescript": "^0.15.0",
     "esm": "^3.2.25",
+    "sinon": "^7.3.2",
     "sinon-chrome": "^3.0.1",
     "typescript": "^3.5.2",
     "xo": "*"
