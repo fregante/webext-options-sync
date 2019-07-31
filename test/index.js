@@ -87,9 +87,9 @@ test('setAll', async t => {
 
 	const storage = new OptionsSync();
 	await storage.setAll(newOptions);
-	t.true(chrome.storage.sync.set.withArgs({
+	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
 		options: newOptions
-	}).calledOnce);
+	});
 });
 
 test('setAll skips defaults', async t => {
@@ -100,9 +100,9 @@ test('setAll skips defaults', async t => {
 
 	const storage = new OptionsSync(simpleSetup);
 	await storage.setAll({...newOptions, sound: true});
-	t.true(chrome.storage.sync.set.withArgs({
-		options: newOptions
-	}).calledOnce);
+	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
+		settings: newOptions
+	});
 });
 
 test('set merges with existing data', async t => {
@@ -112,12 +112,12 @@ test('set merges with existing data', async t => {
 
 	const storage = new OptionsSync();
 	await storage.set({sound: false});
-	t.true(chrome.storage.sync.set.withArgs({
+	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
 		options: {
 			size: 30,
 			sound: false
 		}
-	}).calledOnce);
+	});
 });
 
 test('migrations alter the stored options', async t => {
@@ -134,9 +134,8 @@ test('migrations alter the stored options', async t => {
 			}
 		}
 	]);
-	console.log('fuck you')
 
-	t.deepEqual(chrome.storage.sync.set.getCalls()[0].args[0], {
+	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
 		options: {
 			minSize: 30
 		}

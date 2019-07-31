@@ -56,6 +56,7 @@ class OptionsSync<TOptions extends Options> {
 	};
 
 	storageName: string;
+
 	defaults: TOptions;
 
 	/**

@@ -21,8 +21,9 @@
   "scripts": {
     "build": "tsc",
     "prepublish-only": "tsc",
-    "test": "tsc && ava && xo",
-    "watch": "tsc --watch"
+    "test": "tsc && ava --verbose --serial && xo",
+    "watch": "tsc --watch",
+    "watch:test": "ava --verbose --serial --watch"
   },
   "xo": {
     "envs": [
