@@ -87,6 +87,7 @@ test('setAll', async t => {
 
 	const storage = new OptionsSync();
 	await storage.setAll(newOptions);
+	t.true(chrome.storage.sync.set.calledOnce);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
 		options: newOptions
 	});
@@ -100,6 +101,7 @@ test('setAll skips defaults', async t => {
 
 	const storage = new OptionsSync(simpleSetup);
 	await storage.setAll({...newOptions, sound: true});
+	t.true(chrome.storage.sync.set.calledOnce);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
 		settings: newOptions
 	});
@@ -112,6 +114,7 @@ test('set merges with existing data', async t => {
 
 	const storage = new OptionsSync();
 	await storage.set({sound: false});
+	t.true(chrome.storage.sync.set.calledOnce);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
 		options: {
 			size: 30,
@@ -135,6 +138,7 @@ test('migrations alter the stored options', async t => {
 		}
 	]);
 
+	t.true(chrome.storage.sync.set.calledOnce);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
 		options: {
 			minSize: 30
@@ -142,3 +146,27 @@ test('migrations alter the stored options', async t => {
 	});
 });
 
+test('removeUnused migration works', async t => {
+	chrome.storage.sync.get
+		.withArgs('settings')
+		.yields({
+			settings: {
+				size: 30, // Unused
+				sound: false // Non-default
+			}
+		});
+
+	const storage = new OptionsSync(simpleSetup);
+	await storage._runMigrations([
+		OptionsSync.migrations.removeUnused
+	]);
+
+	t.true(chrome.storage.sync.set.calledOnce);
+	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
+		settings: {
+			sound: false
+		}
+	});
+});
+
+test.todo('form syncing');
