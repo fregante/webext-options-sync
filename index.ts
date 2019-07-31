@@ -210,15 +210,17 @@ class OptionsSync<TOptions extends Options> {
 		this.setAll(options);
 	}
 
-	private async _handleFormInput({currentTarget}: Event): Promise<void> {
+	private async _handleFormInput({target}: Event): Promise<void> {
+		const form = (target as HTMLInputElement).form!;
+
 		// Parse form into object, except invalid fields
 		const invalidFields = document.querySelectorAll<HTMLInputElement>('[name]:invalid');
-		const options: TOptions = serialize(currentTarget as HTMLFormElement, {
+		const options: TOptions = serialize(form, {
 			exclude: [...invalidFields].map(field => field.name)
 		});
 
 		await this.set(options);
-		currentTarget!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
+		form.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 			bubbles: true
 		}));
 	}
