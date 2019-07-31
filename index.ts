@@ -73,6 +73,7 @@ class OptionsSync<TOptions extends Options> {
 	}: Setup<TOptions> = {}) {
 		this.storageName = storageName;
 		this.defaults = defaults;
+		this._handleFormInput = debounce(600, this._handleFormInput.bind(this));
 
 		if (logging === false) {
 			this._log = () => {};
@@ -169,18 +170,25 @@ class OptionsSync<TOptions extends Options> {
 			form :
 			document.querySelector<HTMLFormElement>(form)!;
 
-		element.addEventListener('input', debounce(600, this._handleFormInput.bind(this)));
-		chrome.storage.onChanged.addListener((changes, namespace) => {
-			if (
-				namespace === 'sync' &&
-				changes[this.storageName] &&
-				!element.contains(document.activeElement) // Avoid applying changes while the user is editing a field
-			) {
-				deserialize(element, changes[this.storageName].newValue);
-			}
-		});
+		element.addEventListener('input', this._handleFormInput);
+		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm.bind(this, element));
 
 		deserialize(element, await this.getAll());
+	}
+
+	/**
+	Removes any listeners added by `syncForm`
+
+	@param selector - The `<form>` that needs to be unsynchronized or a CSS selector (one element).
+	The form fields' `name` attributes will have to match the option names.
+	*/
+	async stopSyncForm(form: string | HTMLFormElement): Promise<void> {
+		const element = form instanceof HTMLFormElement ?
+			form :
+			document.querySelector<HTMLFormElement>(form)!;
+
+		element.removeEventListener('input', this._handleFormInput);
+		chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm.bind(this, element));
 	}
 
 	private _log(method: keyof Console, ...args: any[]): void {
@@ -213,6 +221,16 @@ class OptionsSync<TOptions extends Options> {
 		currentTarget!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 			bubbles: true
 		}));
+	}
+
+	private _handleStorageChangeOnForm(form: HTMLFormElement, changes: Record<string, any>, areaName: string): void {
+		if (
+			areaName === 'sync' &&
+			changes[this.storageName] &&
+			!form.contains(document.activeElement) // Avoid applying changes while the user is editing a field
+		) {
+			deserialize(form, changes[this.storageName].newValue);
+		}
 	}
 }
 

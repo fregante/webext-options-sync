@@ -270,6 +270,10 @@ Type: `HTMLFormElement`, `string`
 
 It's the `<form>` that needs to be synchronized or a CSS selector (one element). The form fields' `name` attributes will have to match the option names.
 
+#### opts.stopSyncForm(form)
+
+Removes any listeners added by `syncForm`.
+
 ## Related
 
 * [webext-storage-cache](https://github.com/fregante/webext-storage-cache) - Map-like promised cache storage with expiration.
