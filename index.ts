@@ -199,12 +199,9 @@ class OptionsSync<TOptions extends Options> {
 		const options = await this.getAll();
 
 		if (migrations && migrations.length > 0) {
-			this._log('group', 'Running migrations');
-			this._log('info', 'Current options:', {...options});
-			this._log('info', migrations.length, 'migrations found');
+			this._log('log', 'Found these stored options', {...options});
+			this._log('info', 'Will run', migrations.length, migrations.length === 1 ? 'migration' : ' migrations');
 			migrations.forEach(migrate => migrate(options, this.defaults));
-			this._log('info', 'Migrated options:', options);
-			this._log('groupEnd');
 		}
 
 		this.setAll(options);
