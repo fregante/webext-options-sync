@@ -40,7 +40,6 @@
       }
     ],
     "rules": {
-      "no-new": "off",
       "import/no-unresolved": "warn",
       "import/no-unassigned-import": "off"
     }
