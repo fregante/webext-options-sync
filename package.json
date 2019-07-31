@@ -21,8 +21,9 @@
   "scripts": {
     "build": "tsc",
     "prepublish-only": "tsc",
-    "test": "xo && tsc",
-    "watch": "tsc --watch"
+    "test": "tsc && ava --verbose --serial && xo",
+    "watch": "tsc --watch",
+    "watch:test": "ava --verbose --serial --watch"
   },
   "xo": {
     "envs": [
@@ -39,7 +40,8 @@
       }
     ],
     "rules": {
-      "import/no-unresolved": "warn"
+      "import/no-unresolved": "warn",
+      "import/no-unassigned-import": "off"
     }
   },
   "dependencies": {
@@ -54,9 +56,18 @@
     "@types/throttle-debounce": "^1.1.1",
     "@typescript-eslint/eslint-plugin": "^1.9.0",
     "@typescript-eslint/parser": "^1.10.2",
+    "ava": "^2.2.0",
     "eslint-config-xo-typescript": "^0.15.0",
+    "esm": "^3.2.25",
+    "sinon": "^7.3.2",
+    "sinon-chrome": "^3.0.1",
     "typescript": "^3.5.2",
     "xo": "*"
+  },
+  "ava": {
+    "require": [
+      "esm"
+    ]
   },
   "type": "module"
 }

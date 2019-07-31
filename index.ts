@@ -188,7 +188,7 @@ class OptionsSync<TOptions extends Options> {
 	}
 
 	private async _runMigrations(migrations: Array<Migration<TOptions>>): Promise<void> {
-		const options = {...this.defaults, ...await this.getAll()};
+		const options = await this.getAll();
 
 		if (migrations && migrations.length > 0) {
 			this._log('group', 'Running migrations');
