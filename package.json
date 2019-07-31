@@ -21,7 +21,7 @@
   "scripts": {
     "build": "tsc",
     "prepublish-only": "tsc",
-    "test": "xo && ava && tsc",
+    "test": "tsc && ava && xo",
     "watch": "tsc --watch"
   },
   "xo": {
