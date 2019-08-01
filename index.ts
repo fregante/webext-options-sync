@@ -39,7 +39,7 @@ interface Options {
 /*
 Handler signature for when an extension updates.
 */
-type Migration<TOptions extends Options> = (savedOptions: TOptions, defaults: TOptions) => void;
+export type Migration<TOptions extends Options> = (savedOptions: TOptions, defaults: TOptions) => void;
 
 class OptionsSync<TOptions extends Options> {
 	public static migrations = {
