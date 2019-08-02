@@ -160,28 +160,24 @@ class OptionsSync<TOptions extends Options> {
 	The form fields' `name` attributes will have to match the option names.
 	*/
 	async syncForm(form: string | HTMLFormElement): Promise<void> {
-		const element = form instanceof HTMLFormElement ?
-			form :
-			document.querySelector<HTMLFormElement>(form)!;
-
-		element.addEventListener('input', this._handleFormInput);
-		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm);
-		this._updateForm(element, await this.getAll());
-	}
-
-	/**
-	Removes any listeners added by `syncForm`
-
-	@param selector - The `<form>` that needs to be unsynchronized or a CSS selector (one element).
-	The form fields' `name` attributes will have to match the option names.
-	*/
-	async stopSyncForm(form: string | HTMLFormElement): Promise<void> {
 		this._form = form instanceof HTMLFormElement ?
 			form :
 			document.querySelector<HTMLFormElement>(form)!;
 
-		this._form.removeEventListener('input', this._handleFormInput);
-		chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
+		this._form.addEventListener('input', this._handleFormInput);
+		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm);
+		this._updateForm(this._form, await this.getAll());
+	}
+
+	/**
+	Removes any listeners added by `syncForm`
+	*/
+	async stopSyncForm(): Promise<void> {
+		if (this._form) {
+			this._form.removeEventListener('input', this._handleFormInput);
+			chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
+			delete this._form;
+		}
 	}
 
 	private _log(method: keyof Console, ...args: any[]): void {
