@@ -59,6 +59,8 @@ class OptionsSync<TOptions extends Options> {
 
 	defaults: TOptions;
 
+	private _form!: HTMLFormElement;
+
 	/**
 	@constructor Returns an instance linked to the chosen storage.
 	@param setup - Configuration for `webext-options-sync`
@@ -74,6 +76,7 @@ class OptionsSync<TOptions extends Options> {
 		this.storageName = storageName;
 		this.defaults = defaults;
 		this._handleFormInput = debounce(600, this._handleFormInput.bind(this));
+		this._handleStorageChangeOnForm = this._handleStorageChangeOnForm.bind(this);
 
 		if (logging === false) {
 			this._log = () => {};
@@ -107,17 +110,15 @@ class OptionsSync<TOptions extends Options> {
 	}
 	*/
 	async getAll(): Promise<TOptions> {
-		const keys = await new Promise<Record<string, TOptions>>((resolve, reject) => {
+		return new Promise<TOptions>((resolve, reject) => {
 			chrome.storage.sync.get(this.storageName, result => {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
 				} else {
-					resolve(result);
+					resolve(this._includeDefaults(result[this.storageName]));
 				}
 			});
 		});
-
-		return {...this.defaults, ...keys[this.storageName]};
 	}
 
 	/**
@@ -126,20 +127,13 @@ class OptionsSync<TOptions extends Options> {
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
 	async setAll(newOptions: TOptions): Promise<void> {
-		this._log('log', 'Saving options', {...newOptions});
-
-		// Don't store defaults, they'll be merged at runtime
-		for (const [key, value] of Object.entries(newOptions)) {
-			if (this.defaults[key] === value) {
-				delete newOptions[key];
-			}
-		}
-
-		this._log('log', 'Without the default values', newOptions);
+		const thinnedOptions = this._excludeDefaults(newOptions);
+		this._log('log', 'Saving options', newOptions);
+		this._log('log', 'Without the default values', thinnedOptions);
 
 		return new Promise((resolve, reject) => {
 			chrome.storage.sync.set({
-				[this.storageName]: newOptions
+				[this.storageName]: thinnedOptions
 			}, () => {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
@@ -166,33 +160,43 @@ class OptionsSync<TOptions extends Options> {
 	The form fields' `name` attributes will have to match the option names.
 	*/
 	async syncForm(form: string | HTMLFormElement): Promise<void> {
-		const element = form instanceof HTMLFormElement ?
+		this._form = form instanceof HTMLFormElement ?
 			form :
 			document.querySelector<HTMLFormElement>(form)!;
 
-		element.addEventListener('input', this._handleFormInput);
-		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm.bind(this, element));
-
-		deserialize(element, await this.getAll());
+		this._form.addEventListener('input', this._handleFormInput);
+		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm);
+		this._updateForm(this._form, await this.getAll());
 	}
 
 	/**
 	Removes any listeners added by `syncForm`
-
-	@param selector - The `<form>` that needs to be unsynchronized or a CSS selector (one element).
-	The form fields' `name` attributes will have to match the option names.
 	*/
-	async stopSyncForm(form: string | HTMLFormElement): Promise<void> {
-		const element = form instanceof HTMLFormElement ?
-			form :
-			document.querySelector<HTMLFormElement>(form)!;
-
-		element.removeEventListener('input', this._handleFormInput);
-		chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm.bind(this, element));
+	async stopSyncForm(): Promise<void> {
+		if (this._form) {
+			this._form.removeEventListener('input', this._handleFormInput);
+			chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
+			delete this._form;
+		}
 	}
 
 	private _log(method: keyof Console, ...args: any[]): void {
 		console[method](...args);
+	}
+
+	private _includeDefaults(options: Partial<TOptions>): TOptions {
+		return {...this.defaults, ...options};
+	}
+
+	private _excludeDefaults(options: TOptions): Partial<TOptions> {
+		const thinnedOptions: Partial<TOptions> = {...options};
+		for (const [key, value] of Object.entries(thinnedOptions)) {
+			if (this.defaults[key] === value) {
+				delete thinnedOptions[key];
+			}
+		}
+
+		return thinnedOptions;
 	}
 
 	private async _runMigrations(migrations: Array<Migration<TOptions>>): Promise<void> {
@@ -209,26 +213,49 @@ class OptionsSync<TOptions extends Options> {
 
 	private async _handleFormInput({target}: Event): Promise<void> {
 		const form = (target as HTMLInputElement).form!;
-
-		// Parse form into object, except invalid fields
-		const invalidFields = document.querySelectorAll<HTMLInputElement>('[name]:invalid');
-		const options: TOptions = serialize(form, {
-			exclude: [...invalidFields].map(field => field.name)
-		});
-
-		await this.set(options);
+		await this.set(this._parseForm(form));
 		form.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 			bubbles: true
 		}));
 	}
 
-	private _handleStorageChangeOnForm(form: HTMLFormElement, changes: Record<string, any>, areaName: string): void {
+	private _updateForm(form: HTMLFormElement, options: TOptions): void {
+		// Reduce changes to only values that have changed
+		const currentFormState = this._parseForm(form);
+		for (const [key, value] of Object.entries(options)) {
+			if (currentFormState[key] === value) {
+				delete options[key];
+			}
+		}
+
+		const include = Object.keys(options);
+		if (include.length > 0) {
+			// Limits `deserialize` to only the specified fields. Without it, it will try to set the every field, even if they're missing from the supplied `options`
+			deserialize(form, options, {include});
+		}
+	}
+
+	// Parse form into object, except invalid fields
+	private _parseForm(form: HTMLFormElement): Partial<TOptions> {
+		const include: string[] = [];
+
+		// Don't serialize disabled and invalid fields
+		for (const field of form.querySelectorAll<HTMLInputElement>('[name]')) {
+			if (field.validity.valid && !field.disabled) {
+				include.push(field.name.replace(/\[.*\]/, ''));
+			}
+		}
+
+		return serialize(form, {include});
+	}
+
+	private _handleStorageChangeOnForm(changes: Record<string, any>, areaName: string): void {
 		if (
 			areaName === 'sync' &&
 			changes[this.storageName] &&
-			!form.contains(document.activeElement) // Avoid applying changes while the user is editing a field
+			(!document.hasFocus() || !this._form.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
 		) {
-			deserialize(form, changes[this.storageName].newValue);
+			this._updateForm(this._form, this._includeDefaults(changes[this.storageName].newValue as Partial<TOptions>));
 		}
 	}
 }
