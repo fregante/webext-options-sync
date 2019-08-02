@@ -1,34 +1,6 @@
 import {debounce} from 'throttle-debounce';
-import {JsonObject} from 'type-fest';
 import {isBackgroundPage} from 'webext-detect-page';
 import {serialize, deserialize} from 'dom-form-serializer';
-
-function stripIdenticalValues(a: JsonObject, b: JsonObject): void {
-	for (const [key, value] of Object.entries(a)) {
-		if (b[key] === value) {
-			delete a[key];
-		}
-	}
-}
-
-function limitedDeserialize(form: HTMLFormElement, serializedData: JsonObject): void {
-	const include = Object.keys(serializedData);
-	if (include.length > 0) {
-		deserialize(form, serializedData, {include});
-	}
-}
-
-// Parse form into object, except invalid fields
-function limitedSerialize(form: HTMLFormElement): Options {
-	const include: string[] = [];
-	for (const field of form.querySelectorAll<HTMLInputElement>('[name]')) {
-		if (field.validity.valid && !field.disabled) {
-			include.push(field.name.replace(/\[.*\]/, ''));
-		}
-	}
-
-	return serialize(form, {include});
-}
 
 /**
 @example
@@ -135,17 +107,15 @@ class OptionsSync<TOptions extends Options> {
 	}
 	*/
 	async getAll(): Promise<TOptions> {
-		const keys = await new Promise<Record<string, TOptions>>((resolve, reject) => {
+		return new Promise<TOptions>((resolve, reject) => {
 			chrome.storage.sync.get(this.storageName, result => {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
 				} else {
-					resolve(result);
+					resolve(this._includeDefaults(result[this.storageName]));
 				}
 			});
 		});
-
-		return {...this.defaults, ...keys[this.storageName]};
 	}
 
 	/**
@@ -154,20 +124,13 @@ class OptionsSync<TOptions extends Options> {
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
 	async setAll(newOptions: TOptions): Promise<void> {
-		this._log('log', 'Saving options', {...newOptions});
-
-		// Don't store defaults, they'll be merged at runtime
-		for (const [key, value] of Object.entries(newOptions)) {
-			if (this.defaults[key] === value) {
-				delete newOptions[key];
-			}
-		}
-
-		this._log('log', 'Without the default values', newOptions);
+		const thinnedOptions = this._excludeDefaults(newOptions);
+		this._log('log', 'Saving options', newOptions);
+		this._log('log', 'Without the default values', thinnedOptions);
 
 		return new Promise((resolve, reject) => {
 			chrome.storage.sync.set({
-				[this.storageName]: newOptions
+				[this.storageName]: thinnedOptions
 			}, () => {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
@@ -200,8 +163,7 @@ class OptionsSync<TOptions extends Options> {
 
 		element.addEventListener('input', this._handleFormInput);
 		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm.bind(this, element));
-
-		limitedDeserialize(element, await this.getAll());
+		this._updateForm(element, await this.getAll());
 	}
 
 	/**
@@ -216,11 +178,27 @@ class OptionsSync<TOptions extends Options> {
 			document.querySelector<HTMLFormElement>(form)!;
 
 		element.removeEventListener('input', this._handleFormInput);
+		// TODO: the following doesn't actually work
 		chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm.bind(this, element));
 	}
 
 	private _log(method: keyof Console, ...args: any[]): void {
 		console[method](...args);
+	}
+
+	private _includeDefaults(options: Partial<TOptions>): TOptions {
+		return {...this.defaults, ...options};
+	}
+
+	private _excludeDefaults(options: TOptions): Partial<TOptions> {
+		const thinnedOptions: Partial<TOptions> = {...options};
+		for (const [key, value] of Object.entries(thinnedOptions)) {
+			if (this.defaults[key] === value) {
+				delete thinnedOptions[key];
+			}
+		}
+
+		return thinnedOptions;
 	}
 
 	private async _runMigrations(migrations: Array<Migration<TOptions>>): Promise<void> {
@@ -237,24 +215,49 @@ class OptionsSync<TOptions extends Options> {
 
 	private async _handleFormInput({target}: Event): Promise<void> {
 		const form = (target as HTMLInputElement).form!;
-		await this.set(limitedSerialize(form) as TOptions);
+		await this.set(this._parseForm(form));
 		form.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 			bubbles: true
 		}));
+	}
+
+	private _updateForm(form: HTMLFormElement, options: TOptions): void {
+		// Reduce changes to only values that have changed
+		const currentFormState = this._parseForm(form);
+		for (const [key, value] of Object.entries(options)) {
+			if (currentFormState[key] === value) {
+				delete options[key];
+			}
+		}
+
+		const include = Object.keys(options);
+		if (include.length > 0) {
+			// Limits `deserialize` to only the specified fields. Without it, it will try to set the every field, even if they're missing from the supplied `options`
+			deserialize(form, options, {include});
+		}
+	}
+
+	// Parse form into object, except invalid fields
+	private _parseForm(form: HTMLFormElement): Partial<TOptions> {
+		const include: string[] = [];
+
+		// Don't serialize disabled and invalid fields
+		for (const field of form.querySelectorAll<HTMLInputElement>('[name]')) {
+			if (field.validity.valid && !field.disabled) {
+				include.push(field.name.replace(/\[.*\]/, ''));
+			}
+		}
+
+		return serialize(form, {include});
 	}
 
 	private _handleStorageChangeOnForm(form: HTMLFormElement, changes: Record<string, any>, areaName: string): void {
 		if (
 			areaName === 'sync' &&
 			changes[this.storageName] &&
-			!form.contains(document.activeElement) // Avoid applying changes while the user is editing a field
+			(!document.hasFocus() || !form.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
 		) {
-			const newValues = {
-				...this.defaults,
-				...changes[this.storageName].newValue
-			};
-			stripIdenticalValues(newValues, limitedSerialize(form));
-			limitedDeserialize(form, newValues);
+			this._updateForm(form, this._includeDefaults(changes[this.storageName].newValue as Partial<TOptions>));
 		}
 	}
 }
