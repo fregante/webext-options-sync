@@ -12,7 +12,7 @@ function limitedDeserialize(form: HTMLFormElement, serializedData: JsonObject): 
 function limitedSerialize(form: HTMLFormElement): Options {
 	const include: string[] = [];
 	for (const field of form.querySelectorAll<HTMLInputElement>('[name]')) {
-		if (field.validity.valid) {
+		if (field.validity.valid && !field.disabled) {
 			include.push(field.name.replace(/\[.*\]/, ''));
 		}
 	}
