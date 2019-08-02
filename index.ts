@@ -59,6 +59,8 @@ class OptionsSync<TOptions extends Options> {
 
 	defaults: TOptions;
 
+	private _form!: HTMLFormElement;
+
 	/**
 	@constructor Returns an instance linked to the chosen storage.
 	@param setup - Configuration for `webext-options-sync`
@@ -74,6 +76,7 @@ class OptionsSync<TOptions extends Options> {
 		this.storageName = storageName;
 		this.defaults = defaults;
 		this._handleFormInput = debounce(600, this._handleFormInput.bind(this));
+		this._handleStorageChangeOnForm = this._handleStorageChangeOnForm.bind(this);
 
 		if (logging === false) {
 			this._log = () => {};
@@ -162,7 +165,7 @@ class OptionsSync<TOptions extends Options> {
 			document.querySelector<HTMLFormElement>(form)!;
 
 		element.addEventListener('input', this._handleFormInput);
-		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm.bind(this, element));
+		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm);
 		this._updateForm(element, await this.getAll());
 	}
 
@@ -173,13 +176,12 @@ class OptionsSync<TOptions extends Options> {
 	The form fields' `name` attributes will have to match the option names.
 	*/
 	async stopSyncForm(form: string | HTMLFormElement): Promise<void> {
-		const element = form instanceof HTMLFormElement ?
+		this._form = form instanceof HTMLFormElement ?
 			form :
 			document.querySelector<HTMLFormElement>(form)!;
 
-		element.removeEventListener('input', this._handleFormInput);
-		// TODO: the following doesn't actually work
-		chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm.bind(this, element));
+		this._form.removeEventListener('input', this._handleFormInput);
+		chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
 	}
 
 	private _log(method: keyof Console, ...args: any[]): void {
@@ -251,13 +253,13 @@ class OptionsSync<TOptions extends Options> {
 		return serialize(form, {include});
 	}
 
-	private _handleStorageChangeOnForm(form: HTMLFormElement, changes: Record<string, any>, areaName: string): void {
+	private _handleStorageChangeOnForm(changes: Record<string, any>, areaName: string): void {
 		if (
 			areaName === 'sync' &&
 			changes[this.storageName] &&
-			(!document.hasFocus() || !form.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
+			(!document.hasFocus() || !this._form.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
 		) {
-			this._updateForm(form, this._includeDefaults(changes[this.storageName].newValue as Partial<TOptions>));
+			this._updateForm(this._form, this._includeDefaults(changes[this.storageName].newValue as Partial<TOptions>));
 		}
 	}
 }
