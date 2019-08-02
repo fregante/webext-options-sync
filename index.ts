@@ -3,9 +3,19 @@ import {JsonObject} from 'type-fest';
 import {isBackgroundPage} from 'webext-detect-page';
 import {serialize, deserialize} from 'dom-form-serializer';
 
+function stripIdenticalValues(a: JsonObject, b: JsonObject): void {
+	for (const [key, value] of Object.entries(a)) {
+		if (b[key] === value) {
+			delete a[key];
+		}
+	}
+}
+
 function limitedDeserialize(form: HTMLFormElement, serializedData: JsonObject): void {
 	const include = Object.keys(serializedData);
-	deserialize(form, serializedData, {include});
+	if (include.length > 0) {
+		deserialize(form, serializedData, {include});
+	}
 }
 
 // Parse form into object, except invalid fields
@@ -239,7 +249,12 @@ class OptionsSync<TOptions extends Options> {
 			changes[this.storageName] &&
 			!form.contains(document.activeElement) // Avoid applying changes while the user is editing a field
 		) {
-			limitedDeserialize(form, changes[this.storageName].newValue);
+			const newValues = {
+				...this.defaults,
+				...changes[this.storageName].newValue
+			};
+			stripIdenticalValues(newValues, limitedSerialize(form));
+			limitedDeserialize(form, newValues);
 		}
 	}
 }
