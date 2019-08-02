@@ -1,6 +1,24 @@
 import {debounce} from 'throttle-debounce';
+import {JsonObject} from 'type-fest';
 import {isBackgroundPage} from 'webext-detect-page';
 import {serialize, deserialize} from 'dom-form-serializer';
+
+function limitedDeserialize(form: HTMLFormElement, serializedData: JsonObject): void {
+	const include = Object.keys(serializedData);
+	deserialize(form, serializedData, {include});
+}
+
+// Parse form into object, except invalid fields
+function limitedSerialize(form: HTMLFormElement): Options {
+	const include: string[] = [];
+	for (const field of form.querySelectorAll<HTMLInputElement>('[name]')) {
+		if (field.validity.valid) {
+			include.push(field.name.replace(/\[.*\]/, ''));
+		}
+	}
+
+	return serialize(form, {include});
+}
 
 /**
 @example
@@ -173,7 +191,7 @@ class OptionsSync<TOptions extends Options> {
 		element.addEventListener('input', this._handleFormInput);
 		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm.bind(this, element));
 
-		deserialize(element, await this.getAll());
+		limitedDeserialize(element, await this.getAll());
 	}
 
 	/**
@@ -209,14 +227,7 @@ class OptionsSync<TOptions extends Options> {
 
 	private async _handleFormInput({target}: Event): Promise<void> {
 		const form = (target as HTMLInputElement).form!;
-
-		// Parse form into object, except invalid fields
-		const invalidFields = document.querySelectorAll<HTMLInputElement>('[name]:invalid');
-		const options: TOptions = serialize(form, {
-			exclude: [...invalidFields].map(field => field.name)
-		});
-
-		await this.set(options);
+		await this.set(limitedSerialize(form) as TOptions);
 		form.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 			bubbles: true
 		}));
@@ -228,7 +239,7 @@ class OptionsSync<TOptions extends Options> {
 			changes[this.storageName] &&
 			!form.contains(document.activeElement) // Avoid applying changes while the user is editing a field
 		) {
-			deserialize(form, changes[this.storageName].newValue);
+			limitedDeserialize(form, changes[this.storageName].newValue);
 		}
 	}
 }
