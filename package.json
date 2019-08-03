@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "prepublish-only": "tsc",
+    "prepublishOnly": "tsc",
     "test": "tsc && ava --verbose --serial && xo",
     "watch": "tsc --watch",
     "watch:test": "ava --verbose --serial --watch"
