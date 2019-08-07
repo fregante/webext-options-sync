@@ -13,7 +13,7 @@ Main features:
 You can just download the [standalone bundle](https://packd.fregante.now.sh/webext-options-sync@latest?name=OptionsSync) (it might take a minute to download) and include the file in your `manifest.json`, or:
 
 ```sh
-npm install --save webext-options-sync
+npm install webext-options-sync
 ```
 
 ```js
