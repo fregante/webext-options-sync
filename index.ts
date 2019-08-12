@@ -1,6 +1,6 @@
 import {debounce} from 'throttle-debounce';
 import {isBackgroundPage} from 'webext-detect-page';
-import {serialize, deserialize} from 'dom-form-serializer';
+import {serialize, deserialize} from 'dom-form-serializer/lib';
 
 /**
 @example

@@ -7,6 +7,6 @@
 	},
 	"files": [
 		"globals.d.ts",
-		"index.ts",
+		"index.ts"
 	]
 }

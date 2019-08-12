@@ -1,4 +1,4 @@
-declare module 'dom-form-serializer' {
+declare module 'dom-form-serializer/lib' {
 	import {JsonObject} from 'type-fest';
 
 	export function serialize(
