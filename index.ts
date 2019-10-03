@@ -1,6 +1,7 @@
 import {debounce} from 'throttle-debounce';
 import {isBackgroundPage} from 'webext-detect-page';
 import {serialize, deserialize} from 'dom-form-serializer/lib';
+import {compressToEncodedURIComponent as compress, decompressFromEncodedURIComponent as decompress} from 'lz-string';
 
 /**
 @example
@@ -115,7 +116,8 @@ class OptionsSync<TOptions extends Options> {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
 				} else {
-					resolve(this._includeDefaults(result[this.storageName]));
+					const decompressed = this._decompressOptions(result[this.storageName]);
+					resolve(this._includeDefaults(decompressed));
 				}
 			});
 		});
@@ -131,10 +133,10 @@ class OptionsSync<TOptions extends Options> {
 		this._log('log', 'Saving options', newOptions);
 		this._log('log', 'Without the default values', thinnedOptions);
 
+		const data = {[this.storageName]: this._compressOptions(thinnedOptions)};
+
 		return new Promise((resolve, reject) => {
-			chrome.storage.sync.set({
-				[this.storageName]: thinnedOptions
-			}, () => {
+			chrome.storage.sync.set(data, () => {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
 				} else {
@@ -213,10 +215,15 @@ class OptionsSync<TOptions extends Options> {
 
 	private async _handleFormInput({target}: Event): Promise<void> {
 		const form = (target as HTMLInputElement).form!;
-		await this.set(this._parseForm(form));
-		form.dispatchEvent(new CustomEvent('options-sync:form-synced', {
-			bubbles: true
-		}));
+		try {
+			await this.set(this._parseForm(form));
+			form.dispatchEvent(new CustomEvent('options-sync:form-synced', {
+				bubbles: true
+			}));
+		} catch (error) {
+			// If used in an event handler the error is suppressed
+			this._log('error', error.message || error);
+		}
 	}
 
 	private _updateForm(form: HTMLFormElement, options: TOptions): void {
@@ -257,6 +264,18 @@ class OptionsSync<TOptions extends Options> {
 		) {
 			this._updateForm(this._form, this._includeDefaults(changes[this.storageName].newValue as Partial<TOptions>));
 		}
+	}
+
+	private _compressOptions(options: Partial<TOptions>): string {
+		return compress(JSON.stringify(options));
+	}
+
+	private _decompressOptions(options: string|TOptions): TOptions {
+		if (typeof options !== 'string') {
+			return options;
+		}
+
+		return JSON.parse(decompress(options));
 	}
 }
 
