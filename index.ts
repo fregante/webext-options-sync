@@ -262,7 +262,8 @@ class OptionsSync<TOptions extends Options> {
 			changes[this.storageName] &&
 			(!document.hasFocus() || !this._form.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
 		) {
-			this._updateForm(this._form, this._includeDefaults(changes[this.storageName].newValue as Partial<TOptions>));
+			const decompressed = this._decompressOptions(changes[this.storageName].newValue);
+			this._updateForm(this._form, this._includeDefaults(decompressed));
 		}
 	}
 
