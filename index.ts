@@ -213,7 +213,7 @@ class OptionsSync<TOptions extends Options> {
 
 	private async _handleFormInput({target}: Event): Promise<void> {
 		const field = target as HTMLInputElement;
-		if (!target.name) {
+		if (!field.name) {
 			return;
 		}
 
