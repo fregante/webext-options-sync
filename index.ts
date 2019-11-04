@@ -212,9 +212,13 @@ class OptionsSync<TOptions extends Options> {
 	}
 
 	private async _handleFormInput({target}: Event): Promise<void> {
-		const form = (target as HTMLInputElement).form!;
-		await this.set(this._parseForm(form));
-		form.dispatchEvent(new CustomEvent('options-sync:form-synced', {
+		const field = target as HTMLInputElement;
+		if (!field.name) {
+			return;
+		}
+
+		await this.set(this._parseForm(field.form!));
+		field.form!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 			bubbles: true
 		}));
 	}
