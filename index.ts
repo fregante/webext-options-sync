@@ -165,6 +165,7 @@ class OptionsSync<TOptions extends Options> {
 			document.querySelector<HTMLFormElement>(form)!;
 
 		this._form.addEventListener('input', this._handleFormInput);
+		this._form.addEventListener('submit', this._handleFormSubmit);
 		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm);
 		this._updateForm(this._form, await this.getAll());
 	}
@@ -175,6 +176,7 @@ class OptionsSync<TOptions extends Options> {
 	async stopSyncForm(): Promise<void> {
 		if (this._form) {
 			this._form.removeEventListener('input', this._handleFormInput);
+			this._form.removeEventListener('submit', this._handleFormSubmit);
 			chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
 			delete this._form;
 		}
@@ -221,6 +223,10 @@ class OptionsSync<TOptions extends Options> {
 		field.form!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 			bubbles: true
 		}));
+	}
+
+	private _handleFormSubmit(evt: Event): void {
+		evt.preventDefault();
 	}
 
 	private _updateForm(form: HTMLFormElement, options: TOptions): void {
