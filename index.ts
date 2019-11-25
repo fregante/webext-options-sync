@@ -67,7 +67,6 @@ class OptionsSync<TOptions extends Options> {
 	*/
 	constructor({
 		// `as` reason: https://github.com/fregante/webext-options-sync/pull/21#issuecomment-500314074
-		// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
 		defaults = {} as TOptions,
 		storageName = 'options',
 		migrations = [],
