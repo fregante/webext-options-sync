@@ -224,8 +224,8 @@ class OptionsSync<TOptions extends Options> {
 		}));
 	}
 
-	private _handleFormSubmit(evt: Event): void {
-		evt.preventDefault();
+	private _handleFormSubmit(event: Event): void {
+		event.preventDefault();
 	}
 
 	private _updateForm(form: HTMLFormElement, options: TOptions): void {
