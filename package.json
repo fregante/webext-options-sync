@@ -36,7 +36,10 @@
     "overrides": [
       {
         "files": "**/*.ts",
-        "extends": "xo-typescript"
+        "extends": "xo-typescript",
+        "rules": {
+          "@typescript-eslint/no-dynamic-delete": "off"
+        }
       }
     ],
     "rules": {
@@ -50,19 +53,19 @@
     "webext-detect-page": "^1.0.2"
   },
   "devDependencies": {
-    "@sindresorhus/tsconfig": "^0.4.0",
-    "@types/chrome": "0.0.86",
+    "@sindresorhus/tsconfig": "^0.6.0",
+    "@types/chrome": "0.0.91",
     "@types/dom-inputevent": "^1.0.5",
-    "@types/throttle-debounce": "^1.1.1",
-    "@typescript-eslint/eslint-plugin": "^1.9.0",
-    "@typescript-eslint/parser": "^1.10.2",
+    "@types/throttle-debounce": "^2.1.0",
+    "@typescript-eslint/eslint-plugin": "^2.9.0",
+    "@typescript-eslint/parser": "^2.9.0",
     "ava": "^2.2.0",
-    "eslint-config-xo-typescript": "^0.15.0",
+    "eslint-config-xo-typescript": "^0.22.0",
     "esm": "^3.2.25",
     "sinon": "^7.3.2",
     "sinon-chrome": "^3.0.1",
-    "type-fest": "^0.6.0",
-    "typescript": "^3.5.2",
+    "type-fest": "^0.8.1",
+    "typescript": "^3.7.2",
     "xo": "*"
   },
   "ava": {
