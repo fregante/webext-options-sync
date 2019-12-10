@@ -68,7 +68,6 @@ class OptionsSync<TOptions extends Options> {
 	*/
 	constructor({
 		// `as` reason: https://github.com/fregante/webext-options-sync/pull/21#issuecomment-500314074
-		// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
 		defaults = {} as TOptions,
 		storageName = 'options',
 		migrations = [],
@@ -164,6 +163,7 @@ class OptionsSync<TOptions extends Options> {
 			document.querySelector<HTMLFormElement>(form)!;
 
 		this._form.addEventListener('input', this._handleFormInput);
+		this._form.addEventListener('submit', this._handleFormSubmit);
 		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm);
 		this._updateForm(this._form, await this.getAll());
 	}
@@ -174,6 +174,7 @@ class OptionsSync<TOptions extends Options> {
 	async stopSyncForm(): Promise<void> {
 		if (this._form) {
 			this._form.removeEventListener('input', this._handleFormInput);
+			this._form.removeEventListener('submit', this._handleFormSubmit);
 			chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
 			delete this._form;
 		}
@@ -218,11 +219,19 @@ class OptionsSync<TOptions extends Options> {
 	}
 
 	private async _handleFormInput({target}: Event): Promise<void> {
-		const form = (target as HTMLInputElement).form!;
-		await this.set(this._parseForm(form));
-		form.dispatchEvent(new CustomEvent('options-sync:form-synced', {
+		const field = target as HTMLInputElement;
+		if (!field.name) {
+			return;
+		}
+
+		await this.set(this._parseForm(field.form!));
+		field.form!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 			bubbles: true
 		}));
+	}
+
+	private _handleFormSubmit(event: Event): void {
+		event.preventDefault();
 	}
 
 	private _updateForm(form: HTMLFormElement, options: TOptions): void {
