@@ -1,9 +1,14 @@
 import './_fixtures';
 import test from 'ava';
+import {compressToEncodedURIComponent as compress} from 'lz-string';
 import OptionsSync from '..';
 
 function flattenInstance(setup) {
 	return JSON.parse(JSON.stringify(setup));
+}
+
+function compressOptions(options) {
+	return compress(JSON.stringify(options));
 }
 
 const defaultSetup = {
@@ -55,6 +60,20 @@ test('getAll returns saved options', async t => {
 
 	chrome.storage.sync.get
 		.withArgs('options')
+		.yields({options: compressOptions(previouslySavedOptions)});
+
+	const storage = new OptionsSync();
+	t.deepEqual(await storage.getAll(), previouslySavedOptions);
+});
+
+test('getAll returns saved legacy options', async t => {
+	const previouslySavedOptions = {
+		color: 'fucsia',
+		people: 3
+	};
+
+	chrome.storage.sync.get
+		.withArgs('options')
 		.yields({options: previouslySavedOptions});
 
 	const storage = new OptionsSync();
@@ -69,7 +88,7 @@ test('getAll merges saved options with defaults', async t => {
 
 	chrome.storage.sync.get
 		.withArgs('settings')
-		.yields({settings: previouslySavedOptions});
+		.yields({settings: compressOptions(previouslySavedOptions)});
 
 	const storage = new OptionsSync(simpleSetup);
 	t.deepEqual(await storage.getAll(), {
@@ -89,7 +108,7 @@ test('setAll', async t => {
 	await storage.setAll(newOptions);
 	t.true(chrome.storage.sync.set.calledOnce);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
-		options: newOptions
+		options: compressOptions(newOptions)
 	});
 });
 
@@ -103,7 +122,7 @@ test('setAll skips defaults', async t => {
 	await storage.setAll({...newOptions, sound: true});
 	t.true(chrome.storage.sync.set.calledOnce);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
-		settings: newOptions
+		settings: compressOptions(newOptions)
 	});
 });
 
@@ -116,10 +135,10 @@ test('set merges with existing data', async t => {
 	await storage.set({sound: false});
 	t.true(chrome.storage.sync.set.calledOnce);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
-		options: {
+		options: compressOptions({
 			size: 30,
 			sound: false
-		}
+		})
 	});
 });
 
@@ -140,9 +159,9 @@ test('migrations alter the stored options', async t => {
 
 	t.true(chrome.storage.sync.set.calledOnce);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
-		options: {
+		options: compressOptions({
 			minSize: 30
-		}
+		})
 	});
 });
 
@@ -163,9 +182,9 @@ test('removeUnused migration works', async t => {
 
 	t.true(chrome.storage.sync.set.calledOnce);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
-		settings: {
+		settings: compressOptions({
 			sound: false
-		}
+		})
 	});
 });
 

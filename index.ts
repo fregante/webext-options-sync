@@ -1,6 +1,7 @@
 import {debounce} from 'throttle-debounce';
 import {isBackgroundPage} from 'webext-detect-page';
 import {serialize, deserialize} from 'dom-form-serializer/lib';
+import {compressToEncodedURIComponent as compress, decompressFromEncodedURIComponent as decompress} from 'lz-string';
 
 /**
 @example
@@ -114,7 +115,7 @@ class OptionsSync<TOptions extends Options> {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
 				} else {
-					resolve(this._includeDefaults(result[this.storageName]));
+					resolve(this._decode(result[this.storageName]));
 				}
 			});
 		});
@@ -126,13 +127,11 @@ class OptionsSync<TOptions extends Options> {
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
 	async setAll(newOptions: TOptions): Promise<void> {
-		const thinnedOptions = this._excludeDefaults(newOptions);
 		this._log('log', 'Saving options', newOptions);
-		this._log('log', 'Without the default values', thinnedOptions);
 
 		return new Promise((resolve, reject) => {
 			chrome.storage.sync.set({
-				[this.storageName]: thinnedOptions
+				[this.storageName]: this._encode(newOptions)
 			}, () => {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
@@ -185,11 +184,7 @@ class OptionsSync<TOptions extends Options> {
 		console[method](...args);
 	}
 
-	private _includeDefaults(options: Partial<TOptions>): TOptions {
-		return {...this.defaults, ...options};
-	}
-
-	private _excludeDefaults(options: TOptions): Partial<TOptions> {
+	private _encode(options: TOptions): string {
 		const thinnedOptions: Partial<TOptions> = {...options};
 		for (const [key, value] of Object.entries(thinnedOptions)) {
 			if (this.defaults[key] === value) {
@@ -197,7 +192,18 @@ class OptionsSync<TOptions extends Options> {
 			}
 		}
 
-		return thinnedOptions;
+		this._log('log', 'Without the default values', thinnedOptions);
+
+		return compress(JSON.stringify(thinnedOptions));
+	}
+
+	private _decode(options: string|TOptions): TOptions {
+		let decompressed = options;
+		if (typeof options === 'string') {
+			decompressed = JSON.parse(decompress(options));
+		}
+
+		return {...this.defaults, ...decompressed as TOptions};
 	}
 
 	private async _runMigrations(migrations: Array<Migration<TOptions>>): Promise<void> {
@@ -264,7 +270,7 @@ class OptionsSync<TOptions extends Options> {
 			changes[this.storageName] &&
 			(!document.hasFocus() || !this._form.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
 		) {
-			this._updateForm(this._form, this._includeDefaults(changes[this.storageName].newValue as Partial<TOptions>));
+			this._updateForm(this._form, this._decode(changes[this.storageName].newValue));
 		}
 	}
 }
