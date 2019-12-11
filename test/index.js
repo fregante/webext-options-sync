@@ -12,11 +12,13 @@ function compressOptions(options) {
 }
 
 const defaultSetup = {
+	_migrations: {},
 	defaults: {},
 	storageName: 'options'
 };
 
 const simpleSetup = {
+	_migrations: {},
 	defaults: {
 		color: 'red',
 		sound: true
@@ -27,6 +29,11 @@ const simpleSetup = {
 test.beforeEach(() => {
 	chrome.flush();
 	chrome.storage.sync.set.yields(undefined);
+	chrome.management.getSelf.yields(new Promise(resolve => {
+		setTimeout(resolve, 500, { // Introduce some delay to test racing condition
+			installType: 'development'
+		});
+	}));
 });
 
 test('basic usage', t => {
@@ -147,21 +154,65 @@ test('migrations alter the stored options', async t => {
 		.withArgs('options')
 		.yields({options: {size: 30}});
 
-	const storage = new OptionsSync();
-	await storage._runMigrations([
-		savedOptions => {
-			if (typeof savedOptions.size !== 'undefined') {
-				savedOptions.minSize = savedOptions.size;
-				delete savedOptions.size;
+	const storage = new OptionsSync({
+		migrations: [
+			savedOptions => {
+				if (typeof savedOptions.size !== 'undefined') {
+					savedOptions.minSize = savedOptions.size;
+					delete savedOptions.size;
+				}
 			}
-		}
-	]);
+		]
+	});
+
+	await storage._migrations;
 
 	t.true(chrome.storage.sync.set.calledOnce);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
 		options: compressOptions({
 			minSize: 30
 		})
+	});
+});
+
+test('migrations shouldn’t trigger updates if they don’t change anything', async t => {
+	chrome.storage.sync.get
+		.withArgs('options')
+		.yields({});
+
+	const storage = new OptionsSync({
+		migrations: [
+			() => {}
+		]
+	});
+
+	await storage._migrations;
+
+	t.true(chrome.storage.sync.set.notCalled);
+});
+
+test('migrations are completed before future get/set operations', async t => {
+	chrome.storage.sync.get
+		.withArgs('options')
+		.yields({});
+
+	const storage = new OptionsSync({
+		migrations: [
+			savedOptions => {
+				savedOptions.foo = 'bar';
+				chrome.storage.sync.get
+					.withArgs('options')
+					.yields({
+						options: {
+							foo: 'bar'
+						}
+					});
+			}
+		]
+	});
+
+	t.deepEqual(await storage.getAll(), {
+		foo: 'bar'
 	});
 });
 
