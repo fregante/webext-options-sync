@@ -60,6 +60,8 @@ class OptionsSync<TOptions extends Options> {
 
 	defaults: TOptions;
 
+	readonly _migrations: Promise<void>;
+
 	private _form!: HTMLFormElement;
 
 	/**
@@ -82,18 +84,7 @@ class OptionsSync<TOptions extends Options> {
 			this._log = () => {};
 		}
 
-		if (migrations.length > 0 && isBackgroundPage()) {
-			chrome.management.getSelf(({installType}) => {
-				// Chrome doesn't run `onInstalled` when launching the browser with a pre-loaded development extension #25
-				if (installType === 'development') {
-					this._runMigrations(migrations);
-				} else {
-					chrome.runtime.onInstalled.addListener(() => {
-						this._runMigrations(migrations);
-					});
-				}
-			});
-		}
+		this._migrations = this._runMigrations(migrations);
 	}
 
 	/**
@@ -207,6 +198,16 @@ class OptionsSync<TOptions extends Options> {
 	}
 
 	private async _runMigrations(migrations: Array<Migration<TOptions>>): Promise<void> {
+		if (migrations.length === 0 || !isBackgroundPage()) {
+			return;
+		}
+
+		const {installType} = await new Promise(resolve => chrome.management.getSelf(resolve));
+		// Chrome doesn't run `onInstalled` when launching the browser with a pre-loaded development extension #25
+		if (installType !== 'development') {
+			await new Promise(resolve => chrome.runtime.onInstalled.addListener(resolve));
+		}
+
 		const options = await this.getAll();
 		const initial = JSON.stringify(options);
 
@@ -216,7 +217,7 @@ class OptionsSync<TOptions extends Options> {
 
 		// Only save to storage if there were any changes
 		if (initial !== JSON.stringify(options)) {
-			this.setAll(options);
+			await this.setAll(options);
 		}
 	}
 
