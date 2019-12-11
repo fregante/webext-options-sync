@@ -38,7 +38,8 @@
         "files": "**/*.ts",
         "extends": "xo-typescript",
         "rules": {
-          "@typescript-eslint/no-dynamic-delete": "off"
+          "@typescript-eslint/no-dynamic-delete": "off",
+          "@typescript-eslint/no-empty-function": "off"
         }
       }
     ],
