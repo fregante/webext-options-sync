@@ -60,9 +60,9 @@ class OptionsSync<TOptions extends Options> {
 
 	defaults: TOptions;
 
-	readonly _migrations: Promise<void>;
-
 	private _form!: HTMLFormElement;
+
+	private readonly _migrations: Promise<void>;
 
 	/**
 	@constructor Returns an instance linked to the chosen storage.
@@ -101,15 +101,8 @@ class OptionsSync<TOptions extends Options> {
 	}
 	*/
 	async getAll(): Promise<TOptions> {
-		return new Promise<TOptions>((resolve, reject) => {
-			chrome.storage.sync.get(this.storageName, result => {
-				if (chrome.runtime.lastError) {
-					reject(chrome.runtime.lastError);
-				} else {
-					resolve(this._decode(result[this.storageName]));
-				}
-			});
-		});
+		await this._migrations;
+		return this._getAll();
 	}
 
 	/**
@@ -118,19 +111,8 @@ class OptionsSync<TOptions extends Options> {
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
 	async setAll(newOptions: TOptions): Promise<void> {
-		this._log('log', 'Saving options', newOptions);
-
-		return new Promise((resolve, reject) => {
-			chrome.storage.sync.set({
-				[this.storageName]: this._encode(newOptions)
-			}, () => {
-				if (chrome.runtime.lastError) {
-					reject(chrome.runtime.lastError);
-				} else {
-					resolve();
-				}
-			});
-		});
+		await this._migrations;
+		return this._setAll(newOptions);
 	}
 
 	/**
@@ -175,6 +157,33 @@ class OptionsSync<TOptions extends Options> {
 		console[method](...args);
 	}
 
+	private async _getAll(): Promise<TOptions> {
+		return new Promise<TOptions>((resolve, reject) => {
+			chrome.storage.sync.get(this.storageName, result => {
+				if (chrome.runtime.lastError) {
+					reject(chrome.runtime.lastError);
+				} else {
+					resolve(this._decode(result[this.storageName]));
+				}
+			});
+		});
+	}
+
+	private async _setAll(newOptions: TOptions): Promise<void> {
+		this._log('log', 'Saving options', newOptions);
+		return new Promise((resolve, reject) => {
+			chrome.storage.sync.set({
+				[this.storageName]: this._encode(newOptions)
+			}, () => {
+				if (chrome.runtime.lastError) {
+					reject(chrome.runtime.lastError);
+				} else {
+					resolve();
+				}
+			});
+		});
+	}
+
 	private _encode(options: TOptions): string {
 		const thinnedOptions: Partial<TOptions> = {...options};
 		for (const [key, value] of Object.entries(thinnedOptions)) {
@@ -208,7 +217,7 @@ class OptionsSync<TOptions extends Options> {
 			await new Promise(resolve => chrome.runtime.onInstalled.addListener(resolve));
 		}
 
-		const options = await this.getAll();
+		const options = await this._getAll();
 		const initial = JSON.stringify(options);
 
 		this._log('log', 'Found these stored options', {...options});
@@ -217,7 +226,7 @@ class OptionsSync<TOptions extends Options> {
 
 		// Only save to storage if there were any changes
 		if (initial !== JSON.stringify(options)) {
-			await this.setAll(options);
+			await this._setAll(options);
 		}
 	}
 
