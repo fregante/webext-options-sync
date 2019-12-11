@@ -82,7 +82,7 @@ class OptionsSync<TOptions extends Options> {
 			this._log = () => {};
 		}
 
-		if (isBackgroundPage()) {
+		if (migrations.length > 0 && isBackgroundPage()) {
 			chrome.management.getSelf(({installType}) => {
 				// Chrome doesn't run `onInstalled` when launching the browser with a pre-loaded development extension #25
 				if (installType === 'development') {
@@ -208,14 +208,16 @@ class OptionsSync<TOptions extends Options> {
 
 	private async _runMigrations(migrations: Array<Migration<TOptions>>): Promise<void> {
 		const options = await this.getAll();
+		const initial = JSON.stringify(options);
 
-		if (migrations && migrations.length > 0) {
-			this._log('log', 'Found these stored options', {...options});
-			this._log('info', 'Will run', migrations.length, migrations.length === 1 ? 'migration' : ' migrations');
-			migrations.forEach(migrate => migrate(options, this.defaults));
+		this._log('log', 'Found these stored options', {...options});
+		this._log('info', 'Will run', migrations.length, migrations.length === 1 ? 'migration' : ' migrations');
+		migrations.forEach(migrate => migrate(options, this.defaults));
+
+		// Only save to storage if there were any changes
+		if (initial !== JSON.stringify(options)) {
+			this.setAll(options);
 		}
-
-		this.setAll(options);
 	}
 
 	private async _handleFormInput({target}: Event): Promise<void> {

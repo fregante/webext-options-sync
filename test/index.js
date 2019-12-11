@@ -165,6 +165,19 @@ test('migrations alter the stored options', async t => {
 	});
 });
 
+test('migrations don’t trigger updates if they don’t change anything', async t => {
+	chrome.storage.sync.get
+		.withArgs('options')
+		.yields({options: {size: 30}});
+
+	const storage = new OptionsSync();
+	await storage._runMigrations([
+		() => {}
+	]);
+
+	t.true(chrome.storage.sync.set.notCalled);
+});
+
 test('removeUnused migration works', async t => {
 	chrome.storage.sync.get
 		.withArgs('settings')
