@@ -2,7 +2,6 @@
   "name": "webext-options-sync",
   "version": "1.2.2",
   "description": "Helps you manage and autosave your extension's options.",
-  "module": "index.js",
   "keywords": [
     "browser",
     "chrome",
@@ -20,6 +19,8 @@
     "index.d.ts",
     "vendor/lz-string.js"
   ],
+  "type": "module",
+  "module": "index.js",
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "tsc --sourceMap false",
@@ -50,6 +51,11 @@
       "import/extensions": "off"
     }
   },
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  },
   "dependencies": {
     "dom-form-serializer": "^1.0.7",
     "lz-string": "^1.4.4",
@@ -72,11 +78,5 @@
     "type-fest": "^0.8.1",
     "typescript": "^3.7.2",
     "xo": "*"
-  },
-  "ava": {
-    "require": [
-      "esm"
-    ]
-  },
-  "type": "module"
+  }
 }
