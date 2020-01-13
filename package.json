@@ -22,9 +22,8 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "tsc",
-    "test": "tsc && ava --verbose --serial && xo",
-    "watch": "tsc --watch",
-    "watch:test": "ava --verbose --serial --watch"
+    "test": "tsc && ava && xo",
+    "watch": "tsc --watch"
   },
   "xo": {
     "envs": [

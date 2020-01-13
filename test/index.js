@@ -36,12 +36,12 @@ test.beforeEach(() => {
 	}));
 });
 
-test('basic usage', t => {
+test.serial('basic usage', t => {
 	t.deepEqual(flattenInstance(new OptionsSync()), defaultSetup);
 	t.deepEqual(flattenInstance(new OptionsSync(simpleSetup)), simpleSetup);
 });
 
-test('getAll returns empty object when storage is empty', async t => {
+test.serial('getAll returns empty object when storage is empty', async t => {
 	chrome.storage.sync.get
 		.withArgs('options')
 		.yields({});
@@ -50,7 +50,7 @@ test('getAll returns empty object when storage is empty', async t => {
 	t.deepEqual(await storage.getAll(), {});
 });
 
-test('getAll returns defaults when storage is empty', async t => {
+test.serial('getAll returns defaults when storage is empty', async t => {
 	chrome.storage.sync.get
 		.withArgs('settings')
 		.yields({});
@@ -59,7 +59,7 @@ test('getAll returns defaults when storage is empty', async t => {
 	t.deepEqual(await storage.getAll(), simpleSetup.defaults);
 });
 
-test('getAll returns saved options', async t => {
+test.serial('getAll returns saved options', async t => {
 	const previouslySavedOptions = {
 		color: 'fucsia',
 		people: 3
@@ -73,7 +73,7 @@ test('getAll returns saved options', async t => {
 	t.deepEqual(await storage.getAll(), previouslySavedOptions);
 });
 
-test('getAll returns saved legacy options', async t => {
+test.serial('getAll returns saved legacy options', async t => {
 	const previouslySavedOptions = {
 		color: 'fucsia',
 		people: 3
@@ -87,7 +87,7 @@ test('getAll returns saved legacy options', async t => {
 	t.deepEqual(await storage.getAll(), previouslySavedOptions);
 });
 
-test('getAll merges saved options with defaults', async t => {
+test.serial('getAll merges saved options with defaults', async t => {
 	const previouslySavedOptions = {
 		color: 'fucsia',
 		people: 3
@@ -105,7 +105,7 @@ test('getAll merges saved options with defaults', async t => {
 	});
 });
 
-test('setAll', async t => {
+test.serial('setAll', async t => {
 	const newOptions = {
 		name: 'Rico',
 		people: 3
@@ -119,7 +119,7 @@ test('setAll', async t => {
 	});
 });
 
-test('setAll skips defaults', async t => {
+test.serial('setAll skips defaults', async t => {
 	const newOptions = {
 		name: 'Rico',
 		people: 3
@@ -133,7 +133,7 @@ test('setAll skips defaults', async t => {
 	});
 });
 
-test('set merges with existing data', async t => {
+test.serial('set merges with existing data', async t => {
 	chrome.storage.sync.get
 		.withArgs('options')
 		.yields({options: {size: 30}});
@@ -149,7 +149,7 @@ test('set merges with existing data', async t => {
 	});
 });
 
-test('migrations alter the stored options', async t => {
+test.serial('migrations alter the stored options', async t => {
 	chrome.storage.sync.get
 		.withArgs('options')
 		.yields({options: {size: 30}});
@@ -175,7 +175,7 @@ test('migrations alter the stored options', async t => {
 	});
 });
 
-test('migrations shouldn’t trigger updates if they don’t change anything', async t => {
+test.serial('migrations shouldn’t trigger updates if they don’t change anything', async t => {
 	chrome.storage.sync.get
 		.withArgs('options')
 		.yields({});
@@ -191,7 +191,7 @@ test('migrations shouldn’t trigger updates if they don’t change anything', a
 	t.true(chrome.storage.sync.set.notCalled);
 });
 
-test('migrations are completed before future get/set operations', async t => {
+test.serial('migrations are completed before future get/set operations', async t => {
 	chrome.storage.sync.get
 		.withArgs('options')
 		.yields({});
@@ -216,7 +216,7 @@ test('migrations are completed before future get/set operations', async t => {
 	});
 });
 
-test('removeUnused migration works', async t => {
+test.serial('removeUnused migration works', async t => {
 	chrome.storage.sync.get
 		.withArgs('settings')
 		.yields({
