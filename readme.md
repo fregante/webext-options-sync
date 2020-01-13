@@ -142,7 +142,7 @@ optionsStorage.syncForm(document.querySelector('form'));
 
 When using the `syncForm` method, `OptionsSync` will serialize the form using [dom-form-serializer](https://github.com/jefersondaniel/dom-form-serializer), which uses the `name` attribute as `key` for your options. Refer to its readme for more info on the structure of the data.
 
-Any changes to the form are immediately saved into `chrome.storage.sync` via `input` events debounced by 600ms.
+Any user changes to the form are automatically saved into `chrome.storage.sync` after 300ms (debounced). It listens to `input` events.
 
 #### Input validation
 

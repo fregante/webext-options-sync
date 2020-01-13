@@ -77,7 +77,7 @@ class OptionsSync<TOptions extends Options> {
 	}: Setup<TOptions> = {}) {
 		this.storageName = storageName;
 		this.defaults = defaults;
-		this._handleFormInput = debounce(600, this._handleFormInput.bind(this));
+		this._handleFormInput = debounce(300, this._handleFormInput.bind(this));
 		this._handleStorageChangeOnForm = this._handleStorageChangeOnForm.bind(this);
 
 		if (logging === false) {
