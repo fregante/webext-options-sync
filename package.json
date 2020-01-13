@@ -2,6 +2,7 @@
   "name": "webext-options-sync",
   "version": "1.2.1",
   "description": "Helps you manage and autosave your extension's options.",
+  "module": "index.js",
   "keywords": [
     "browser",
     "chrome",
