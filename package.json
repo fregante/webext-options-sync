@@ -17,7 +17,8 @@
   "author": "Federico Brigante <opensource@bfred.it> (bfred.it)",
   "files": [
     "index.js",
-    "index.d.ts"
+    "index.d.ts",
+    "vendor/lz-string.js"
   ],
   "scripts": {
     "build": "tsc",
@@ -45,7 +46,8 @@
     ],
     "rules": {
       "import/no-unresolved": "warn",
-      "import/no-unassigned-import": "off"
+      "import/no-unassigned-import": "off",
+      "import/extensions": "off"
     }
   },
   "dependencies": {
