@@ -1,0 +1,32 @@
+name: ESM
+
+on:
+  - pull_request
+  - push
+
+jobs:
+
+  Pack:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - run: npm install
+    - run: npm run build --if-present
+    - run: npm pack --dry-run
+    - run: npm pack --silent 2>/dev/null | xargs cat | tar -xz
+    - uses: actions/upload-artifact@v1
+      with:
+        path: package
+
+  Webpack:
+    runs-on: ubuntu-latest
+    depends-on: Pack
+    steps:
+    - uses: actions/download-artifact@v1
+      with:
+        name: package
+    - run: cd package && npm link && cd .. && npm link webext-options-sync
+    - run: npm install webpack webpack-cli
+    - run: echo 'import "webext-options-sync"' > index.js
+    - run: webpack index.js
+    
