@@ -40,7 +40,7 @@ jobs:
         name: package
     - run: npm install ./package parcel
     - run: echo 'import "webext-options-sync"' > index.js
-    - run: ./node_modules/.bin/parcel index.js
+    - run: echo DISABLED ./node_modules/.bin/parcel index.js
     - run: cat dist/index.js
       
   Rollup:
@@ -66,6 +66,7 @@ jobs:
         name: package
     - run: npm install ./package snowpack
     - run: echo 'import "webext-options-sync"' > index.js
+    - run: echo '{}' > package.json
     - run: ./node_modules/.bin/snowpack index.js
     - run: cat web_modules/webext-options-sync
 
@@ -80,8 +81,9 @@ jobs:
       with:
         node-version: '13.x'
     - run: npm install ./package
-    - run: echo 'import "webext-options-sync"' > index.js
+    - run: echo 'import "webext-options-sync/index.js"' > index.js
     - run: "echo '{\"type\": \"module\"}' > package.json"
+    - run: find . -not -name Library
     - run: node index.js
 
   TypeScript:
