@@ -68,7 +68,7 @@ jobs:
     - run: echo 'import "webext-options-sync"' > index.js
     - run: npm install ./package
     - run: npx snowpack index.js
-    - run: cat web_modules/webext-options-sync
+    - run: cat web_modules/webext-options-sync.js
 
   Node:
     runs-on: ubuntu-latest
