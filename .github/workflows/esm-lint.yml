@@ -38,9 +38,9 @@ jobs:
     - uses: actions/download-artifact@v1
       with:
         name: package
-    - run: npm install ./package parcel
+    - run: npm install ./package
     - run: echo 'import "webext-options-sync"' > index.js
-    - run: ./node_modules/.bin/parcel build index.js
+    - run: npx parcel build index.js
     - run: cat dist/index.js
       
   Rollup:
@@ -55,7 +55,7 @@ jobs:
         echo "import resolve from '@rollup/plugin-node-resolve';
           export default {plugins: [resolve()]}" > rollup.config.js
     - run: echo 'import "webext-options-sync"' > index.js
-    - run: ./node_modules/.bin/rollup index.js --config
+    - run: npx rollup index.js --config
 
   Snowpack:
     runs-on: ubuntu-latest
@@ -69,6 +69,18 @@ jobs:
     - run: npm install ./package
     - run: npx snowpack index.js
     - run: cat web_modules/webext-options-sync.js
+
+  TypeScript:
+    runs-on: ubuntu-latest
+    needs: Pack
+    steps:
+    - uses: actions/download-artifact@v1
+      with:
+        name: package
+    - run: npm install ./package
+    - run: echo 'import "webext-options-sync"' > index.ts
+    - run: tsc index.ts
+    - run: cat index.js
 
   Node:
     runs-on: ubuntu-latest
@@ -84,15 +96,3 @@ jobs:
     - run: echo 'import "webext-options-sync/index.js"' > index.js
     - run: npm install ./package
     - run: node index.js
-
-  TypeScript:
-    runs-on: ubuntu-latest
-    needs: Pack
-    steps:
-    - uses: actions/download-artifact@v1
-      with:
-        name: package
-    - run: npm install ./package
-    - run: echo 'import "webext-options-sync"' > index.ts
-    - run: tsc index.ts
-    - run: cat index.js
