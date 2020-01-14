@@ -40,7 +40,7 @@ jobs:
         name: package
     - run: npm install ./package parcel
     - run: echo 'import "webext-options-sync"' > index.js
-    - run: echo DISABLED ./node_modules/.bin/parcel index.js
+    - run: ./node_modules/.bin/parcel build index.js
     - run: cat dist/index.js
       
   Rollup:
