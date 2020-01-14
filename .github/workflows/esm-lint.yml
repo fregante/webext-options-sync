@@ -38,9 +38,9 @@ jobs:
     - uses: actions/download-artifact@v1
       with:
         name: package
-    - run: npm install ./package
+    - run: npm install ./package parcel
     - run: echo 'import "webext-options-sync"' > index.js
-    - run: parcel index.js
+    - run: ./node_modules/.bin/parcel index.js
     - run: cat dist/index.js
       
   Rollup:
@@ -51,12 +51,11 @@ jobs:
       with:
         name: package
     - run: npm install ./package rollup @rollup/plugin-node-resolve
-    - run: export PATH=$(npm bin):$PATH
     - run: |
         echo "import resolve from '@rollup/plugin-node-resolve';
           export default {plugins: [resolve()]}" > rollup.config.js
     - run: echo 'import "webext-options-sync"' > index.js
-    - run: rollup index.js --config
+    - run: ./node_modules/.bin/rollup index.js --config
 
   Snowpack:
     runs-on: ubuntu-latest
@@ -66,9 +65,8 @@ jobs:
       with:
         name: package
     - run: npm install ./package snowpack
-    - run: export PATH=$(npm bin):$PATH
     - run: echo 'import "webext-options-sync"' > index.js
-    - run: snowpack index.js
+    - run: ./node_modules/.bin/snowpack index.js
     - run: cat web_modules/webext-options-sync
 
   Node:
