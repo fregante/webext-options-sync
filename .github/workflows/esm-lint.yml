@@ -58,8 +58,6 @@ jobs:
         echo "export default {plugins: [require('@rollup/plugin-node-resolve')()]}" > rollup.config.js
     - run: echo $importer > index.js
     - run: npx rollup index.js --config
-    - run: "true"
-      if: failure()
 
   Snowpack:
     runs-on: ubuntu-latest
@@ -100,5 +98,3 @@ jobs:
     - run: echo $importer > index.js
     - run: npm install ./package
     - run: node index.js
-    - run: "true"
-      if: failure()
