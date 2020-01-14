@@ -26,7 +26,7 @@ jobs:
     - uses: actions/download-artifact@v1
       with:
         name: package
-    - run: npm install webpack webpack-cli
-    - run: echo 'import "./package"' > index.js
+    - run: npm install ./package webpack webpack-cli
+    - run: echo 'import "webext-options-sync"' > index.js
     - run: webpack index.js
     
