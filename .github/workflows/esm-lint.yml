@@ -64,10 +64,10 @@ jobs:
     - uses: actions/download-artifact@v1
       with:
         name: package
-    - run: npm install ./package snowpack
-    - run: echo 'import "webext-options-sync"' > index.js
     - run: echo '{}' > package.json
-    - run: ./node_modules/.bin/snowpack index.js
+    - run: echo 'import "webext-options-sync"' > index.js
+    - run: npm install ./package
+    - run: npx snowpack index.js
     - run: cat web_modules/webext-options-sync
 
   Node:
@@ -80,10 +80,9 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '13.x'
-    - run: npm install ./package
-    - run: echo 'import "webext-options-sync/index.js"' > index.js
     - run: "echo '{\"type\": \"module\"}' > package.json"
-    - run: find . -not -name Library
+    - run: echo 'import "webext-options-sync/index.js"' > index.js
+    - run: npm install ./package
     - run: node index.js
 
   TypeScript:
