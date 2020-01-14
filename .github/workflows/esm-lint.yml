@@ -20,7 +20,7 @@ jobs:
 
   Webpack:
     runs-on: ubuntu-latest
-    depends-on: Pack
+    needs: Pack
     steps:
     - uses: actions/download-artifact@v1
       with:
