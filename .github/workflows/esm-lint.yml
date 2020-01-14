@@ -50,8 +50,8 @@ jobs:
     - uses: actions/download-artifact@v1
       with:
         name: package
-    - run: npm install --global rollup @rollup/plugin-node-resolve
-    - run: npm install ./package
+    - run: npm install ./package rollup @rollup/plugin-node-resolve
+    - run: export PATH=$(npm bin):$PATH
     - run: |
         echo "import resolve from '@rollup/plugin-node-resolve';
           export default {plugins: [resolve()]}" > rollup.config.js
@@ -65,8 +65,8 @@ jobs:
     - uses: actions/download-artifact@v1
       with:
         name: package
-    - run: npm install --global snowpack
-    - run: npm install ./package
+    - run: npm install ./package snowpack
+    - run: export PATH=$(npm bin):$PATH
     - run: echo 'import "webext-options-sync"' > index.js
     - run: snowpack index.js
     - run: cat web_modules/webext-options-sync
@@ -83,6 +83,7 @@ jobs:
         node-version: '13.x'
     - run: npm install ./package
     - run: echo 'import "webext-options-sync"' > index.js
+    - run: "echo '{\"type\": \"module\"}' > package.json"
     - run: node index.js
 
   TypeScript:
