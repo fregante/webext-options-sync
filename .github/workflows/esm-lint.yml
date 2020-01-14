@@ -16,6 +16,7 @@ jobs:
     - run: npm pack --silent 2>/dev/null | xargs cat | tar -xz
     - uses: actions/upload-artifact@v1
       with:
+        name: package
         path: package
 
   Webpack:
