@@ -31,23 +31,11 @@
       "browser",
       "webextensions"
     ],
-    "extensions": [
-      "ts"
-    ],
-    "overrides": [
-      {
-        "files": "**/*.ts",
-        "extends": "xo-typescript",
-        "rules": {
-          "@typescript-eslint/no-dynamic-delete": "off",
-          "@typescript-eslint/no-empty-function": "off"
-        }
-      }
-    ],
     "rules": {
-      "import/no-unresolved": "warn",
-      "import/no-unassigned-import": "off",
-      "import/extensions": "off"
+      "@typescript-eslint/no-dynamic-delete": "off",
+      "@typescript-eslint/no-empty-function": "off",
+      "import/no-duplicates": "off",
+      "import/no-unassigned-import": "off"
     }
   },
   "ava": {
@@ -63,19 +51,16 @@
   },
   "devDependencies": {
     "@sindresorhus/tsconfig": "^0.7.0",
-    "@types/chrome": "0.0.91",
+    "@types/chrome": "0.0.103",
     "@types/dom-inputevent": "^1.0.5",
-    "@types/lz-string": "^1.3.33",
+    "@types/lz-string": "^1.3.34",
     "@types/throttle-debounce": "^2.1.0",
-    "@typescript-eslint/eslint-plugin": "^2.9.0",
-    "@typescript-eslint/parser": "^2.9.0",
     "ava": "^2.2.0",
-    "eslint-config-xo-typescript": "^0.23.0",
     "esm": "^3.2.25",
     "sinon": "^7.3.2",
     "sinon-chrome": "^3.0.1",
-    "type-fest": "^0.8.1",
-    "typescript": "^3.7.2",
-    "xo": "*"
+    "type-fest": "^0.13.0",
+    "typescript": "^3.8.3",
+    "xo": "^0.28.3"
   }
 }

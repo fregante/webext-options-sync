@@ -1,7 +1,7 @@
 import {debounce} from 'throttle-debounce';
 import {isBackgroundPage} from 'webext-detect-page';
 import {serialize, deserialize} from 'dom-form-serializer/lib';
-import {compressToEncodedURIComponent as compress, decompressFromEncodedURIComponent as decompress} from './vendor/lz-string.js';
+import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from './vendor/lz-string';
 
 /**
 @example
@@ -80,7 +80,7 @@ class OptionsSync<TOptions extends Options> {
 		this._handleFormInput = debounce(300, this._handleFormInput.bind(this));
 		this._handleStorageChangeOnForm = this._handleStorageChangeOnForm.bind(this);
 
-		if (logging === false) {
+		if (!logging) {
 			this._log = () => {};
 		}
 
@@ -194,13 +194,13 @@ class OptionsSync<TOptions extends Options> {
 
 		this._log('log', 'Without the default values', thinnedOptions);
 
-		return compress(JSON.stringify(thinnedOptions));
+		return compressToEncodedURIComponent(JSON.stringify(thinnedOptions));
 	}
 
 	private _decode(options: string|TOptions): TOptions {
 		let decompressed = options;
 		if (typeof options === 'string') {
-			decompressed = JSON.parse(decompress(options));
+			decompressed = JSON.parse(decompressFromEncodedURIComponent(options));
 		}
 
 		return {...this.defaults, ...decompressed as TOptions};
@@ -269,7 +269,7 @@ class OptionsSync<TOptions extends Options> {
 		// Don't serialize disabled and invalid fields
 		for (const field of form.querySelectorAll<HTMLInputElement>('[name]')) {
 			if (field.validity.valid && !field.disabled) {
-				include.push(field.name.replace(/\[.*\]/, ''));
+				include.push(field.name.replace(/\[.*]/, ''));
 			}
 		}
 
