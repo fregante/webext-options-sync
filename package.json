@@ -45,7 +45,6 @@
   },
   "dependencies": {
     "dom-form-serializer": "^1.0.7",
-    "lz-string": "^1.4.4",
     "throttle-debounce": "^2.1.0",
     "webext-detect-page": "^1.0.2"
   },

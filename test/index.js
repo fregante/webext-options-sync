@@ -1,6 +1,6 @@
 import './_fixtures';
 import test from 'ava';
-import {compressToEncodedURIComponent as compress} from 'lz-string';
+import {compressToEncodedURIComponent} from '../vendor/lz-string';
 import OptionsSync from '..';
 
 function flattenInstance(setup) {
@@ -8,7 +8,7 @@ function flattenInstance(setup) {
 }
 
 function compressOptions(options) {
-	return compress(JSON.stringify(options));
+	return compressToEncodedURIComponent(JSON.stringify(options));
 }
 
 const defaultSetup = {

@@ -1,6 +1,7 @@
 import {debounce} from 'throttle-debounce';
+import serialize from 'dom-form-serializer/lib/serialize';
+import deserialize from 'dom-form-serializer/lib/deserialize';
 import {isBackgroundPage} from 'webext-detect-page';
-import {serialize, deserialize} from 'dom-form-serializer/lib';
 import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from './vendor/lz-string';
 
 /**
