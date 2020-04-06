@@ -14,13 +14,12 @@
   "repository": "fregante/webext-options-sync",
   "license": "MIT",
   "author": "Federico Brigante <opensource@bfred.it> (bfred.it)",
+  "module": "index.js",
   "files": [
     "index.js",
     "index.d.ts",
     "vendor/lz-string.js"
   ],
-  "type": "module",
-  "module": "index.js",
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "tsc --sourceMap false",
