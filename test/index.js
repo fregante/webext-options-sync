@@ -3,6 +3,8 @@ import test from 'ava';
 import {compressToEncodedURIComponent} from '../vendor/lz-string';
 import OptionsSync from '..';
 
+OptionsSync.prototype._log = () => {};
+
 function flattenInstance(setup) {
 	return JSON.parse(JSON.stringify(setup));
 }
@@ -140,7 +142,7 @@ test.serial('set merges with existing data', async t => {
 
 	const storage = new OptionsSync();
 	await storage.set({sound: false});
-	t.true(chrome.storage.sync.set.calledOnce);
+	t.is(chrome.storage.sync.set.callCount, 1);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
 		options: compressOptions({
 			size: 30,
@@ -167,7 +169,7 @@ test.serial('migrations alter the stored options', async t => {
 
 	await storage._migrations;
 
-	t.true(chrome.storage.sync.set.calledOnce);
+	t.is(chrome.storage.sync.set.callCount, 1);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
 		options: compressOptions({
 			minSize: 30
@@ -231,7 +233,7 @@ test.serial('removeUnused migration works', async t => {
 		OptionsSync.migrations.removeUnused
 	]);
 
-	t.true(chrome.storage.sync.set.calledOnce);
+	t.is(chrome.storage.sync.set.callCount, 1);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
 		settings: compressOptions({
 			sound: false
