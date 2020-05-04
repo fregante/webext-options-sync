@@ -21,7 +21,7 @@ import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from '
 	],
 }
 */
-interface Setup<TOptions extends Options> {
+export interface Setup<TOptions extends Options> {
 	storageName?: string;
 	logging?: boolean;
 	defaults?: TOptions;
@@ -34,7 +34,7 @@ interface Setup<TOptions extends Options> {
 /**
 A map of options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 */
-interface Options {
+export interface Options {
 	[key: string]: string | number | boolean;
 }
 
@@ -61,7 +61,7 @@ class OptionsSync<TOptions extends Options> {
 
 	defaults: TOptions;
 
-	private _form!: HTMLFormElement;
+	_form!: HTMLFormElement;
 
 	private readonly _migrations: Promise<void>;
 
