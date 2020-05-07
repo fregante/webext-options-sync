@@ -169,9 +169,9 @@ input:invalid ~ .error-message {
 
 ## API
 
-#### const optionsStorage = new OptionsSync([setup])
+#### const optionsStorage = new OptionsSync(setup?)
 
-Returns an instance linked to the chosen storage.
+Returns an instance linked to the chosen storage. It will also run any migrations if it's called in the background.
 
 ##### setup
 
