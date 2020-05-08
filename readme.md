@@ -4,9 +4,9 @@
 
 Main features:
 
-* Define your default options
-* Add autoload and autosave to your options `<form>`
-* Run migrations on update
+- Define your default options
+- Add autoload and autosave to your options `<form>`
+- Run migrations on update
 
 ## Install
 
@@ -59,7 +59,7 @@ window.optionsStorage = new OptionsSync({
 	defaults: {
 		colorString: 'green',
 		anyBooleans: true,
-		numbersAreFine: 9001,
+		numbersAreFine: 9001
 	},
 
 	// List of functions that are called when the extension is updated
@@ -152,7 +152,7 @@ If your form fields have any [validation attributes](https://developer.mozilla.o
 
 Since autosave and validation is silent, you should inform the user of invalid fields, possibly via CSS by using the `:invalid` selector:
 
-``` css
+```css
 /* Style the element */
 input:invalid {
 	color: red;
@@ -276,12 +276,12 @@ Removes any listeners added by `syncForm`.
 
 ## Related
 
-* [webext-storage-cache](https://github.com/fregante/webext-storage-cache) - Map-like promised cache storage with expiration.
-* [webext-domain-permission-toggle](https://github.com/fregante/webext-domain-permission-toggle) - Browser-action context menu to request permission for the current tab.
-* [webext-dynamic-content-scripts](https://github.com/fregante/webext-dynamic-content-scripts) - Automatically inject your `content_scripts` on custom domains.
-* [webext-detect-page](https://github.com/fregante/webext-detect-page) - Detects where the current browser extension code is being run.
-* [webext-content-script-ping](https://github.com/fregante/webext-content-script-ping) - One-file interface to detect whether your content script have loaded.
-* [`Awesome WebExtensions`](https://github.com/fregante/Awesome-WebExtensions): A curated list of awesome resources for Web Extensions development
+- [webext-storage-cache](https://github.com/fregante/webext-storage-cache) - Map-like promised cache storage with expiration.
+- [webext-domain-permission-toggle](https://github.com/fregante/webext-domain-permission-toggle) - Browser-action context menu to request permission for the current tab.
+- [webext-dynamic-content-scripts](https://github.com/fregante/webext-dynamic-content-scripts) - Automatically inject your `content_scripts` on custom domains.
+- [webext-detect-page](https://github.com/fregante/webext-detect-page) - Detects where the current browser extension code is being run.
+- [webext-content-script-ping](https://github.com/fregante/webext-content-script-ping) - One-file interface to detect whether your content script have loaded.
+- [`Awesome WebExtensions`](https://github.com/fregante/Awesome-WebExtensions): A curated list of awesome resources for Web Extensions development
 
 ## License
 

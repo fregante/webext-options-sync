@@ -1,65 +1,65 @@
 {
-  "name": "webext-options-sync",
-  "version": "1.2.3",
-  "description": "Helps you manage and autosave your extension's options.",
-  "keywords": [
-    "browser",
-    "chrome",
-    "extension",
-    "firefox",
-    "options",
-    "sync",
-    "webext"
-  ],
-  "repository": "fregante/webext-options-sync",
-  "license": "MIT",
-  "author": "Federico Brigante <opensource@bfred.it> (bfred.it)",
-  "module": "index.js",
-  "files": [
-    "index.js",
-    "index.d.ts",
-    "vendor/lz-string.js"
-  ],
-  "scripts": {
-    "build": "tsc",
-    "prepublishOnly": "tsc --sourceMap false",
-    "test": "tsc && ava && xo",
-    "watch": "tsc --watch"
-  },
-  "xo": {
-    "envs": [
-      "browser",
-      "webextensions"
-    ],
-    "rules": {
-      "@typescript-eslint/no-dynamic-delete": "off",
-      "@typescript-eslint/no-empty-function": "off",
-      "import/no-duplicates": "off",
-      "import/no-unassigned-import": "off"
-    }
-  },
-  "ava": {
-    "require": [
-      "esm"
-    ]
-  },
-  "dependencies": {
-    "dom-form-serializer": "^1.0.7",
-    "throttle-debounce": "^2.1.0",
-    "webext-detect-page": "^2.0.4"
-  },
-  "devDependencies": {
-    "@sindresorhus/tsconfig": "^0.7.0",
-    "@types/chrome": "0.0.103",
-    "@types/dom-inputevent": "^1.0.5",
-    "@types/lz-string": "^1.3.34",
-    "@types/throttle-debounce": "^2.1.0",
-    "ava": "^2.4.0",
-    "esm": "^3.2.25",
-    "sinon": "^9.0.1",
-    "sinon-chrome": "^3.0.1",
-    "type-fest": "^0.13.0",
-    "typescript": "^3.8.3",
-    "xo": "^0.28.3"
-  }
+	"name": "webext-options-sync",
+	"version": "1.2.3",
+	"description": "Helps you manage and autosave your extension's options.",
+	"keywords": [
+		"browser",
+		"chrome",
+		"extension",
+		"firefox",
+		"options",
+		"sync",
+		"webext"
+	],
+	"repository": "fregante/webext-options-sync",
+	"license": "MIT",
+	"author": "Federico Brigante <opensource@bfred.it> (bfred.it)",
+	"module": "index.js",
+	"files": [
+		"index.js",
+		"index.d.ts",
+		"vendor/lz-string.js"
+	],
+	"scripts": {
+		"build": "tsc",
+		"prepack": "tsc --sourceMap false",
+		"test": "tsc && ava && xo",
+		"watch": "tsc --watch"
+	},
+	"xo": {
+		"envs": [
+			"browser",
+			"webextensions"
+		],
+		"rules": {
+			"@typescript-eslint/no-dynamic-delete": "off",
+			"@typescript-eslint/no-empty-function": "off",
+			"import/no-duplicates": "off",
+			"import/no-unassigned-import": "off"
+		}
+	},
+	"ava": {
+		"require": [
+			"esm"
+		]
+	},
+	"dependencies": {
+		"dom-form-serializer": "^1.0.7",
+		"throttle-debounce": "^2.1.0",
+		"webext-detect-page": "^2.0.4"
+	},
+	"devDependencies": {
+		"@sindresorhus/tsconfig": "^0.7.0",
+		"@types/chrome": "0.0.103",
+		"@types/dom-inputevent": "^1.0.5",
+		"@types/lz-string": "^1.3.34",
+		"@types/throttle-debounce": "^2.1.0",
+		"ava": "^2.4.0",
+		"esm": "^3.2.25",
+		"sinon": "^9.0.1",
+		"sinon-chrome": "^3.0.1",
+		"type-fest": "^0.13.0",
+		"typescript": "^3.8.3",
+		"xo": "^0.28.3"
+	}
 }
