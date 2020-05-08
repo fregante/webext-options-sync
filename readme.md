@@ -8,6 +8,27 @@ Main features:
 - Add autoload and autosave to your options `<form>`
 - Run migrations on update
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Table of contents
+
+- [Install](#install)
+- [Usage](#usage)
+  - [Simple usage](#simple-usage)
+  - [Advanced usage](#advanced-usage)
+  - [Form autosave and autoload](#form-autosave-and-autoload)
+    - [Input validation](#input-validation)
+- [API](#api)
+    - [const optionsStorage = new OptionsSync([setup])](#const-optionsstorage--new-optionssyncsetup)
+    - [opts.set(options)](#optssetoptions)
+    - [opts.setAll(options)](#optssetalloptions)
+    - [opts.getAll()](#optsgetall)
+    - [opts.syncForm(form)](#optssyncformform)
+    - [opts.stopSyncForm()](#optsstopsyncform)
+- [Related](#related)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Install
 
 You can just download the [standalone bundle](https://packd.fregante.now.sh/webext-options-sync@latest?name=OptionsSync) (it might take a minute to download) and include the file in your `manifest.json`, or:
