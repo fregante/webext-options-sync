@@ -8,6 +8,8 @@ Main features:
 - Add autoload and autosave to your options `<form>`
 - Run migrations on update
 
+This also lets you very easily have [separate options for each domain](https://github.com/fregante/webext-options-sync-per-domain) with the help of `webext-options-sync-per-domain`.
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 ## Table of contents
@@ -297,6 +299,7 @@ Removes any listeners added by `syncForm`.
 
 ## Related
 
+- [webext-options-sync-per-domain](https://github.com/fregante/webext-options-sync-per-domain) - Wrapper for `webext-options-sync` to have different options for each domain your extension supports.
 - [webext-storage-cache](https://github.com/fregante/webext-storage-cache) - Map-like promised cache storage with expiration.
 - [webext-domain-permission-toggle](https://github.com/fregante/webext-domain-permission-toggle) - Browser-action context menu to request permission for the current tab.
 - [webext-dynamic-content-scripts](https://github.com/fregante/webext-dynamic-content-scripts) - Automatically inject your `content_scripts` on custom domains.
