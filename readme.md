@@ -1,4 +1,4 @@
-# webext-options-sync [![Travis build status](https://api.travis-ci.org/fregante/webext-options-sync.svg?branch=master)](https://travis-ci.org/fregante/webext-options-sync) [![npm version](https://img.shields.io/npm/v/webext-options-sync.svg)](https://www.npmjs.com/package/webext-options-sync)
+# webext-options-sync [![](https://img.shields.io/npm/v/webext-options-sync.svg)](https://www.npmjs.com/package/webext-options-sync)
 
 > Helps you manage and autosave your extension's options.
 
@@ -31,7 +31,7 @@ This module requires the `storage` permission in `manifest.json`:
 	"name": "My Cool Extension",
 	"permissions": [
 		"storage"
- 	]
+	]
 }
 ```
 
