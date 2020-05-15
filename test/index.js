@@ -32,7 +32,7 @@ test.beforeEach(() => {
 	chrome.flush();
 	chrome.storage.sync.set.yields(undefined);
 	chrome.management.getSelf.yields(new Promise(resolve => {
-		setTimeout(resolve, 500, { // Introduce some delay to test racing condition
+		setTimeout(resolve, 400, { // Introduce some delay to test race condition
 			installType: 'development'
 		});
 	}));
