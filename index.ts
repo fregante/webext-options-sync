@@ -215,7 +215,15 @@ class OptionsSync<TOptions extends Options> {
 		const {installType} = await new Promise(resolve => chrome.management.getSelf(resolve));
 		// Chrome doesn't run `onInstalled` when launching the browser with a pre-loaded development extension #25
 		if (installType !== 'development') {
-			await new Promise(resolve => chrome.runtime.onInstalled.addListener(resolve));
+			// Migrations should only run onInstalled, but if that event never happens this promise still needs to proceed
+			const timeout = await Promise.race([
+				new Promise(resolve => chrome.runtime.onInstalled.addListener(resolve)),
+				new Promise(resolve => setTimeout(resolve, 500, true))
+			]);
+
+			if (timeout === true) {
+				return;
+			}
 		}
 
 		const options = await this._getAll();
