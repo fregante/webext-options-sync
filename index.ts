@@ -4,6 +4,23 @@ import deserialize from 'dom-form-serializer/lib/deserialize';
 import {isBackgroundPage} from 'webext-detect-page';
 import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from './vendor/lz-string';
 
+async function shouldRunMigrations(): Promise<boolean> {
+	return new Promise(resolve => {
+		chrome.management.getSelf(({installType}) => {
+			// Always run migrations during development #25
+			if (installType === 'development') {
+				return true;
+			}
+
+			// Run migrations when the extension is installed or updated
+			chrome.runtime.onInstalled.addListener(() => resolve(true));
+
+			// If `onInstalled` isn't fired, then migrations should not be run
+			setTimeout(resolve, 500, false);
+		});
+	});
+}
+
 /**
 @example
 {
@@ -208,22 +225,8 @@ class OptionsSync<TOptions extends Options> {
 	}
 
 	private async _runMigrations(migrations: Array<Migration<TOptions>>): Promise<void> {
-		if (migrations.length === 0 || !isBackgroundPage()) {
+		if (migrations.length === 0 || !isBackgroundPage() || !shouldRunMigrations()) {
 			return;
-		}
-
-		const {installType} = await new Promise(resolve => chrome.management.getSelf(resolve));
-		// Chrome doesn't run `onInstalled` when launching the browser with a pre-loaded development extension #25
-		if (installType !== 'development') {
-			// Migrations should only run onInstalled, but if that event never happens this promise still needs to proceed
-			const timeout = await Promise.race([
-				new Promise(resolve => chrome.runtime.onInstalled.addListener(resolve)),
-				new Promise(resolve => setTimeout(resolve, 500, true))
-			]);
-
-			if (timeout === true) {
-				return;
-			}
 		}
 
 		const options = await this._getAll();
