@@ -9,7 +9,8 @@ async function shouldRunMigrations(): Promise<boolean> {
 		chrome.management.getSelf(({installType}) => {
 			// Always run migrations during development #25
 			if (installType === 'development') {
-				return true;
+				resolve(true);
+				return;
 			}
 
 			// Run migrations when the extension is installed or updated
@@ -225,7 +226,7 @@ class OptionsSync<TOptions extends Options> {
 	}
 
 	private async _runMigrations(migrations: Array<Migration<TOptions>>): Promise<void> {
-		if (migrations.length === 0 || !isBackgroundPage() || !shouldRunMigrations()) {
+		if (migrations.length === 0 || !isBackgroundPage() || !await shouldRunMigrations()) {
 			return;
 		}
 
