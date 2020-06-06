@@ -1,4 +1,4 @@
-# webext-options-sync [![Travis build status](https://api.travis-ci.org/fregante/webext-options-sync.svg?branch=master)](https://travis-ci.org/fregante/webext-options-sync) [![npm version](https://img.shields.io/npm/v/webext-options-sync.svg)](https://www.npmjs.com/package/webext-options-sync)
+# webext-options-sync [![](https://img.shields.io/npm/v/webext-options-sync.svg)](https://www.npmjs.com/package/webext-options-sync)
 
 > Helps you manage and autosave your extension's options.
 
@@ -54,7 +54,7 @@ This module requires the `storage` permission in `manifest.json`:
 	"name": "My Cool Extension",
 	"permissions": [
 		"storage"
- 	]
+	]
 }
 ```
 
@@ -192,7 +192,9 @@ input:invalid ~ .error-message {
 
 ## API
 
-#### const optionsStorage = new OptionsSync([setup])
+#### const optionsStorage = new OptionsSync(setup?)
+
+Returns an instance linked to the chosen storage. It will also run any migrations if it's called in the background.
 
 ##### setup
 
@@ -214,8 +216,6 @@ Optional. It should follow this format:
 	],
 }
 ```
-
-Returns an instance linked to the chosen storage.
 
 ###### defaults
 
@@ -261,7 +261,7 @@ Default: `true`
 
 Whether info and warnings (on sync, updating form, etc.) should be logged to the console or not.
 
-#### opts.set(options)
+#### optionsStorage.set(options)
 
 This will merge the existing options with the object provided.
 
@@ -275,15 +275,15 @@ Example: `{color: red}`
 
 A map of default options as strings, booleans, numbers and anything accepted by [dom-form-serializer](https://github.com/jefersondaniel/dom-form-serializer)’s `deserialize` function.
 
-#### opts.setAll(options)
+#### optionsStorage.setAll(options)
 
 This will override **all** the options stored with your `options`.
 
-#### opts.getAll()
+#### optionsStorage.getAll()
 
 This returns a Promise that will resolve with all the options.
 
-#### opts.syncForm(form)
+#### optionsStorage.syncForm(form)
 
 Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved via `chrome.storage.sync`
 
@@ -293,7 +293,7 @@ Type: `HTMLFormElement`, `string`
 
 It's the `<form>` that needs to be synchronized or a CSS selector (one element). The form fields' `name` attributes will have to match the option names.
 
-#### opts.stopSyncForm()
+#### optionsStorage.stopSyncForm()
 
 Removes any listeners added by `syncForm`.
 
