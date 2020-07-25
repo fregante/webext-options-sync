@@ -11,6 +11,3 @@ logs
 index.js
 index.d.ts
 !*/index.js
-cjs
-esm/*
-!esm/package.json
