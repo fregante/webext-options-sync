@@ -14,17 +14,21 @@
 	"repository": "fregante/webext-options-sync",
 	"license": "MIT",
 	"author": "Federico Brigante <opensource@bfred.it> (bfred.it)",
-	"module": "index.js",
+	"main": "cjs/index.js",
+	"module": "esm/index.js",
 	"files": [
-		"index.js",
-		"index.d.ts",
-		"vendor/lz-string.js"
+		"cjs/index.js",
+		"cjs/index.d.ts",
+		"esm/index.js",
+		"esm/index.d.ts"
 	],
 	"scripts": {
-		"build": "tsc",
-		"prepack": "tsc --sourceMap false",
-		"test": "tsc && ava && xo",
-		"watch": "tsc --watch"
+		"build": "rollup -c",
+		"prepack": "rollup -c",
+		"test": "run-p build ava xo",
+		"watch": "rollup -c --watch",
+		"ava": "ava",
+		"xo": "xo"
 	},
 	"xo": {
 		"envs": [
@@ -44,22 +48,27 @@
 		]
 	},
 	"dependencies": {
-		"dom-form-serializer": "^1.0.7",
-		"throttle-debounce": "^2.1.0",
+		"dom-form-serializer": "^1.0.8",
+		"throttle-debounce": "^2.2.1",
 		"webext-detect-page": "^2.0.4"
 	},
 	"devDependencies": {
+		"@rollup/plugin-commonjs": "^14.0.0",
+		"@rollup/plugin-typescript": "^5.0.2",
 		"@sindresorhus/tsconfig": "^0.7.0",
-		"@types/chrome": "0.0.103",
+		"@types/chrome": "0.0.122",
 		"@types/dom-inputevent": "^1.0.5",
 		"@types/lz-string": "^1.3.34",
 		"@types/throttle-debounce": "^2.1.0",
-		"ava": "^2.4.0",
+		"ava": "^3.10.1",
 		"esm": "^3.2.25",
-		"sinon": "^9.0.1",
+		"npm-run-all": "^4.1.5",
+		"rollup": "^2.23.0",
+		"rollup-plugin-terser": "^6.1.0",
+		"sinon": "^9.0.2",
 		"sinon-chrome": "^3.0.1",
-		"type-fest": "^0.13.0",
-		"typescript": "^3.8.3",
-		"xo": "^0.28.3"
+		"type-fest": "^0.16.0",
+		"typescript": "^3.9.7",
+		"xo": "^0.32.1"
 	}
 }
