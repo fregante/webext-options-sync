@@ -45,21 +45,21 @@
 	},
 	"dependencies": {
 		"dom-form-serializer": "^1.0.7",
-		"throttle-debounce": "^2.2.1",
+		"throttle-debounce": "^2.1.0",
 		"webext-detect-page": "^2.0.4"
 	},
 	"devDependencies": {
 		"@sindresorhus/tsconfig": "^0.7.0",
-		"@types/chrome": "0.0.115",
+		"@types/chrome": "0.0.103",
 		"@types/dom-inputevent": "^1.0.5",
 		"@types/lz-string": "^1.3.34",
 		"@types/throttle-debounce": "^2.1.0",
-		"ava": "^3.9.0",
+		"ava": "^2.4.0",
 		"esm": "^3.2.25",
-		"sinon": "^9.0.2",
+		"sinon": "^9.0.1",
 		"sinon-chrome": "^3.0.1",
-		"type-fest": "^0.15.1",
-		"typescript": "^3.9.5",
-		"xo": "^0.32.0"
+		"type-fest": "^0.13.0",
+		"typescript": "^3.8.3",
+		"xo": "^0.28.3"
 	}
 }
