@@ -9,6 +9,10 @@ export default {
 		format: 'esm',
 		dir: '.'
 	},
+	external: [
+		// These are `type: module` packages so they don't need to be bundled
+		'webext-detect-page'
+	],
 	plugins: [
 		resolve(),
 		commonjs(),
