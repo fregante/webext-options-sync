@@ -1,6 +1,6 @@
 import './_fixtures';
 import test from 'ava';
-import {compressToEncodedURIComponent} from 'lz-string';
+import {compressToEncodedURIComponent} from '../vendor/lz-string';
 import OptionsSync from '..';
 
 OptionsSync.prototype._log = () => {};
