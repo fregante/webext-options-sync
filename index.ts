@@ -2,7 +2,7 @@ import {debounce} from 'throttle-debounce';
 import serialize from 'dom-form-serializer/lib/serialize';
 import deserialize from 'dom-form-serializer/lib/deserialize';
 import {isBackgroundPage} from 'webext-detect-page';
-import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from './vendor/lz-string';
+import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from 'lz-string';
 
 /**
 @example
@@ -201,7 +201,7 @@ class OptionsSync<TOptions extends Options> {
 	private _decode(options: string|TOptions): TOptions {
 		let decompressed = options;
 		if (typeof options === 'string') {
-			decompressed = JSON.parse(decompressFromEncodedURIComponent(options));
+			decompressed = JSON.parse(decompressFromEncodedURIComponent(options) as string);
 		}
 
 		return {...this.defaults, ...decompressed as TOptions};

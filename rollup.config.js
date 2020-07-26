@@ -1,16 +1,18 @@
 import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
+import resolve from '@rollup/plugin-node-resolve';
 
-export default ['cjs', 'esm'].map(format => ({
+export default {
 	input: 'index.ts',
 	output: {
-		format,
-		dir: format
+		format: 'esm',
+		dir: '.'
 	},
 	plugins: [
+		resolve(),
 		commonjs(),
 		typescript({
-			outDir: format
+			outDir: '.'
 		})
 	]
-}));
+};
