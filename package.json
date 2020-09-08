@@ -14,6 +14,8 @@
 	"repository": "fregante/webext-options-sync",
 	"license": "MIT",
 	"author": "Federico Brigante <opensource@bfred.it> (bfred.it)",
+	"type": "module",
+	"main": "index.js",
 	"module": "index.js",
 	"files": [
 		"index.js",
