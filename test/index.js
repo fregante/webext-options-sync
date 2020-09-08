@@ -31,11 +31,9 @@ const simpleSetup = {
 test.beforeEach(() => {
 	chrome.flush();
 	chrome.storage.sync.set.yields(undefined);
-	chrome.management.getSelf.yields(new Promise(resolve => {
-		setTimeout(resolve, 500, { // Introduce some delay to test racing condition
-			installType: 'development'
-		});
-	}));
+	chrome.management.getSelf.yields({
+		installType: 'development'
+	});
 });
 
 test.serial('basic usage', t => {

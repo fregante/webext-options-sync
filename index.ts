@@ -4,6 +4,24 @@ import deserialize from 'dom-form-serializer/lib/deserialize';
 import {isBackgroundPage} from 'webext-detect-page';
 import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from './vendor/lz-string';
 
+async function shouldRunMigrations(): Promise<boolean> {
+	return new Promise(resolve => {
+		chrome.management.getSelf(({installType}) => {
+			// Always run migrations during development #25
+			if (installType === 'development') {
+				resolve(true);
+				return;
+			}
+
+			// Run migrations when the extension is installed or updated
+			chrome.runtime.onInstalled.addListener(() => resolve(true));
+
+			// If `onInstalled` isn't fired, then migrations should not be run
+			setTimeout(resolve, 500, false);
+		});
+	});
+}
+
 /**
 @example
 {
@@ -208,14 +226,8 @@ class OptionsSync<TOptions extends Options> {
 	}
 
 	private async _runMigrations(migrations: Array<Migration<TOptions>>): Promise<void> {
-		if (migrations.length === 0 || !isBackgroundPage()) {
+		if (migrations.length === 0 || !isBackgroundPage() || !await shouldRunMigrations()) {
 			return;
-		}
-
-		const {installType} = await new Promise(resolve => chrome.management.getSelf(resolve));
-		// Chrome doesn't run `onInstalled` when launching the browser with a pre-loaded development extension #25
-		if (installType !== 'development') {
-			await new Promise(resolve => chrome.runtime.onInstalled.addListener(resolve));
 		}
 
 		const options = await this._getAll();
