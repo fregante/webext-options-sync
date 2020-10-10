@@ -72,6 +72,8 @@ const options = await optionsStorage.getAll();
 // {showStars: 10}
 ```
 
+**Note:** `OptionsSync` relies on `chrome.storage.sync`, so its [limitations](https://developer.chrome.com/apps/storage#properties) apply, both the size limit and the type of data stored (which must be compatible with JSON).
+
 ### Advanced usage
 
 It's suggested to create an `options-storage.js` file with your defaults and possible migrations, and import it where needed:
