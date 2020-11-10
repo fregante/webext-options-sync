@@ -1,4 +1,8 @@
-name: Test
+env: {}
+
+# DO NOT EDIT BELOW - use `npx ghat fregante/ghatemplates/node`
+
+name: CI
 
 on:
   - pull_request
@@ -9,21 +13,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: npm install
-      - run: npx xo
-
-  Build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: npm install
-      - run: npm run build
+      - name: install
+        run: npm ci || npm install
+      - name: XO
+        run: npx xo
 
   Test:
     runs-on: ubuntu-latest
     container: node:12.15
     steps:
       - uses: actions/checkout@v2
-      - run: npm install
-      - run: npm run build
-      - run: npx ava
+      - name: install
+        run: npm ci || npm install
+      - name: build
+        run: npm run build --if-present
+      - name: AVA
+        run: npx ava
+
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: install
+        run: npm ci || npm install
+      - name: build
+        run: npm run build --if-present
