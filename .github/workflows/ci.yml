@@ -20,6 +20,7 @@ jobs:
 
   Test:
     runs-on: ubuntu-latest
+    container: node:12.15
     steps:
       - uses: actions/checkout@v2
       - name: install
