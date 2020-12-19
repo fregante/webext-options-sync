@@ -3,7 +3,7 @@ import {terser} from 'rollup-plugin-terser';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 
-export default {
+const config = {
 	input: 'index.ts',
 	output: {
 		format: 'esm',
@@ -35,3 +35,5 @@ export default {
 		})
 	]
 };
+
+export default config;

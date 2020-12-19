@@ -58,6 +58,7 @@ export interface Setup<TOptions extends Options> {
 /**
 A map of options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 */
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style -- Interfaces are extendable
 export interface Options {
 	[key: string]: string | number | boolean;
 }
@@ -174,6 +175,7 @@ class OptionsSync<TOptions extends Options> {
 			this._form.removeEventListener('input', this._handleFormInput);
 			this._form.removeEventListener('submit', this._handleFormSubmit);
 			chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
+			/* @ts-expect-error */
 			delete this._form;
 		}
 	}
