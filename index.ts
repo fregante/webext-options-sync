@@ -6,7 +6,7 @@ import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from '
 
 async function shouldRunMigrations(): Promise<boolean> {
 	return new Promise(resolve => {
-		chrome.management.getSelf(({installType}) => {
+		const callback = (installType: string): void => {
 			// Always run migrations during development #25
 			if (installType === 'development') {
 				resolve(true);
@@ -18,7 +18,13 @@ async function shouldRunMigrations(): Promise<boolean> {
 
 			// If `onInstalled` isn't fired, then migrations should not be run
 			setTimeout(resolve, 500, false);
-		});
+		};
+
+		if (chrome.management?.getSelf) {
+			chrome.management.getSelf(({installType}) => callback(installType));
+		} else {
+			callback('unknown');
+		}
 	});
 }
 
