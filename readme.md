@@ -33,7 +33,9 @@ This also lets you very easily have [separate options for each domain](https://g
 
 ## Install
 
-You can just download the [standalone bundle](https://packd.fregante.now.sh/webext-options-sync@latest?name=OptionsSync) (it might take a minute to download) and include the file in your `manifest.json`, or:
+You can download the [standalone bundle](https://bundle.fregante.com/?pkg=webext-options-sync&global=OptionsSync) and include it in your `manifest.json`.
+
+Or use `npm`:
 
 ```sh
 npm install webext-options-sync
