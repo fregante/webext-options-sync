@@ -10,27 +10,6 @@ Main features:
 
 This also lets you very easily have [separate options for each domain](https://github.com/fregante/webext-options-sync-per-domain) with the help of `webext-options-sync-per-domain`.
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-## Table of contents
-
-- [Install](#install)
-- [Usage](#usage)
-  - [Simple usage](#simple-usage)
-  - [Advanced usage](#advanced-usage)
-  - [Form autosave and autoload](#form-autosave-and-autoload)
-    - [Input validation](#input-validation)
-- [API](#api)
-    - [const optionsStorage = new OptionsSync([setup])](#const-optionsstorage--new-optionssyncsetup)
-    - [opts.set(options)](#optssetoptions)
-    - [opts.setAll(options)](#optssetalloptions)
-    - [opts.getAll()](#optsgetall)
-    - [opts.syncForm(form)](#optssyncformform)
-    - [opts.stopSyncForm()](#optsstopsyncform)
-- [Related](#related)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 ## Install
 
 You can download the [standalone bundle](https://bundle.fregante.com/?pkg=webext-options-sync&global=OptionsSync) and include it in your `manifest.json`.
