@@ -7,33 +7,33 @@ const config = {
 	input: 'index.ts',
 	output: {
 		format: 'esm',
-		dir: '.'
+		dir: '.',
 	},
 	external: [
 		// These are `type: module` packages so they don't need to be bundled
-		'webext-detect-page'
+		'webext-detect-page',
 	],
 	plugins: [
 		resolve(),
 		commonjs(),
 		typescript({
-			outDir: '.'
+			outDir: '.',
 		}),
 		terser({
 			toplevel: true,
 			output: {
 				comments: false,
-				beautify: true
+				beautify: true,
 			},
 			mangle: false,
 			compress: {
 				join_vars: false, // eslint-disable-line camelcase
 				booleans: false,
 				expression: false,
-				sequences: false
-			}
-		})
-	]
+				sequences: false,
+			},
+		}),
+	],
 };
 
 export default config;
