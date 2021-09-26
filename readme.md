@@ -284,12 +284,10 @@ Removes any listeners added by `syncForm`.
 
 - [webext-options-sync-per-domain](https://github.com/fregante/webext-options-sync-per-domain) - Wrapper for `webext-options-sync` to have different options for each domain your extension supports.
 - [webext-storage-cache](https://github.com/fregante/webext-storage-cache) - Map-like promised cache storage with expiration.
-- [webext-domain-permission-toggle](https://github.com/fregante/webext-domain-permission-toggle) - Browser-action context menu to request permission for the current tab.
-- [webext-dynamic-content-scripts](https://github.com/fregante/webext-dynamic-content-scripts) - Automatically inject your `content_scripts` on custom domains.
-- [webext-detect-page](https://github.com/fregante/webext-detect-page) - Detects where the current browser extension code is being run.
-- [webext-content-script-ping](https://github.com/fregante/webext-content-script-ping) - One-file interface to detect whether your content script have loaded.
-- [`Awesome WebExtensions`](https://github.com/fregante/Awesome-WebExtensions): A curated list of awesome resources for Web Extensions development
+- [webext-dynamic-content-scripts](https://github.com/fregante/webext-dynamic-content-scripts) - Automatically registers your content_scripts on domains added via permission.request.
+- [Awesome-WebExtensions](https://github.com/fregante/Awesome-WebExtensions) - A curated list of awesome resources for WebExtensions development.
+- [More…](https://github.com/fregante/webext-fun)
 
 ## License
 
-MIT © [Federico Brigante](https://bfred.it)
+MIT © [Federico Brigante](https://fregante.com)

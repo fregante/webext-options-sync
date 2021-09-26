@@ -14,14 +14,18 @@ async function shouldRunMigrations(): Promise<boolean> {
 			}
 
 			// Run migrations when the extension is installed or updated
-			chrome.runtime.onInstalled.addListener(() => resolve(true));
+			chrome.runtime.onInstalled.addListener(() => {
+				resolve(true);
+			});
 
 			// If `onInstalled` isn't fired, then migrations should not be run
 			setTimeout(resolve, 500, false);
 		};
 
 		if (chrome.management?.getSelf) {
-			chrome.management.getSelf(({installType}) => callback(installType));
+			chrome.management.getSelf(({installType}) => {
+				callback(installType);
+			});
 		} else {
 			callback('unknown');
 		}
@@ -79,14 +83,14 @@ class OptionsSync<TOptions extends Options> {
 					delete options[key];
 				}
 			}
-		}
+		},
 	};
 
 	storageName: string;
 
 	defaults: TOptions;
 
-	_form!: HTMLFormElement;
+	_form: HTMLFormElement | undefined;
 
 	private readonly _migrations: Promise<void>;
 
@@ -99,7 +103,7 @@ class OptionsSync<TOptions extends Options> {
 		defaults = {} as TOptions,
 		storageName = 'options',
 		migrations = [],
-		logging = true
+		logging = true,
 	}: Setup<TOptions> = {}) {
 		this.storageName = storageName;
 		this.defaults = defaults;
@@ -157,9 +161,9 @@ class OptionsSync<TOptions extends Options> {
 	The form fields' `name` attributes will have to match the option names.
 	*/
 	async syncForm(form: string | HTMLFormElement): Promise<void> {
-		this._form = form instanceof HTMLFormElement ?
-			form :
-			document.querySelector<HTMLFormElement>(form)!;
+		this._form = form instanceof HTMLFormElement
+			? form
+			: document.querySelector<HTMLFormElement>(form)!;
 
 		this._form.addEventListener('input', this._handleFormInput);
 		this._form.addEventListener('submit', this._handleFormSubmit);
@@ -175,12 +179,11 @@ class OptionsSync<TOptions extends Options> {
 			this._form.removeEventListener('input', this._handleFormInput);
 			this._form.removeEventListener('submit', this._handleFormSubmit);
 			chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
-			/* @ts-expect-error */
 			delete this._form;
 		}
 	}
 
-	private _log(method: keyof Console, ...args: any[]): void {
+	private _log(method: 'log' | 'info', ...args: any[]): void {
 		console[method](...args);
 	}
 
@@ -200,7 +203,7 @@ class OptionsSync<TOptions extends Options> {
 		this._log('log', 'Saving options', newOptions);
 		return new Promise((resolve, reject) => {
 			chrome.storage.sync.set({
-				[this.storageName]: this._encode(newOptions)
+				[this.storageName]: this._encode(newOptions),
 			}, () => {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
@@ -224,10 +227,10 @@ class OptionsSync<TOptions extends Options> {
 		return compressToEncodedURIComponent(JSON.stringify(thinnedOptions));
 	}
 
-	private _decode(options: string|TOptions): TOptions {
+	private _decode(options: string | TOptions): TOptions {
 		let decompressed = options;
 		if (typeof options === 'string') {
-			decompressed = JSON.parse(decompressFromEncodedURIComponent(options)!);
+			decompressed = JSON.parse(decompressFromEncodedURIComponent(options)!) as TOptions;
 		}
 
 		return {...this.defaults, ...decompressed as TOptions};
@@ -243,7 +246,9 @@ class OptionsSync<TOptions extends Options> {
 
 		this._log('log', 'Found these stored options', {...options});
 		this._log('info', 'Will run', migrations.length, migrations.length === 1 ? 'migration' : ' migrations');
-		migrations.forEach(migrate => migrate(options, this.defaults));
+		for (const migrate of migrations) {
+			migrate(options, this.defaults);
+		}
 
 		// Only save to storage if there were any changes
 		if (initial !== JSON.stringify(options)) {
@@ -259,7 +264,7 @@ class OptionsSync<TOptions extends Options> {
 
 		await this.set(this._parseForm(field.form!));
 		field.form!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
-			bubbles: true
+			bubbles: true,
 		}));
 	}
 
@@ -299,11 +304,11 @@ class OptionsSync<TOptions extends Options> {
 
 	private _handleStorageChangeOnForm(changes: Record<string, any>, areaName: string): void {
 		if (
-			areaName === 'sync' &&
-			changes[this.storageName] &&
-			(!document.hasFocus() || !this._form.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
+			areaName === 'sync'
+			&& changes[this.storageName]
+			&& (!document.hasFocus() || !this._form!.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
 		) {
-			this._updateForm(this._form, this._decode(changes[this.storageName].newValue));
+			this._updateForm(this._form!, this._decode(changes[this.storageName].newValue));
 		}
 	}
 }
