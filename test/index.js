@@ -30,6 +30,10 @@ const simpleSetup = {
 
 test.beforeEach(() => {
 	chrome.flush();
+	chrome.runtime.getManifest.returns({
+		version: 2,
+		background: {scripts: 'background.js'},
+	});
 	chrome.storage.sync.set.yields(undefined);
 	chrome.management.getSelf.yields({
 		installType: 'development',

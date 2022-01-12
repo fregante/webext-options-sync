@@ -1,7 +1,7 @@
 import {debounce} from 'throttle-debounce';
 import serialize from 'dom-form-serializer/lib/serialize';
 import deserialize from 'dom-form-serializer/lib/deserialize';
-import {isBackgroundPage} from 'webext-detect-page';
+import {isBackground} from 'webext-detect-page';
 import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from 'lz-string';
 
 async function shouldRunMigrations(): Promise<boolean> {
@@ -49,14 +49,14 @@ async function shouldRunMigrations(): Promise<boolean> {
 	],
 }
 */
-export interface Setup<TOptions extends Options> {
+export interface Setup<UserOptions extends Options> {
 	storageName?: string;
 	logging?: boolean;
-	defaults?: TOptions;
+	defaults?: UserOptions;
 	/**
 	 * A list of functions to call when the extension is updated.
 	 */
-	migrations?: Array<Migration<TOptions>>;
+	migrations?: Array<Migration<UserOptions>>;
 }
 
 /**
@@ -70,9 +70,9 @@ export interface Options {
 /*
 Handler signature for when an extension updates.
 */
-export type Migration<TOptions extends Options> = (savedOptions: TOptions, defaults: TOptions) => void;
+export type Migration<UserOptions extends Options> = (savedOptions: UserOptions, defaults: UserOptions) => void;
 
-class OptionsSync<TOptions extends Options> {
+class OptionsSync<UserOptions extends Options> {
 	public static migrations = {
 		/**
 		Helper method that removes any option that isn't defined in the defaults. It's useful to avoid leaving old options taking up space.
@@ -88,7 +88,7 @@ class OptionsSync<TOptions extends Options> {
 
 	storageName: string;
 
-	defaults: TOptions;
+	defaults: UserOptions;
 
 	_form: HTMLFormElement | undefined;
 
@@ -100,11 +100,11 @@ class OptionsSync<TOptions extends Options> {
 	*/
 	constructor({
 		// `as` reason: https://github.com/fregante/webext-options-sync/pull/21#issuecomment-500314074
-		defaults = {} as TOptions,
+		defaults = {} as UserOptions,
 		storageName = 'options',
 		migrations = [],
 		logging = true,
-	}: Setup<TOptions> = {}) {
+	}: Setup<UserOptions> = {}) {
 		this.storageName = storageName;
 		this.defaults = defaults;
 		this._handleFormInput = debounce(300, this._handleFormInput.bind(this));
@@ -130,7 +130,7 @@ class OptionsSync<TOptions extends Options> {
 		document.body.style.color = color;
 	}
 	*/
-	async getAll(): Promise<TOptions> {
+	async getAll(): Promise<UserOptions> {
 		await this._migrations;
 		return this._getAll();
 	}
@@ -140,7 +140,7 @@ class OptionsSync<TOptions extends Options> {
 
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	async setAll(newOptions: TOptions): Promise<void> {
+	async setAll(newOptions: UserOptions): Promise<void> {
 		await this._migrations;
 		return this._setAll(newOptions);
 	}
@@ -150,7 +150,7 @@ class OptionsSync<TOptions extends Options> {
 
 	@param newOptions - A map of default options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 	*/
-	async set(newOptions: Partial<TOptions>): Promise<void> {
+	async set(newOptions: Partial<UserOptions>): Promise<void> {
 		return this.setAll({...await this.getAll(), ...newOptions});
 	}
 
@@ -187,8 +187,8 @@ class OptionsSync<TOptions extends Options> {
 		console[method](...args);
 	}
 
-	private async _getAll(): Promise<TOptions> {
-		return new Promise<TOptions>((resolve, reject) => {
+	private async _getAll(): Promise<UserOptions> {
+		return new Promise<UserOptions>((resolve, reject) => {
 			chrome.storage.sync.get(this.storageName, result => {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
@@ -199,7 +199,7 @@ class OptionsSync<TOptions extends Options> {
 		});
 	}
 
-	private async _setAll(newOptions: TOptions): Promise<void> {
+	private async _setAll(newOptions: UserOptions): Promise<void> {
 		this._log('log', 'Saving options', newOptions);
 		return new Promise((resolve, reject) => {
 			chrome.storage.sync.set({
@@ -214,8 +214,8 @@ class OptionsSync<TOptions extends Options> {
 		});
 	}
 
-	private _encode(options: TOptions): string {
-		const thinnedOptions: Partial<TOptions> = {...options};
+	private _encode(options: UserOptions): string {
+		const thinnedOptions: Partial<UserOptions> = {...options};
 		for (const [key, value] of Object.entries(thinnedOptions)) {
 			if (this.defaults[key] === value) {
 				delete thinnedOptions[key];
@@ -227,17 +227,17 @@ class OptionsSync<TOptions extends Options> {
 		return compressToEncodedURIComponent(JSON.stringify(thinnedOptions));
 	}
 
-	private _decode(options: string | TOptions): TOptions {
+	private _decode(options: string | UserOptions): UserOptions {
 		let decompressed = options;
 		if (typeof options === 'string') {
-			decompressed = JSON.parse(decompressFromEncodedURIComponent(options)!) as TOptions;
+			decompressed = JSON.parse(decompressFromEncodedURIComponent(options)!) as UserOptions;
 		}
 
-		return {...this.defaults, ...decompressed as TOptions};
+		return {...this.defaults, ...decompressed as UserOptions};
 	}
 
-	private async _runMigrations(migrations: Array<Migration<TOptions>>): Promise<void> {
-		if (migrations.length === 0 || !isBackgroundPage() || !await shouldRunMigrations()) {
+	private async _runMigrations(migrations: Array<Migration<UserOptions>>): Promise<void> {
+		if (migrations.length === 0 || !isBackground() || !await shouldRunMigrations()) {
 			return;
 		}
 
@@ -272,7 +272,7 @@ class OptionsSync<TOptions extends Options> {
 		event.preventDefault();
 	}
 
-	private _updateForm(form: HTMLFormElement, options: TOptions): void {
+	private _updateForm(form: HTMLFormElement, options: UserOptions): void {
 		// Reduce changes to only values that have changed
 		const currentFormState = this._parseForm(form);
 		for (const [key, value] of Object.entries(options)) {
@@ -289,7 +289,7 @@ class OptionsSync<TOptions extends Options> {
 	}
 
 	// Parse form into object, except invalid fields
-	private _parseForm(form: HTMLFormElement): Partial<TOptions> {
+	private _parseForm(form: HTMLFormElement): Partial<UserOptions> {
 		const include: string[] = [];
 
 		// Don't serialize disabled and invalid fields
