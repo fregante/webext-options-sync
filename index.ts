@@ -1,7 +1,7 @@
 import {debounce} from 'throttle-debounce';
 import serialize from 'dom-form-serializer/lib/serialize';
 import deserialize from 'dom-form-serializer/lib/deserialize';
-import {isBackgroundPage} from 'webext-detect-page';
+import {isBackground} from 'webext-detect-page';
 import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from 'lz-string';
 
 async function shouldRunMigrations(): Promise<boolean> {
@@ -237,7 +237,7 @@ class OptionsSync<UserOptions extends Options> {
 	}
 
 	private async _runMigrations(migrations: Array<Migration<UserOptions>>): Promise<void> {
-		if (migrations.length === 0 || !isBackgroundPage() || !await shouldRunMigrations()) {
+		if (migrations.length === 0 || !isBackground() || !await shouldRunMigrations()) {
 			return;
 		}
 
