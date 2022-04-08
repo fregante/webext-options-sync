@@ -53,7 +53,7 @@ const options = await optionsStorage.getAll();
 // {showStars: 10}
 ```
 
-**Note:** `OptionsSync` relies on `browser.storage.sync`, so its [limitations](https://developer.chrome.com/apps/storage#properties) apply, both the size limit and the type of data stored (which must be compatible with JSON).
+**Note:** `OptionsSync` relies on `chrome.storage.sync`, so its [limitations](https://developer.chrome.com/apps/storage#properties) apply, both the size limit and the type of data stored (which must be compatible with JSON).
 
 ### Advanced usage
 
@@ -148,7 +148,7 @@ optionsStorage.syncForm(document.querySelector('form'));
 
 When using the `syncForm` method, `OptionsSync` will serialize the form using [dom-form-serializer](https://github.com/jefersondaniel/dom-form-serializer), which uses the `name` attribute as `key` for your options. Refer to its readme for more info on the structure of the data.
 
-Any user changes to the form are automatically saved into `browser.storage.sync` after 300ms (debounced). It listens to `input` events.
+Any user changes to the form are automatically saved into `chrome.storage.sync` after 300ms (debounced). It listens to `input` events.
 
 #### Input validation
 
@@ -235,7 +235,7 @@ A list of functions to run in the `background` when the extension is updated. Ex
 Type: `string`
 Default: `'options'`
 
-The key used to store data in `browser.storage.sync`
+The key used to store data in `chrome.storage.sync`
 
 ###### logging
 
@@ -246,8 +246,8 @@ Whether info and warnings (on sync, updating form, etc.) should be logged to the
 
 ###### storage
 
-Type: `browser.Storage.StorageArea`
-Default: `browser.storage.sync`
+Type: `chrome.storage.StorageArea`
+Default: `chrome.storage.sync`
 
 What storage area to use (sync storage vs local storage). Sync storage is used by default.
 
@@ -275,7 +275,7 @@ This returns a Promise that will resolve with all the options.
 
 #### optionsStorage.syncForm(form)
 
-Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved via `browser.storage.sync`
+Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved via `chrome.storage.sync`
 
 ##### form
 

@@ -1,4 +1,3 @@
-import * as browser from 'webextension-polyfill';
 import {debounce} from 'throttle-debounce';
 import serialize from 'dom-form-serializer/lib/serialize';
 import deserialize from 'dom-form-serializer/lib/deserialize';
@@ -15,7 +14,7 @@ async function shouldRunMigrations(): Promise<boolean> {
 			}
 
 			// Run migrations when the extension is installed or updated
-			browser.runtime.onInstalled.addListener(() => {
+			chrome.runtime.onInstalled.addListener(() => {
 				resolve(true);
 			});
 
@@ -23,8 +22,8 @@ async function shouldRunMigrations(): Promise<boolean> {
 			setTimeout(resolve, 500, false);
 		};
 
-		if (browser.management?.getSelf) {
-			browser.management.getSelf().then(({installType}) => {
+		if (chrome.management?.getSelf) {
+			chrome.management.getSelf(({installType}) => {
 				callback(installType);
 			});
 		} else {
@@ -58,7 +57,7 @@ export interface Setup<UserOptions extends Options> {
 	 * A list of functions to call when the extension is updated.
 	 */
 	migrations?: Array<Migration<UserOptions>>;
-	storage?: browser.Storage.StorageArea;
+	storage?: chrome.storage.StorageArea;
 }
 
 /**
@@ -88,7 +87,7 @@ class OptionsSync<UserOptions extends Options> {
 		},
 	};
 
-	storage: browser.Storage.StorageArea;
+	storage: chrome.storage.StorageArea;
 	storageName: string;
 
 	defaults: UserOptions;
@@ -107,7 +106,7 @@ class OptionsSync<UserOptions extends Options> {
 		storageName = 'options',
 		migrations = [],
 		logging = true,
-		storage = browser.storage.sync,
+		storage = chrome.storage.sync,
 	}: Setup<UserOptions> = {}) {
 		this.storageName = storageName;
 		this.defaults = defaults;
@@ -172,7 +171,7 @@ class OptionsSync<UserOptions extends Options> {
 
 		this._form.addEventListener('input', this._handleFormInput);
 		this._form.addEventListener('submit', this._handleFormSubmit);
-		browser.storage.onChanged.addListener(this._handleStorageChangeOnForm);
+		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm);
 		this._updateForm(this._form, await this.getAll());
 	}
 
@@ -183,7 +182,7 @@ class OptionsSync<UserOptions extends Options> {
 		if (this._form) {
 			this._form.removeEventListener('input', this._handleFormInput);
 			this._form.removeEventListener('submit', this._handleFormSubmit);
-			browser.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
+			chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
 			delete this._form;
 		}
 	}
@@ -194,9 +193,9 @@ class OptionsSync<UserOptions extends Options> {
 
 	private async _getAll(): Promise<UserOptions> {
 		return new Promise<UserOptions>((resolve, reject) => {
-			this.storage.get(this.storageName).then(result => {
-				if (browser.runtime.lastError) {
-					reject(browser.runtime.lastError);
+			this.storage.get(this.storageName, result => {
+				if (chrome.runtime.lastError) {
+					reject(chrome.runtime.lastError);
 				} else {
 					resolve(this._decode(result[this.storageName]));
 				}
@@ -209,9 +208,9 @@ class OptionsSync<UserOptions extends Options> {
 		return new Promise((resolve, reject) => {
 			this.storage.set({
 				[this.storageName]: this._encode(newOptions),
-			}).then(() => {
-				if (browser.runtime.lastError) {
-					reject(browser.runtime.lastError);
+			}, () => {
+				if (chrome.runtime.lastError) {
+					reject(chrome.runtime.lastError);
 				} else {
 					resolve();
 				}
