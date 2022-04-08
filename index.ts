@@ -32,6 +32,8 @@ async function shouldRunMigrations(): Promise<boolean> {
 	});
 }
 
+export type StorageType = 'sync' | 'local' | 'managed';
+
 /**
 @example
 {
@@ -57,7 +59,7 @@ export interface Setup<UserOptions extends Options> {
 	 * A list of functions to call when the extension is updated.
 	 */
 	migrations?: Array<Migration<UserOptions>>;
-	storage?: chrome.storage.StorageArea;
+	storageType?: StorageType;
 }
 
 /**
@@ -106,11 +108,11 @@ class OptionsSync<UserOptions extends Options> {
 		storageName = 'options',
 		migrations = [],
 		logging = true,
-		storage = chrome.storage.sync,
+		storageType = 'sync',
 	}: Setup<UserOptions> = {}) {
 		this.storageName = storageName;
 		this.defaults = defaults;
-		this.storage = storage;
+		this.storage = chrome.storage[storageType];
 		this._handleFormInput = debounce(300, this._handleFormInput.bind(this));
 		this._handleStorageChangeOnForm = this._handleStorageChangeOnForm.bind(this);
 
