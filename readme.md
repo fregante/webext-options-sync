@@ -244,12 +244,12 @@ Default: `true`
 
 Whether info and warnings (on sync, updating form, etc.) should be logged to the console or not.
 
-###### storage
+###### storageType
 
-Type: `chrome.storage.StorageArea`
-Default: `chrome.storage.sync`
+Type: `'loacal' | 'sync' | 'managed'`
+Default: `sync`
 
-What storage area to use (sync storage vs local storage). Sync storage is used by default.
+What storage area type to use (sync storage vs local storage). Sync storage is used by default.
 
 #### optionsStorage.set(options)
 
