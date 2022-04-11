@@ -32,7 +32,7 @@ async function shouldRunMigrations(): Promise<boolean> {
 	});
 }
 
-export type StorageType = 'sync' | 'local' | 'managed';
+export type StorageType = 'sync' | 'local';
 
 /**
 @example
@@ -89,8 +89,8 @@ class OptionsSync<UserOptions extends Options> {
 		},
 	};
 
-	storage: chrome.storage.StorageArea;
 	storageName: string;
+	storageType: StorageType;
 
 	defaults: UserOptions;
 
@@ -112,7 +112,7 @@ class OptionsSync<UserOptions extends Options> {
 	}: Setup<UserOptions> = {}) {
 		this.storageName = storageName;
 		this.defaults = defaults;
-		this.storage = chrome.storage[storageType];
+		this.storageType = storageType;
 		this._handleFormInput = debounce(300, this._handleFormInput.bind(this));
 		this._handleStorageChangeOnForm = this._handleStorageChangeOnForm.bind(this);
 
@@ -121,6 +121,10 @@ class OptionsSync<UserOptions extends Options> {
 		}
 
 		this._migrations = this._runMigrations(migrations);
+	}
+
+	get storage(): chrome.storage.StorageArea {
+		return chrome.storage[this.storageType];
 	}
 
 	/**
@@ -308,8 +312,9 @@ class OptionsSync<UserOptions extends Options> {
 		return serialize(form, {include});
 	}
 
-	private _handleStorageChangeOnForm(changes: Record<string, any>): void {
-		if (changes[this.storageName]
+	private _handleStorageChangeOnForm(changes: Record<string, any>, areaName: string): void {
+		if (areaName === this.storageType
+			&& changes[this.storageName]
 			&& (!document.hasFocus() || !this._form!.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
 		) {
 			this._updateForm(this._form!, this._decode(changes[this.storageName].newValue));
