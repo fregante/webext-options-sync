@@ -32,6 +32,8 @@ async function shouldRunMigrations(): Promise<boolean> {
 	});
 }
 
+export type StorageType = 'sync' | 'local';
+
 /**
 @example
 {
@@ -57,6 +59,7 @@ export interface Setup<UserOptions extends Options> {
 	 * A list of functions to call when the extension is updated.
 	 */
 	migrations?: Array<Migration<UserOptions>>;
+	storageType?: StorageType;
 }
 
 /**
@@ -87,6 +90,7 @@ class OptionsSync<UserOptions extends Options> {
 	};
 
 	storageName: string;
+	storageType: StorageType;
 
 	defaults: UserOptions;
 
@@ -104,9 +108,11 @@ class OptionsSync<UserOptions extends Options> {
 		storageName = 'options',
 		migrations = [],
 		logging = true,
+		storageType = 'sync',
 	}: Setup<UserOptions> = {}) {
 		this.storageName = storageName;
 		this.defaults = defaults;
+		this.storageType = storageType;
 		this._handleFormInput = debounce(300, this._handleFormInput.bind(this));
 		this._handleStorageChangeOnForm = this._handleStorageChangeOnForm.bind(this);
 
@@ -115,6 +121,10 @@ class OptionsSync<UserOptions extends Options> {
 		}
 
 		this._migrations = this._runMigrations(migrations);
+	}
+
+	get storage(): chrome.storage.StorageArea {
+		return chrome.storage[this.storageType];
 	}
 
 	/**
@@ -155,7 +165,7 @@ class OptionsSync<UserOptions extends Options> {
 	}
 
 	/**
-	Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved via `chrome.storage.sync`.
+	Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved to storage
 
 	@param selector - The `<form>` that needs to be synchronized or a CSS selector (one element).
 	The form fields' `name` attributes will have to match the option names.
@@ -189,7 +199,7 @@ class OptionsSync<UserOptions extends Options> {
 
 	private async _getAll(): Promise<UserOptions> {
 		return new Promise<UserOptions>((resolve, reject) => {
-			chrome.storage.sync.get(this.storageName, result => {
+			this.storage.get(this.storageName, result => {
 				if (chrome.runtime.lastError) {
 					reject(chrome.runtime.lastError);
 				} else {
@@ -202,7 +212,7 @@ class OptionsSync<UserOptions extends Options> {
 	private async _setAll(newOptions: UserOptions): Promise<void> {
 		this._log('log', 'Saving options', newOptions);
 		return new Promise((resolve, reject) => {
-			chrome.storage.sync.set({
+			this.storage.set({
 				[this.storageName]: this._encode(newOptions),
 			}, () => {
 				if (chrome.runtime.lastError) {
@@ -304,7 +314,7 @@ class OptionsSync<UserOptions extends Options> {
 
 	private _handleStorageChangeOnForm(changes: Record<string, any>, areaName: string): void {
 		if (
-			areaName === 'sync'
+			areaName === this.storageType
 			&& changes[this.storageName]
 			&& (!document.hasFocus() || !this._form!.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
 		) {

@@ -17,6 +17,7 @@ const defaultSetup = {
 	_migrations: {},
 	defaults: {},
 	storageName: 'options',
+	storageType: 'sync',
 };
 
 const simpleSetup = {
@@ -26,6 +27,7 @@ const simpleSetup = {
 		sound: true,
 	},
 	storageName: 'settings',
+	storageType: 'sync',
 };
 
 test.beforeEach(() => {

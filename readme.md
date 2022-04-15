@@ -244,6 +244,19 @@ Default: `true`
 
 Whether info and warnings (on sync, updating form, etc.) should be logged to the console or not.
 
+###### storageType
+
+Type: `'local' | 'sync'`
+Default: `sync`
+
+What storage area type to use (sync storage vs local storage). Sync storage is used by default.
+
+**Considerations for selecting which option to use:**
+
+- Sync is default as it's likely more convenient for users.
+- Firefox requires [`browser_specific_settings.gecko.id`](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings) for the `sync` storage to work locally.
+- Sync storage is subject to much tighter [quota limitations](https://developer.chrome.com/docs/extensions/reference/storage/#property-sync), and may cause privacy concerns if the data being stored is confidential. 
+
 #### optionsStorage.set(options)
 
 This will merge the existing options with the object provided.
