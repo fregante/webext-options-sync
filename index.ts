@@ -313,7 +313,8 @@ class OptionsSync<UserOptions extends Options> {
 	}
 
 	private _handleStorageChangeOnForm(changes: Record<string, any>, areaName: string): void {
-		if (areaName === this.storageType
+		if (
+			areaName === this.storageType
 			&& changes[this.storageName]
 			&& (!document.hasFocus() || !this._form!.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
 		) {
