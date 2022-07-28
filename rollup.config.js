@@ -12,6 +12,8 @@ const config = {
 	external: [
 		// These are `type: module` packages so they don't need to be bundled
 		'webext-detect-page',
+		'dom-form-serializer',
+		'throttle-debounce',
 	],
 	plugins: [
 		resolve(),
