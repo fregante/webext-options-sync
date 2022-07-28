@@ -115,7 +115,7 @@ class OptionsSync<UserOptions extends Options> {
 		this._migrations = this._runMigrations(migrations);
 	}
 
-	get storage(): chromeP.storage.StorageArea {
+	private get storage(): chromeP.storage.StorageArea {
 		return chromeP.storage[this.storageType];
 	}
 
