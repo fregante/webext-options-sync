@@ -77,7 +77,7 @@ jobs:
     needs: Pack
     steps:
       - uses: actions/download-artifact@v3
-      - run: npm install ./artifact && npm install -g @types/estree
+      - run: npm install ./artifact && npm install @types/estree
       - run: echo "${{ env.IMPORT_TEXT }} '${{ env.NPM_MODULE_NAME }}'" > index.ts
       - run: tsc index.ts
       - run: cat index.js
