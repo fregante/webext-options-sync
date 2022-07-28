@@ -1,4 +1,3 @@
-import './_fixtures.js';
 import test from 'ava';
 import lzString from 'lz-string';
 import OptionsSync from '../index.js';

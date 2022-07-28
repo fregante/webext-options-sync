@@ -1,7 +1,8 @@
 {
 	"extends": "@sindresorhus/tsconfig/tsconfig.json",
 	"compilerOptions": {
-		"target": "es2020"
+		"target": "es2020",
+		"outDir": "."
 	},
 	"files": [
 		"globals.d.ts",

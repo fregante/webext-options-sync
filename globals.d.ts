@@ -1,18 +1,14 @@
-declare module 'dom-form-serializer/lib/serialize' {
+declare module 'dom-form-serializer/dist/dom-form-serializer.mjs' {
 	import {JsonObject} from 'type-fest';
 
-	export default function serialize(
+	export function serialize(
 		element: HTMLFormElement,
 		options: {
 			include?: string[];
 		}
 	): JSONValue;
-}
 
-declare module 'dom-form-serializer/lib/deserialize' {
-	import {JsonObject} from 'type-fest';
-
-	export default function deserialize(
+	export function deserialize(
 		element: HTMLFormElement,
 		serializedData: JsonObject,
 		options?: {
