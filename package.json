@@ -35,15 +35,15 @@
 			"webextensions"
 		],
 		"rules": {
-			"@typescript-eslint/no-unsafe-call": "off",
 			"@typescript-eslint/no-unsafe-return": "off",
-			"@typescript-eslint/no-unsafe-member-access": "off",
-			"@typescript-eslint/no-duplicate-imports": "off",
 			"@typescript-eslint/no-dynamic-delete": "off",
-			"@typescript-eslint/no-empty-function": "off",
-			"import/no-duplicates": "off",
-			"import/no-unassigned-import": "off"
+			"@typescript-eslint/no-empty-function": "off"
 		}
+	},
+	"ava": {
+		"require": [
+			"./test/_env.js"
+		]
 	},
 	"dependencies": {
 		"dom-form-serializer": "^2.0.0",
