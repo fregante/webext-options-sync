@@ -46,28 +46,30 @@
 		}
 	},
 	"dependencies": {
-		"webext-detect-page": "^4.0.0"
+		"webext-detect-page": "^4.0.1",
+		"webext-polyfill-kinda": "^0.10.0"
 	},
 	"devDependencies": {
-		"@rollup/plugin-commonjs": "^21.0.1",
-		"@rollup/plugin-node-resolve": "^13.1.3",
-		"@rollup/plugin-typescript": "^8.3.0",
-		"@sindresorhus/tsconfig": "^2.0.0",
-		"@types/chrome": "0.0.176",
-		"@types/estree": "^0.0.50",
+		"@rollup/plugin-commonjs": "^22.0.1",
+		"@rollup/plugin-node-resolve": "^13.3.0",
+		"@rollup/plugin-typescript": "^8.3.4",
+		"@sindresorhus/tsconfig": "^3.0.1",
+		"@types/chrome": "0.0.193",
+		"@types/firefox-webext-browser": "^94.0.1",
 		"@types/lz-string": "^1.3.34",
-		"@types/throttle-debounce": "^2.1.0",
-		"ava": "^4.0.1",
+		"@types/throttle-debounce": "^5.0.0",
+		"ava": "^4.3.1",
 		"dom-form-serializer": "^2.0.0",
 		"lz-string": "^1.4.4",
 		"npm-run-all": "^4.1.5",
-		"rollup": "^2.63.0",
+		"rollup": "^2.77.2",
 		"rollup-plugin-terser": "^7.0.2",
-		"sinon": "^12.0.1",
+		"sinon": "^14.0.0",
 		"sinon-chrome": "^3.0.1",
-		"throttle-debounce": "^3.0.1",
-		"type-fest": "^2.9.0",
-		"typescript": "^4.5.4",
-		"xo": "^0.47.0"
+		"throttle-debounce": "^5.0.0",
+		"tslib": "^2.4.0",
+		"type-fest": "^2.17.0",
+		"typescript": "^4.7.4",
+		"xo": "^0.51.0"
 	}
 }

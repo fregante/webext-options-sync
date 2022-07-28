@@ -1,34 +1,25 @@
 import {debounce} from 'throttle-debounce';
-import serialize from 'dom-form-serializer/lib/serialize';
-import deserialize from 'dom-form-serializer/lib/deserialize';
+import chromeP from 'webext-polyfill-kinda';
 import {isBackground} from 'webext-detect-page';
+import {serialize, deserialize} from 'dom-form-serializer/dist/dom-form-serializer.mjs';
 import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from 'lz-string';
 
 async function shouldRunMigrations(): Promise<boolean> {
+	const self = await chromeP.management?.getSelf();
+
+	// Always run migrations during development #25
+	if (self?.installType === 'development') {
+		return true;
+	}
+
 	return new Promise(resolve => {
-		const callback = (installType: string): void => {
-			// Always run migrations during development #25
-			if (installType === 'development') {
-				resolve(true);
-				return;
-			}
+		// Run migrations when the extension is installed or updated
+		chrome.runtime.onInstalled.addListener(() => {
+			resolve(true);
+		});
 
-			// Run migrations when the extension is installed or updated
-			chrome.runtime.onInstalled.addListener(() => {
-				resolve(true);
-			});
-
-			// If `onInstalled` isn't fired, then migrations should not be run
-			setTimeout(resolve, 500, false);
-		};
-
-		if (chrome.management?.getSelf) {
-			chrome.management.getSelf(({installType}) => {
-				callback(installType);
-			});
-		} else {
-			callback('unknown');
-		}
+		// If `onInstalled` isn't fired, then migrations should not be run
+		setTimeout(resolve, 500, false);
 	});
 }
 
@@ -113,8 +104,6 @@ class OptionsSync<UserOptions extends Options> {
 		this.storageName = storageName;
 		this.defaults = defaults;
 		this.storageType = storageType;
-		this._handleFormInput = debounce(300, this._handleFormInput.bind(this));
-		this._handleStorageChangeOnForm = this._handleStorageChangeOnForm.bind(this);
 
 		if (!logging) {
 			this._log = () => {};
@@ -123,8 +112,8 @@ class OptionsSync<UserOptions extends Options> {
 		this._migrations = this._runMigrations(migrations);
 	}
 
-	get storage(): chrome.storage.StorageArea {
-		return chrome.storage[this.storageType];
+	get storage(): chromeP.storage.StorageArea {
+		return chromeP.storage[this.storageType];
 	}
 
 	/**
@@ -198,29 +187,14 @@ class OptionsSync<UserOptions extends Options> {
 	}
 
 	private async _getAll(): Promise<UserOptions> {
-		return new Promise<UserOptions>((resolve, reject) => {
-			this.storage.get(this.storageName, result => {
-				if (chrome.runtime.lastError) {
-					reject(chrome.runtime.lastError);
-				} else {
-					resolve(this._decode(result[this.storageName]));
-				}
-			});
-		});
+		const result = await this.storage.get(this.storageName);
+		return this._decode(result[this.storageName]);
 	}
 
 	private async _setAll(newOptions: UserOptions): Promise<void> {
 		this._log('log', 'Saving options', newOptions);
-		return new Promise((resolve, reject) => {
-			this.storage.set({
-				[this.storageName]: this._encode(newOptions),
-			}, () => {
-				if (chrome.runtime.lastError) {
-					reject(chrome.runtime.lastError);
-				} else {
-					resolve();
-				}
-			});
+		await this.storage.set({
+			[this.storageName]: this._encode(newOptions),
 		});
 	}
 
@@ -266,7 +240,8 @@ class OptionsSync<UserOptions extends Options> {
 		}
 	}
 
-	private async _handleFormInput({target}: Event): Promise<void> {
+	// eslint-disable-next-line @typescript-eslint/member-ordering -- Needs to be near _handleFormSubmit
+	private readonly _handleFormInput = debounce(300, async ({target}: Event): Promise<void> => {
 		const field = target as HTMLInputElement;
 		if (!field.name) {
 			return;
@@ -276,7 +251,7 @@ class OptionsSync<UserOptions extends Options> {
 		field.form!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 			bubbles: true,
 		}));
-	}
+	});
 
 	private _handleFormSubmit(event: Event): void {
 		event.preventDefault();
@@ -312,7 +287,7 @@ class OptionsSync<UserOptions extends Options> {
 		return serialize(form, {include});
 	}
 
-	private _handleStorageChangeOnForm(changes: Record<string, any>, areaName: string): void {
+	private readonly _handleStorageChangeOnForm = (changes: Record<string, any>, areaName: string): void => {
 		if (
 			areaName === this.storageType
 			&& changes[this.storageName]
@@ -320,7 +295,7 @@ class OptionsSync<UserOptions extends Options> {
 		) {
 			this._updateForm(this._form!, this._decode(changes[this.storageName].newValue));
 		}
-	}
+	};
 }
 
 export default OptionsSync;
