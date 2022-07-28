@@ -2,7 +2,10 @@ import {debounce} from 'throttle-debounce';
 import chromeP from 'webext-polyfill-kinda';
 import {isBackground} from 'webext-detect-page';
 import {serialize, deserialize} from 'dom-form-serializer/dist/dom-form-serializer.mjs';
-import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from 'lz-string';
+import LZString from 'lz-string';
+
+// eslint-disable-next-line @typescript-eslint/naming-convention -- CJS in ESM imports
+const {compressToEncodedURIComponent, decompressFromEncodedURIComponent} = LZString;
 
 async function shouldRunMigrations(): Promise<boolean> {
 	const self = await chromeP.management?.getSelf();

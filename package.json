@@ -22,7 +22,7 @@
 		"index.d.ts"
 	],
 	"scripts": {
-		"build": "rollup -c",
+		"build": "tsc",
 		"prepack": "rollup -c",
 		"test": "run-p build ava xo",
 		"watch": "rollup -c --watch",
