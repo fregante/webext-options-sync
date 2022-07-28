@@ -13,6 +13,7 @@ const config = {
 		'webext-detect-page',
 		'dom-form-serializer/dist/dom-form-serializer.mjs',
 		'throttle-debounce',
+		'lz-string',
 	],
 	plugins: [
 		resolve(),
