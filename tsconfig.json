@@ -1,5 +1,5 @@
 {
-	"extends": "@sindresorhus/tsconfig/tsconfig.json",
+	"extends": "@sindresorhus/tsconfig",
 	"compilerOptions": {
 		"target": "es2022",
 		"outDir": "."

@@ -45,6 +45,7 @@ export type StorageType = 'sync' | 'local';
 	],
 }
 */
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- Maybe later
 export interface Setup<UserOptions extends Options> {
 	storageName?: string;
 	logging?: boolean;
@@ -59,7 +60,7 @@ export interface Setup<UserOptions extends Options> {
 /**
 A map of options as strings or booleans. The keys will have to match the form fields' `name` attributes.
 */
-// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style -- Interfaces are extendable
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style, @typescript-eslint/consistent-type-definitions -- Interfaces are extendable
 export interface Options {
 	[key: string]: string | number | boolean;
 }
@@ -115,7 +116,7 @@ class OptionsSync<UserOptions extends Options> {
 		this._migrations = this._runMigrations(migrations);
 	}
 
-	private get storage(): chromeP.storage.StorageArea {
+	private get storage(): chrome.storage.StorageArea {
 		return chromeP.storage[this.storageType];
 	}
 

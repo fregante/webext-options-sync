@@ -1,5 +1,5 @@
 declare module 'dom-form-serializer/dist/dom-form-serializer.mjs' {
-	import {JsonObject} from 'type-fest';
+	import {type JsonObject} from 'type-fest';
 
 	export function serialize(
 		element: HTMLFormElement,
