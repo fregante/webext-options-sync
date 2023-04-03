@@ -255,7 +255,7 @@ What storage area type to use (sync storage vs local storage). Sync storage is u
 
 - Sync is default as it's likely more convenient for users.
 - Firefox requires [`browser_specific_settings.gecko.id`](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings) for the `sync` storage to work locally.
-- Sync storage is subject to much tighter [quota limitations](https://developer.chrome.com/docs/extensions/reference/storage/#property-sync), and may cause privacy concerns if the data being stored is confidential. 
+- Sync storage is subject to much tighter [quota limitations](https://developer.chrome.com/docs/extensions/reference/storage/#property-sync), and may cause privacy concerns if the data being stored is confidential.
 
 #### optionsStorage.set(options)
 
@@ -281,7 +281,7 @@ This returns a Promise that will resolve with all the options.
 
 #### optionsStorage.syncForm(form)
 
-Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved via `chrome.storage.sync`
+Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved via `chrome.storage.sync`. It also looks for any buttons with `js-import` or `js-export` classes that when clicked will allow the user to export and import the options to a JSON file.
 
 ##### form
 
@@ -292,6 +292,14 @@ It's the `<form>` that needs to be synchronized or a CSS selector (one element).
 #### optionsStorage.stopSyncForm()
 
 Removes any listeners added by `syncForm`.
+
+#### optionsStorage.exportFromFile()
+
+Opens the browser’s "save file" dialog to export options to a JSON file. If your form has a `.js-export` element, this listener will be attached automatically.
+
+#### optionsStorage.importFromFile()
+
+Opens the browser’s file picker to import options from a previously-saved JSON file. If your form has a `.js-import` element, this listener will be attached automatically.
 
 ## Related
 

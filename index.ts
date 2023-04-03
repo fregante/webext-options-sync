@@ -172,6 +172,9 @@ class OptionsSync<UserOptions extends Options> {
 		this._form.addEventListener('submit', this._handleFormSubmit);
 		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm);
 		this._updateForm(this._form, await this.getAll());
+
+		this._form.querySelector('.js-export')?.addEventListener('click', this.exportToFile);
+		this._form.querySelector('.js-import')?.addEventListener('click', this.importFromFile);
 	}
 
 	/**
@@ -181,10 +184,66 @@ class OptionsSync<UserOptions extends Options> {
 		if (this._form) {
 			this._form.removeEventListener('input', this._handleFormInput);
 			this._form.removeEventListener('submit', this._handleFormSubmit);
+			this._form.querySelector('.js-export')?.addEventListener('click', this.exportToFile);
+			this._form.querySelector('.js-import')?.addEventListener('click', this.importFromFile);
 			chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
 			delete this._form;
 		}
 	}
+
+	private get _jsonIdentityHelper() {
+		return '__optionsForExtension';
+	}
+
+	/**
+	Opens the browser’s file picker to import options from a previously-saved JSON file
+	*/
+	importFromFile = async (): Promise<void> => {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = '.json';
+		input.addEventListener('change', this._handleImportFile, {once: true});
+		input.click();
+	};
+
+	/**
+	Opens the browser’s "save file" dialog to export options to a JSON file
+	*/
+	exportToFile = async (): Promise<void> => {
+		const {name} = chrome.runtime.getManifest();
+		const options = {
+			[this._jsonIdentityHelper]: name,
+			...await this.getAll(),
+		};
+
+		const text = JSON.stringify(options, null, '\t');
+		const url = URL.createObjectURL(new Blob([text], {type: 'application/json'}));
+		const link = document.createElement('a');
+		link.download = name + ' options.json';
+		link.href = url;
+		link.click();
+	};
+
+	private readonly _handleImportFile = async (event: Event): Promise<void> => {
+		const file = (event.target as HTMLInputElement).files![0];
+		if (!file) {
+			return;
+		}
+
+		const text = await file.text();
+		try {
+			JSON.parse(text);
+		} catch {
+			// eslint-disable-next-line no-alert
+			alert('The file is not a valid JSON file.');
+			return;
+		}
+
+		const options = JSON.parse(text) as UserOptions;
+		delete options[this._jsonIdentityHelper];
+
+		await this.setAll(options);
+	};
 
 	private _log(method: 'log' | 'info', ...args: any[]): void {
 		console[method](...args);
