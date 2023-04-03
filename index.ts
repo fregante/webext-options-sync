@@ -68,7 +68,7 @@ export interface Options {
 /*
 Handler signature for when an extension updates.
 */
-export type Migration<UserOptions extends Options> = (savedOptions: UserOptions, defaults: UserOptions) => void;
+export type Migration<UserOptions extends Options> = (savedOptions: UserOptions, defaults: UserOptions) => Promise<void>;
 
 class OptionsSync<UserOptions extends Options> {
 	public static migrations = {
@@ -235,7 +235,8 @@ class OptionsSync<UserOptions extends Options> {
 		this._log('log', 'Found these stored options', {...options});
 		this._log('info', 'Will run', migrations.length, migrations.length === 1 ? 'migration' : ' migrations');
 		for (const migrate of migrations) {
-			migrate(options, this.defaults);
+			// eslint-disable-next-line no-await-in-loop -- Must be done in order
+			await migrate(options, this.defaults);
 		}
 
 		// Only save to storage if there were any changes
