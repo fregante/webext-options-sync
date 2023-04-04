@@ -213,7 +213,7 @@ class OptionsSync<UserOptions extends Options> {
 		const {name} = chrome.runtime.getManifest();
 		const options = {
 			[this._jsonIdentityHelper]: name,
-			...await this.getAll(),
+			...await this._getAll(false),
 		};
 
 		const text = JSON.stringify(options, null, '\t');
@@ -249,9 +249,9 @@ class OptionsSync<UserOptions extends Options> {
 		console[method](...args);
 	}
 
-	private async _getAll(): Promise<UserOptions> {
+	private async _getAll(defaults = true): Promise<UserOptions> {
 		const result = await this.storage.get(this.storageName);
-		return this._decode(result[this.storageName]);
+		return this._decode(result[this.storageName], defaults);
 	}
 
 	private async _setAll(newOptions: UserOptions): Promise<void> {
@@ -274,13 +274,17 @@ class OptionsSync<UserOptions extends Options> {
 		return compressToEncodedURIComponent(JSON.stringify(thinnedOptions));
 	}
 
-	private _decode(options: string | UserOptions): UserOptions {
+	private _decode(options: string | UserOptions, defaults = true): UserOptions {
 		let decompressed = options;
-		if (typeof options === 'string') {
-			decompressed = JSON.parse(decompressFromEncodedURIComponent(options)!) as UserOptions;
+		if (typeof decompressed === 'string') {
+			decompressed = JSON.parse(decompressFromEncodedURIComponent(decompressed)!) as UserOptions;
 		}
 
-		return {...this.defaults, ...decompressed as UserOptions};
+		if (defaults) {
+			return {...this.defaults, ...decompressed};
+		}
+
+		return decompressed;
 	}
 
 	private async _runMigrations(migrations: Array<Migration<UserOptions>>): Promise<void> {
