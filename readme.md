@@ -293,7 +293,7 @@ It's the `<form>` that needs to be synchronized or a CSS selector (one element).
 
 Removes any listeners added by `syncForm`.
 
-#### optionsStorage.exportToFile()
+#### optionsStorage.exportFromFile()
 
 Opens the browser’s "save file" dialog to export options to a JSON file. If your form has a `.js-export` element, this listener will be attached automatically.
 
