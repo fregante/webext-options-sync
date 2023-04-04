@@ -199,11 +199,33 @@ class OptionsSync<UserOptions extends Options> {
 	Opens the browser’s file picker to import options from a previously-saved JSON file
 	*/
 	importFromFile = async (): Promise<void> => {
-		const input = document.createElement('input');
-		input.type = 'file';
-		input.accept = '.json';
-		input.addEventListener('change', this._handleImportFile, {once: true});
-		input.click();
+		let fileHandle: FileSystemFileHandle;
+		try {
+			[fileHandle] = await showOpenFilePicker();
+		} catch {
+			// eslint-disable-next-line no-alert
+			alert('This feature doesn’t seem to be supported by your browser. Make sure you’re using its latest version.');
+			return;
+		}
+
+		const file = await fileHandle.getFile();
+		const text = await file.text();
+		let options: UserOptions;
+
+		try {
+			options = JSON.parse(text) as UserOptions;
+		} catch {
+			// eslint-disable-next-line no-alert
+			alert('The file is not a valid JSON file.');
+			return;
+		}
+
+		delete options[this._jsonIdentityHelper];
+
+		await this.set(options);
+		if (this._form) {
+			this._updateForm(this._form, options);
+		}
 	};
 
 	/**
@@ -217,35 +239,22 @@ class OptionsSync<UserOptions extends Options> {
 		};
 
 		const text = JSON.stringify(options, null, '\t');
-		const url = URL.createObjectURL(new Blob([text], {type: 'application/json'}));
-		const link = document.createElement('a');
-		link.download = name + ' options.json';
-		link.href = url;
-		link.click();
-	};
 
-	private readonly _handleImportFile = async (event: Event): Promise<void> => {
-		const file = (event.target as HTMLInputElement).files![0];
-		if (!file) {
-			return;
-		}
+		const fileHandle = await window.showSaveFilePicker({
+			suggestedName: name + ' options.json',
+			types: [
+				{
+					accept: {
+						// eslint-disable-next-line @typescript-eslint/naming-convention
+						'application/json': ['.json'],
+					},
+				},
+			],
+		});
 
-		const text = await file.text();
-		try {
-			JSON.parse(text);
-		} catch {
-			// eslint-disable-next-line no-alert
-			alert('The file is not a valid JSON file.');
-			return;
-		}
-
-		const options = JSON.parse(text) as UserOptions;
-		delete options[this._jsonIdentityHelper];
-
-		await this.set(options);
-		if (this._form) {
-			this._updateForm(this._form, options);
-		}
+		const writable = await fileHandle.createWritable();
+		await writable.write(new Blob([text], {type: 'application/json'}));
+		await writable.close();
 	};
 
 	private _log(method: 'log' | 'info', ...args: any[]): void {
