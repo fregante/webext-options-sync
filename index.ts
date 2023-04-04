@@ -7,6 +7,23 @@ import LZString from 'lz-string';
 // eslint-disable-next-line @typescript-eslint/naming-convention -- CJS in ESM imports
 const {compressToEncodedURIComponent, decompressFromEncodedURIComponent} = LZString;
 
+function alertAndThrow(message: string): never {
+	// eslint-disable-next-line no-alert
+	alert(message);
+	throw new Error(message);
+}
+
+const filePickerOptions: FilePickerOptions = {
+	types: [
+		{
+			accept: {
+				// eslint-disable-next-line @typescript-eslint/naming-convention
+				'application/json': '.json',
+			},
+		},
+	],
+};
+
 async function shouldRunMigrations(): Promise<boolean> {
 	const self = await chromeP.management?.getSelf();
 
@@ -90,6 +107,8 @@ class OptionsSync<UserOptions extends Options> {
 	defaults: UserOptions;
 
 	_form: HTMLFormElement | undefined;
+
+	isExportSupported = typeof showOpenFilePicker === 'function';
 
 	private readonly _migrations: Promise<void>;
 
@@ -192,22 +211,22 @@ class OptionsSync<UserOptions extends Options> {
 	}
 
 	private get _jsonIdentityHelper() {
-		return '__optionsForExtension';
+		return '__webextOptionsSync';
 	}
+
+	assertExportSupported = (): void => {
+		if (!this.isExportSupported) {
+			alertAndThrow('This feature doesn’t seem to be supported by your browser. Make sure you’re using its latest version.');
+		}
+	};
 
 	/**
 	Opens the browser’s file picker to import options from a previously-saved JSON file
 	*/
 	importFromFile = async (): Promise<void> => {
-		let fileHandle: FileSystemFileHandle;
-		try {
-			[fileHandle] = await showOpenFilePicker();
-		} catch {
-			// eslint-disable-next-line no-alert
-			alert('This feature doesn’t seem to be supported by your browser. Make sure you’re using its latest version.');
-			return;
-		}
+		this.assertExportSupported();
 
+		const [fileHandle] = await showOpenFilePicker(filePickerOptions);
 		const file = await fileHandle.getFile();
 		const text = await file.text();
 		let options: UserOptions;
@@ -215,9 +234,11 @@ class OptionsSync<UserOptions extends Options> {
 		try {
 			options = JSON.parse(text) as UserOptions;
 		} catch {
-			// eslint-disable-next-line no-alert
-			alert('The file is not a valid JSON file.');
-			return;
+			alertAndThrow('The file is not a valid JSON file.');
+		}
+
+		if (!(this._jsonIdentityHelper in options)) {
+			alertAndThrow('The file selected is not a valid recognized options file.');
 		}
 
 		delete options[this._jsonIdentityHelper];
@@ -232,28 +253,21 @@ class OptionsSync<UserOptions extends Options> {
 	Opens the browser’s "save file" dialog to export options to a JSON file
 	*/
 	exportToFile = async (): Promise<void> => {
-		const {name} = chrome.runtime.getManifest();
-		const options = {
-			[this._jsonIdentityHelper]: name,
+		this.assertExportSupported();
+
+		const extension = chrome.runtime.getManifest();
+		const text = JSON.stringify({
+			[this._jsonIdentityHelper]: extension.name,
 			...await this.getAll(),
-		};
+		}, null, '\t');
 
-		const text = JSON.stringify(options, null, '\t');
-
-		const fileHandle = await window.showSaveFilePicker({
-			suggestedName: name + ' options.json',
-			types: [
-				{
-					accept: {
-						// eslint-disable-next-line @typescript-eslint/naming-convention
-						'application/json': ['.json'],
-					},
-				},
-			],
+		const fileHandle = await showSaveFilePicker({
+			...filePickerOptions,
+			suggestedName: extension.name + ' options.json',
 		});
 
 		const writable = await fileHandle.createWritable();
-		await writable.write(new Blob([text], {type: 'application/json'}));
+		await writable.write(text);
 		await writable.close();
 	};
 
