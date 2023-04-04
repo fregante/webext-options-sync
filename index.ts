@@ -243,6 +243,9 @@ class OptionsSync<UserOptions extends Options> {
 		delete options[this._jsonIdentityHelper];
 
 		await this.set(options);
+		if (this._form) {
+			this._updateForm(this._form, options);
+		}
 	};
 
 	private _log(method: 'log' | 'info', ...args: any[]): void {
