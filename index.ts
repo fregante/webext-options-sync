@@ -242,7 +242,7 @@ class OptionsSync<UserOptions extends Options> {
 		const options = JSON.parse(text) as UserOptions;
 		delete options[this._jsonIdentityHelper];
 
-		await this.setAll(options);
+		await this.set(options);
 	};
 
 	private _log(method: 'log' | 'info', ...args: any[]): void {
