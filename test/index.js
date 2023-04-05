@@ -161,6 +161,12 @@ test.serial('migrations alter the stored options', async t => {
 
 	const storage = new OptionsSync({
 		migrations: [
+			async savedOptions => {
+				await new Promise(resolve => {
+					setTimeout(resolve, 100);
+				});
+				savedOptions.size += 10;
+			},
 			savedOptions => {
 				if (typeof savedOptions.size !== 'undefined') {
 					savedOptions.minSize = savedOptions.size;
@@ -175,7 +181,7 @@ test.serial('migrations alter the stored options', async t => {
 	t.is(chrome.storage.sync.set.callCount, 1);
 	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
 		options: compressOptions({
-			minSize: 30,
+			minSize: 40,
 		}),
 	});
 });
