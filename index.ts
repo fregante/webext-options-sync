@@ -75,7 +75,7 @@ export interface Options {
 /*
 Handler signature for when an extension updates.
 */
-export type Migration<UserOptions extends Options> = (savedOptions: UserOptions, defaults: UserOptions) => Promise<void>;
+export type Migration<UserOptions extends Options> = (savedOptions: UserOptions, defaults: UserOptions) => Promise<void> | void;
 
 class OptionsSync<UserOptions extends Options> {
 	public static migrations = {
