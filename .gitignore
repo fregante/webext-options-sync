@@ -10,4 +10,6 @@ logs
 *.map
 index.js
 index.d.ts
+file.js
+file.d.ts
 !*/index.js

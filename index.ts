@@ -3,6 +3,7 @@ import chromeP from 'webext-polyfill-kinda';
 import {isBackground} from 'webext-detect-page';
 import {serialize, deserialize} from 'dom-form-serializer/dist/dom-form-serializer.mjs';
 import LZString from 'lz-string';
+import {loadFile, saveFile} from './file.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention -- CJS in ESM imports
 const {compressToEncodedURIComponent, decompressFromEncodedURIComponent} = LZString;
@@ -12,17 +13,6 @@ function alertAndThrow(message: string): never {
 	alert(message);
 	throw new Error(message);
 }
-
-const filePickerOptions: FilePickerOptions = {
-	types: [
-		{
-			accept: {
-				// eslint-disable-next-line @typescript-eslint/naming-convention
-				'application/json': '.json',
-			},
-		},
-	],
-};
 
 async function shouldRunMigrations(): Promise<boolean> {
 	const self = await chromeP.management?.getSelf();
@@ -107,8 +97,6 @@ class OptionsSync<UserOptions extends Options> {
 	defaults: UserOptions;
 
 	_form: HTMLFormElement | undefined;
-
-	isExportSupported = typeof showOpenFilePicker === 'function';
 
 	private readonly _migrations: Promise<void>;
 
@@ -214,21 +202,12 @@ class OptionsSync<UserOptions extends Options> {
 		return '__webextOptionsSync';
 	}
 
-	assertExportSupported = (): void => {
-		if (!this.isExportSupported) {
-			alertAndThrow('This feature doesn’t seem to be supported by your browser. Make sure you’re using its latest version.');
-		}
-	};
-
 	/**
 	Opens the browser’s file picker to import options from a previously-saved JSON file
 	*/
 	importFromFile = async (): Promise<void> => {
-		this.assertExportSupported();
+		const text = await loadFile();
 
-		const [fileHandle] = await showOpenFilePicker(filePickerOptions);
-		const file = await fileHandle.getFile();
-		const text = await file.text();
 		let options: UserOptions;
 
 		try {
@@ -253,22 +232,13 @@ class OptionsSync<UserOptions extends Options> {
 	Opens the browser’s "save file" dialog to export options to a JSON file
 	*/
 	exportToFile = async (): Promise<void> => {
-		this.assertExportSupported();
-
 		const extension = chrome.runtime.getManifest();
 		const text = JSON.stringify({
 			[this._jsonIdentityHelper]: extension.name,
 			...await this.getAll(),
 		}, null, '\t');
 
-		const fileHandle = await showSaveFilePicker({
-			...filePickerOptions,
-			suggestedName: extension.name + ' options.json',
-		});
-
-		const writable = await fileHandle.createWritable();
-		await writable.write(text);
-		await writable.close();
+		await saveFile(text, extension.name + ' options.json');
 	};
 
 	private _log(method: 'log' | 'info', ...args: any[]): void {

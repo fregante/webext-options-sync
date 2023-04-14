@@ -15,7 +15,6 @@ function compressOptions(options) {
 const defaultSetup = {
 	_migrations: {},
 	defaults: {},
-	isExportSupported: false,
 	storageName: 'options',
 	storageType: 'sync',
 };
