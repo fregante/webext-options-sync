@@ -19,7 +19,9 @@
 	"main": "index.js",
 	"files": [
 		"index.js",
-		"index.d.ts"
+		"index.d.ts",
+		"file.js",
+		"file.d.ts"
 	],
 	"scripts": {
 		"build": "tsc",
