@@ -31,7 +31,8 @@ async function loadFileOld(): Promise<string> {
 }
 
 async function saveFileOld(text: string, suggestedName: string): Promise<void> {
-	const url = URL.createObjectURL(new Blob([text], {type: 'application/json'}));
+	// Use base64 because Safari doesn't support saving blob URLs
+	const url = `data:application/json;base64,${btoa(text)}`;
 	const link = document.createElement('a');
 	link.download = suggestedName;
 	link.href = url;
