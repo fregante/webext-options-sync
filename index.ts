@@ -3,9 +3,16 @@ import chromeP from 'webext-polyfill-kinda';
 import {isBackground} from 'webext-detect-page';
 import {serialize, deserialize} from 'dom-form-serializer/dist/dom-form-serializer.mjs';
 import LZString from 'lz-string';
+import {loadFile, saveFile} from './file.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention -- CJS in ESM imports
 const {compressToEncodedURIComponent, decompressFromEncodedURIComponent} = LZString;
+
+function alertAndThrow(message: string): never {
+	// eslint-disable-next-line no-alert
+	alert(message);
+	throw new Error(message);
+}
 
 async function shouldRunMigrations(): Promise<boolean> {
 	const self = await chromeP.management?.getSelf();
@@ -172,6 +179,9 @@ class OptionsSync<UserOptions extends Options> {
 		this._form.addEventListener('submit', this._handleFormSubmit);
 		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm);
 		this._updateForm(this._form, await this.getAll());
+
+		this._form.querySelector('.js-export')?.addEventListener('click', this.exportToFile);
+		this._form.querySelector('.js-import')?.addEventListener('click', this.importFromFile);
 	}
 
 	/**
@@ -181,10 +191,55 @@ class OptionsSync<UserOptions extends Options> {
 		if (this._form) {
 			this._form.removeEventListener('input', this._handleFormInput);
 			this._form.removeEventListener('submit', this._handleFormSubmit);
+			this._form.querySelector('.js-export')?.addEventListener('click', this.exportToFile);
+			this._form.querySelector('.js-import')?.addEventListener('click', this.importFromFile);
 			chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
 			delete this._form;
 		}
 	}
+
+	private get _jsonIdentityHelper() {
+		return '__webextOptionsSync';
+	}
+
+	/**
+	Opens the browser’s file picker to import options from a previously-saved JSON file
+	*/
+	importFromFile = async (): Promise<void> => {
+		const text = await loadFile();
+
+		let options: UserOptions;
+
+		try {
+			options = JSON.parse(text) as UserOptions;
+		} catch {
+			alertAndThrow('The file is not a valid JSON file.');
+		}
+
+		if (!(this._jsonIdentityHelper in options)) {
+			alertAndThrow('The file selected is not a valid recognized options file.');
+		}
+
+		delete options[this._jsonIdentityHelper];
+
+		await this.set(options);
+		if (this._form) {
+			this._updateForm(this._form, options);
+		}
+	};
+
+	/**
+	Opens the browser’s "save file" dialog to export options to a JSON file
+	*/
+	exportToFile = async (): Promise<void> => {
+		const extension = chrome.runtime.getManifest();
+		const text = JSON.stringify({
+			[this._jsonIdentityHelper]: extension.name,
+			...await this.getAll(),
+		}, null, '\t');
+
+		await saveFile(text, extension.name + ' options.json');
+	};
 
 	private _log(method: 'log' | 'info', ...args: any[]): void {
 		console[method](...args);
