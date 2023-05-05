@@ -52,6 +52,7 @@
 		"lz-string": "^1.4.4",
 		"throttle-debounce": "^5.0.0",
 		"webext-detect-page": "^4.0.1",
+		"webext-events": "^1.1.0",
 		"webext-polyfill-kinda": "^1.0.0"
 	},
 	"devDependencies": {
