@@ -246,13 +246,13 @@ class OptionsSync<UserOptions extends Options> {
 		await saveFile(text, extension.name + ' options.json');
 	};
 
-	private _log(method: 'log' | 'info', ...args: any[]): void {
+	private _log(method: 'log' | 'info', ...args: unknown[]): void {
 		console[method](...args);
 	}
 
 	private async _getAll(): Promise<UserOptions> {
 		const result = await this.storage.get(this.storageName);
-		return this._decode(result[this.storageName]);
+		return this._decode(result[this.storageName] as UserOptions);
 	}
 
 	private async _setAll(newOptions: UserOptions): Promise<void> {
@@ -352,13 +352,13 @@ class OptionsSync<UserOptions extends Options> {
 		return serialize(form, {include});
 	}
 
-	private readonly _handleStorageChangeOnForm = (changes: Record<string, any>, areaName: string): void => {
+	private readonly _handleStorageChangeOnForm = (changes: Record<string, chrome.storage.StorageChange>, areaName: string): void => {
 		if (
 			areaName === this.storageType
-			&& changes[this.storageName]
+			&& this.storageName in changes
 			&& (!document.hasFocus() || !this._form!.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
 		) {
-			this._updateForm(this._form!, this._decode(changes[this.storageName].newValue));
+			this._updateForm(this._form!, this._decode(changes[this.storageName]!.newValue as string));
 		}
 	};
 }
