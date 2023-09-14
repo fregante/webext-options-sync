@@ -168,7 +168,7 @@ test.serial('migrations alter the stored options', async t => {
 				savedOptions.size += 10;
 			},
 			savedOptions => {
-				if (typeof savedOptions.size !== 'undefined') {
+				if (savedOptions.size !== undefined) {
 					savedOptions.minSize = savedOptions.size;
 					delete savedOptions.size;
 				}
