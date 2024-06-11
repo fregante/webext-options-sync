@@ -1,3 +1,5 @@
+import {stringToBase64} from 'uint8array-extras';
+
 const filePickerOptions: FilePickerOptions = {
 	types: [
 		{
@@ -32,7 +34,7 @@ async function loadFileOld(): Promise<string> {
 async function saveFileOld(text: string, suggestedName: string): Promise<void> {
 	// Use data URL because Safari doesn't support saving blob URLs
 	// Use base64 or else linebreaks are lost
-	const url = `data:application/json;base64,${btoa(text)}`;
+	const url = `data:application/json;base64,${stringToBase64(text)}`;
 	const link = document.createElement('a');
 	link.download = suggestedName;
 	link.href = url;
