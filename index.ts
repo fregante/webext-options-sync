@@ -246,8 +246,8 @@ class OptionsSync<UserOptions extends Options> {
 		await saveFile(text, extension.name + ' options.json');
 	};
 
-	private _log(method: 'log' | 'info', ...args: unknown[]): void {
-		console[method](...args);
+	private _log(method: 'log' | 'info', ...arguments_: unknown[]): void {
+		console[method](...arguments_);
 	}
 
 	private async _getAll(): Promise<UserOptions> {
@@ -278,7 +278,7 @@ class OptionsSync<UserOptions extends Options> {
 	private _decode(options: string | UserOptions): UserOptions {
 		let decompressed = options;
 		if (typeof options === 'string') {
-			decompressed = JSON.parse(decompressFromEncodedURIComponent(options)!) as UserOptions;
+			decompressed = JSON.parse(decompressFromEncodedURIComponent(options)) as UserOptions;
 		}
 
 		return {...this.defaults, ...decompressed as UserOptions};
