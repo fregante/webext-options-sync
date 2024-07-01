@@ -17,7 +17,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
-          cache: npm
       - name: install
         run: npm ci || npm install
       - name: XO
@@ -30,7 +29,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
-          cache: npm
       - name: install
         run: npm ci || npm install
       - name: build
@@ -45,7 +43,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: package.json
-          cache: npm
       - name: install
         run: npm ci || npm install
       - name: build
