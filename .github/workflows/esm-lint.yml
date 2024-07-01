@@ -1,5 +1,5 @@
 env:
-  IMPORT_STATEMENT: import OptionsSync from "webext-options-sync"
+  IMPORT_STATEMENT: export OptionsSync from "webext-options-sync"
 
 # FILE GENERATED WITH: npx ghat fregante/ghatemplates/esm-lint
 # SOURCE: https://github.com/fregante/ghatemplates
