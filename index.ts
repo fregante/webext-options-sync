@@ -196,8 +196,8 @@ class OptionsSync<UserOptions extends Options> {
 		if (this._form) {
 			this._form.removeEventListener('input', this._handleFormInput);
 			this._form.removeEventListener('submit', this._handleFormSubmit);
-			this._form.querySelector('.js-export')?.addEventListener('click', this.exportToFile);
-			this._form.querySelector('.js-import')?.addEventListener('click', this.importFromFile);
+			this._form.querySelector('.js-export')?.removeEventListener('click', this.exportToFile);
+			this._form.querySelector('.js-import')?.removeEventListener('click', this.importFromFile);
 			chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
 			delete this._form;
 		}
