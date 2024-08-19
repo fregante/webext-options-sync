@@ -3,6 +3,7 @@ env:
 
 # FILE GENERATED WITH: npx ghat fregante/ghatemplates/esm-lint
 # SOURCE: https://github.com/fregante/ghatemplates
+# OPTIONS: {"exclude":["jobs.Rollup"]}
 
 name: ESM
 on:
@@ -52,14 +53,6 @@ jobs:
           package.json
       - run: npx parcel@2 build index.js
       - run: cat dist/index.js
-  Rollup:
-    runs-on: ubuntu-latest
-    needs: Pack
-    steps:
-      - uses: actions/download-artifact@v4
-      - run: npm install --omit=dev ./artifact rollup@4 @rollup/plugin-node-resolve
-      - run: echo "$IMPORT_STATEMENT" > index.js
-      - run: npx rollup -p node-resolve index.js
   Vite:
     runs-on: ubuntu-latest
     needs: Pack
