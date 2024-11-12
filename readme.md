@@ -53,7 +53,7 @@ const options = await optionsStorage.getAll();
 // {showStars: 10}
 ```
 
-**Note:** `OptionsSync` relies on `chrome.storage.sync`, so its [limitations](https://developer.chrome.com/apps/storage#properties) apply, both the size limit and the type of data stored (which must be compatible with JSON).
+**Note:** `OptionsSync` relies on `chrome.storage.sync`, so its [limitations](https://developer.chrome.com/docs/extensions/reference/api/storage?hl=en#property-sync) apply, both the size limit and the type of data stored (which must be compatible with JSON).
 
 ### Advanced usage
 
