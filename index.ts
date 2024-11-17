@@ -323,6 +323,11 @@ class OptionsSync<UserOptions extends Options> {
 			throw error;
 		}
 
+		field.dispatchEvent(new CustomEvent('options-sync:save-success', {
+			bubbles: true,
+		}));
+
+		// TODO: Deprecated; drop in next major
 		field.form!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
 			bubbles: true,
 		}));
