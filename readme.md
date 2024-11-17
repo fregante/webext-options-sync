@@ -216,10 +216,10 @@ A list of functions to run in the `background` when the extension is updated. Ex
 ```js
 {
 	migrations: [
-		(savedOptions, defaults) => {
-			// Change the `savedOptions`
-			if(savedOptions.oldStuff) {
-				delete savedOptions.oldStuff
+		(options, defaults) => {
+			// Change the `options`
+			if(options.oldStuff) {
+				delete options.oldStuff
 			}
 
 			// No return needed
@@ -230,6 +230,9 @@ A list of functions to run in the `background` when the extension is updated. Ex
 	],
 }
 ```
+
+> [!NOTE]
+> The `options` argument will always include the `defaults` as well as any options that were saved before the update.
 
 ###### storageName
 
