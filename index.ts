@@ -247,6 +247,23 @@ class OptionsSync<UserOptions extends Options> {
 		await saveFile(text, extension.name + ' options.json');
 	};
 
+	onChanged(callback: (options: UserOptions, oldOptions: UserOptions) => void, signal?: AbortSignal): void {
+		const onChanged = (changes: Record<string, chrome.storage.StorageChange>, area: chrome.storage.AreaName) => {
+			const data = changes[this.storageName];
+			if (data && area === this.storageType) {
+				callback(
+					this._decode(data.newValue as string),
+					this._decode(data.oldValue as string ?? {}),
+				);
+			}
+		};
+
+		chrome.storage.onChanged.addListener(onChanged);
+		signal?.addEventListener('abort', () => {
+			chrome.storage.onChanged.removeListener(onChanged);
+		});
+	}
+
 	private _log(method: 'log' | 'info', ...arguments_: unknown[]): void {
 		console[method](...arguments_);
 	}

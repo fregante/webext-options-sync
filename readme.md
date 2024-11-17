@@ -280,6 +280,20 @@ This will override **all** the options stored with your `options`.
 
 This returns a Promise that will resolve with all the options.
 
+#### optionsStorage.onChanged(callback, signal?)
+
+Listens to changes in the storage and calls the callback when the options are changed. The callback is called with the new and old options.
+
+##### callback
+
+Type: `(newOptions: object, oldOptions: object) => void`
+
+##### signal
+
+Type: `AbortSignal`
+
+If provided, the callback will be removed when the signal is aborted.
+
 #### optionsStorage.syncForm(form)
 
 Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved via `chrome.storage.sync`. It also looks for any buttons with `js-import` or `js-export` classes that when clicked will allow the user to export and import the options to a JSON file.
