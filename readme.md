@@ -7,6 +7,7 @@ Main features:
 - Define your default options
 - Add autoload and autosave to your options `<form>`
 - Run migrations on update
+- Import/export helpers
 
 This also lets you very easily have [separate options for each domain](https://github.com/fregante/webext-options-sync-per-domain) with the help of `webext-options-sync-per-domain`.
 
@@ -283,6 +284,11 @@ This returns a Promise that will resolve with all the options.
 
 Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved via `chrome.storage.sync`. It also looks for any buttons with `js-import` or `js-export` classes that when clicked will allow the user to export and import the options to a JSON file.
 
+- `options-sync:save-success`: Fired on the edited field when the form is saved.
+- `options-sync:save-error`: Fired on the edited field when the form is not saved due to an error. The error is passed as the `detail` property.
+
+Saving can fail when the storage quota is exceeded for example. You should handle this case and display a message to the user.
+
 ##### form
 
 Type: `HTMLFormElement`, `string`
@@ -308,7 +314,3 @@ Opens the browser’s file picker to import options from a previously-saved JSON
 - [webext-dynamic-content-scripts](https://github.com/fregante/webext-dynamic-content-scripts) - Automatically registers your content_scripts on domains added via permission.request.
 - [Awesome-WebExtensions](https://github.com/fregante/Awesome-WebExtensions) - A curated list of awesome resources for WebExtensions development.
 - [More…](https://github.com/fregante/webext-fun)
-
-## License
-
-MIT © [Federico Brigante](https://fregante.com)
