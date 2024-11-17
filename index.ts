@@ -172,6 +172,7 @@ class OptionsSync<UserOptions extends Options> {
 	The form fields' `name` attributes will have to match the option names.
 	*/
 	async syncForm(form: string | HTMLFormElement): Promise<void> {
+		this.stopSyncForm();
 		this._form = form instanceof HTMLFormElement
 			? form
 			: document.querySelector<HTMLFormElement>(form)!;
@@ -192,7 +193,7 @@ class OptionsSync<UserOptions extends Options> {
 	/**
 	Removes any listeners added by `syncForm`
 	*/
-	async stopSyncForm(): Promise<void> {
+	stopSyncForm(): void {
 		if (this._form) {
 			this._form.removeEventListener('input', this._handleFormInput);
 			this._form.removeEventListener('submit', this._handleFormSubmit);
