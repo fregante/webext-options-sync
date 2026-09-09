@@ -9,6 +9,13 @@ import {loadFile, saveFile} from './file.js';
 // eslint-disable-next-line @typescript-eslint/naming-convention -- CJS in ESM imports
 const {compressToEncodedURIComponent, decompressFromEncodedURIComponent} = LZString;
 
+// `===` never matches two distinct arrays with equal contents, which broke change-detection for array-valued options (name="user[]")
+function isEqual(a: unknown, b: unknown): boolean {
+	return Array.isArray(a) && Array.isArray(b)
+		? a.length === b.length && a.every((value, index) => value === b[index])
+		: a === b;
+}
+
 function alertAndThrow(message: string): never {
 	// eslint-disable-next-line no-alert
 	alert(message);
@@ -70,7 +77,7 @@ A map of options as strings or booleans. The keys will have to match the form fi
 */
 // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style, @typescript-eslint/consistent-type-definitions -- Interfaces are extendable
 export interface Options {
-	[key: string]: string | number | boolean;
+	[key: string]: string | number | boolean | string[] | number[] | boolean[];
 }
 
 /*
@@ -283,7 +290,7 @@ class OptionsSync<UserOptions extends Options> {
 	private _encode(options: UserOptions): string {
 		const thinnedOptions: Partial<UserOptions> = {...options};
 		for (const [key, value] of Object.entries(thinnedOptions)) {
-			if (this.defaults[key] === value) {
+			if (isEqual(this.defaults[key], value)) {
 				delete thinnedOptions[key];
 			}
 		}
@@ -358,7 +365,7 @@ class OptionsSync<UserOptions extends Options> {
 		// Reduce changes to only values that have changed
 		const currentFormState = this._parseForm(form);
 		for (const [key, value] of Object.entries(options)) {
-			if (currentFormState[key] === value) {
+			if (isEqual(currentFormState[key], value)) {
 				delete options[key];
 			}
 		}
