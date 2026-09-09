@@ -9,7 +9,7 @@ import {loadFile, saveFile} from './file.js';
 // eslint-disable-next-line @typescript-eslint/naming-convention -- CJS in ESM imports
 const {compressToEncodedURIComponent, decompressFromEncodedURIComponent} = LZString;
 
-// `===` never matches two distinct arrays with equal contents, which broke change-detection for array-valued options (name="user[]")
+// Arrays compare by reference with `===`, so equal-content arrays need to be compared element-wise instead
 function isEqual(a: unknown, b: unknown): boolean {
 	return Array.isArray(a) && Array.isArray(b)
 		? a.length === b.length && a.every((value, index) => value === b[index])
