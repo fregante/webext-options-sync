@@ -370,7 +370,7 @@ class OptionsSync<UserOptions extends Options> {
 			}
 		}
 
-		const include = Object.keys(options);
+		const include = Object.entries(options).map(([key, value]) => Array.isArray(value) ? `${key}[]` : key);
 		if (include.length > 0) {
 			// Limits `deserialize` to only the specified fields. Without it, it will try to set the every field, even if they're missing from the supplied `options`
 			deserialize(form, options, {include});
@@ -384,7 +384,7 @@ class OptionsSync<UserOptions extends Options> {
 		// Don't serialize disabled and invalid fields
 		for (const field of form.querySelectorAll<HTMLInputElement>('[name]')) {
 			if (field.validity.valid && !field.disabled) {
-				include.push(field.name.replace(/\[.*]/, ''));
+				include.push(field.name);
 			}
 		}
 
