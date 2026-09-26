@@ -49,7 +49,7 @@
 		]
 	},
 	"dependencies": {
-		"dom-form-serializer": "^2.0.0",
+		"@fregante/dom-form-serializer": "^2.1.0-0",
 		"lz-string": "^1.5.0",
 		"throttle-debounce": "^5.0.2",
 		"uint8array-extras": "^1.2.0",

@@ -1,7 +1,7 @@
 import {debounce} from 'throttle-debounce';
 import chromeP from 'webext-polyfill-kinda';
 import {isBackground} from 'webext-detect';
-import {serialize, deserialize} from 'dom-form-serializer/dist/dom-form-serializer.mjs';
+import {serialize, deserialize} from '@fregante/dom-form-serializer/dist/dom-form-serializer.mjs';
 import LZString from 'lz-string';
 import {onContextInvalidated} from 'webext-events';
 import {loadFile, saveFile} from './file.js';
