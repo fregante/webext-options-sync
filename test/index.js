@@ -138,6 +138,51 @@ test.serial('setAll skips defaults', async t => {
 	});
 });
 
+test.serial('setAll skips default arrays', async t => {
+	const storage = new OptionsSync({
+		...simpleSetup,
+		defaults: {
+			...simpleSetup.defaults,
+			tags: ['a', 'b'],
+		},
+	});
+
+	await storage.setAll({
+		...simpleSetup.defaults,
+		tags: ['a', 'b'],
+		name: 'Rico',
+	});
+
+	t.true(chrome.storage.sync.set.calledOnce);
+	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
+		settings: compressOptions({
+			name: 'Rico',
+		}),
+	});
+});
+
+test.serial('setAll keeps changed arrays', async t => {
+	const storage = new OptionsSync({
+		...simpleSetup,
+		defaults: {
+			...simpleSetup.defaults,
+			tags: ['a', 'b'],
+		},
+	});
+
+	await storage.setAll({
+		...simpleSetup.defaults,
+		tags: ['a', 'c'],
+	});
+
+	t.true(chrome.storage.sync.set.calledOnce);
+	t.deepEqual(chrome.storage.sync.set.firstCall.args[0], {
+		settings: compressOptions({
+			tags: ['a', 'c'],
+		}),
+	});
+});
+
 test.serial('set merges with existing data', async t => {
 	chrome.storage.sync.get
 		.withArgs('options')

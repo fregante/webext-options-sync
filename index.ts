@@ -1,13 +1,20 @@
 import {debounce} from 'throttle-debounce';
 import chromeP from 'webext-polyfill-kinda';
 import {isBackground} from 'webext-detect';
-import {serialize, deserialize} from 'dom-form-serializer/dist/dom-form-serializer.mjs';
+import {serialize, deserialize} from '@fregante/dom-form-serializer/dist/dom-form-serializer.mjs';
 import LZString from 'lz-string';
 import {onContextInvalidated} from 'webext-events';
 import {loadFile, saveFile} from './file.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention -- CJS in ESM imports
 const {compressToEncodedURIComponent, decompressFromEncodedURIComponent} = LZString;
+
+// Arrays compare by reference with `===`, so equal-content arrays need to be compared element-wise instead
+function isEqual(a: unknown, b: unknown): boolean {
+	return Array.isArray(a) && Array.isArray(b)
+		? a.length === b.length && a.every((value, index) => value === b[index])
+		: a === b;
+}
 
 function alertAndThrow(message: string): never {
 	// eslint-disable-next-line no-alert
@@ -70,7 +77,7 @@ A map of options as strings or booleans. The keys will have to match the form fi
 */
 // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style, @typescript-eslint/consistent-type-definitions -- Interfaces are extendable
 export interface Options {
-	[key: string]: string | number | boolean;
+	[key: string]: string | number | boolean | string[] | number[] | boolean[];
 }
 
 /*
@@ -283,7 +290,7 @@ class OptionsSync<UserOptions extends Options> {
 	private _encode(options: UserOptions): string {
 		const thinnedOptions: Partial<UserOptions> = {...options};
 		for (const [key, value] of Object.entries(thinnedOptions)) {
-			if (this.defaults[key] === value) {
+			if (isEqual(this.defaults[key], value)) {
 				delete thinnedOptions[key];
 			}
 		}
@@ -358,12 +365,12 @@ class OptionsSync<UserOptions extends Options> {
 		// Reduce changes to only values that have changed
 		const currentFormState = this._parseForm(form);
 		for (const [key, value] of Object.entries(options)) {
-			if (currentFormState[key] === value) {
+			if (isEqual(currentFormState[key], value)) {
 				delete options[key];
 			}
 		}
 
-		const include = Object.keys(options);
+		const include = Object.entries(options).map(([key, value]) => Array.isArray(value) ? `${key}[]` : key);
 		if (include.length > 0) {
 			// Limits `deserialize` to only the specified fields. Without it, it will try to set the every field, even if they're missing from the supplied `options`
 			deserialize(form, options, {include});
@@ -377,7 +384,7 @@ class OptionsSync<UserOptions extends Options> {
 		// Don't serialize disabled and invalid fields
 		for (const field of form.querySelectorAll<HTMLInputElement>('[name]')) {
 			if (field.validity.valid && !field.disabled) {
-				include.push(field.name.replace(/\[.*]/, ''));
+				include.push(field.name);
 			}
 		}
 
