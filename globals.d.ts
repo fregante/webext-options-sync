@@ -1,4 +1,4 @@
-declare module 'dom-form-serializer/dist/dom-form-serializer.mjs' {
+declare module '@fregante/dom-form-serializer/dist/dom-form-serializer.mjs' {
 	import {type JsonObject} from 'type-fest';
 
 	export function serialize(
