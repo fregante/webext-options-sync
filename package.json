@@ -41,8 +41,7 @@
 		"throttle-debounce": "^5.0.2",
 		"uint8array-extras": "^1.6.0",
 		"webext-detect": "^6.0.0",
-		"webext-events": "^4.0.0",
-		"webext-polyfill-kinda": "^1.0.2"
+		"webext-events": "^4.0.0"
 	},
 	"devDependencies": {
 		"@sindresorhus/tsconfig": "^8.1.0",
