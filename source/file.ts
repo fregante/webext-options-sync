@@ -4,7 +4,7 @@ const filePickerOptions: FilePickerOptions = {
 	types: [
 		{
 			accept: {
-				// eslint-disable-next-line @typescript-eslint/naming-convention
+
 				'application/json': '.json',
 			},
 		},

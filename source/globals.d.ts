@@ -5,7 +5,7 @@ declare module '@fregante/dom-form-serializer/dist/dom-form-serializer.mjs' {
 		element: HTMLFormElement,
 		options: {
 			include?: string[];
-		}
+		},
 	): JSONValue;
 
 	export function deserialize(
@@ -13,6 +13,6 @@ declare module '@fregante/dom-form-serializer/dist/dom-form-serializer.mjs' {
 		serializedData: JsonObject,
 		options?: {
 			include?: string[];
-		}
+		},
 	): void;
 }

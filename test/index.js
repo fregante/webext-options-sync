@@ -1,10 +1,11 @@
 import test from 'ava';
 import lzString from 'lz-string';
-import OptionsSync from '../index.js';
+import OptionsSync from '../distribution/index.js';
 
 OptionsSync.prototype._log = () => {};
 
 function flattenInstance(setup) {
+	// eslint-disable-next-line unicorn/prefer-structured-clone -- Instances contain functions, which `structuredClone` can't clone
 	return JSON.parse(JSON.stringify(setup));
 }
 
@@ -213,10 +214,12 @@ test.serial('migrations alter the stored options', async t => {
 				savedOptions.size += 10;
 			},
 			savedOptions => {
-				if (savedOptions.size !== undefined) {
-					savedOptions.minSize = savedOptions.size;
-					delete savedOptions.size;
+				if (savedOptions.size === undefined) {
+					return;
 				}
+
+				savedOptions.minSize = savedOptions.size;
+				delete savedOptions.size;
 			},
 		],
 	});
