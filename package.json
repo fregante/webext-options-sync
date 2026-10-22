@@ -13,11 +13,11 @@
 	},
 	"sideEffects": false,
 	"engines": {
-		"node": ">=18"
+		"node": ">=24"
 	},
 	"scripts": {
 		"build": "tsc",
-		"prepack": "tsc",
+		"prepare": "tsc",
 		"test": "npm run build && run-p ava xo",
 		"watch": "tsc --watch",
 		"ava": "ava",
@@ -41,7 +41,7 @@
 		"throttle-debounce": "^5.0.2",
 		"uint8array-extras": "^1.6.0",
 		"webext-detect": "^6.0.0",
-		"webext-events": "^3.1.1",
+		"webext-events": "^4.0.0",
 		"webext-polyfill-kinda": "^1.0.2"
 	},
 	"devDependencies": {

@@ -3,7 +3,7 @@ import chromeP from 'webext-polyfill-kinda';
 import {isBackground} from 'webext-detect';
 import {serialize, deserialize} from '@fregante/dom-form-serializer/dist/dom-form-serializer.mjs';
 import LZString from 'lz-string';
-import {onContextInvalidated} from 'webext-events';
+import onContextInvalidated from 'webext-events/on-context-invalidated';
 import {loadFile, saveFile} from './file.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention -- CJS in ESM imports
