@@ -98,44 +98,6 @@ class OptionsSync<UserOptions extends Options> {
 		},
 	};
 
-	private readonly _migrations: Promise<void>;
-
-	private readonly _handleFormInput = debounce(300, async ({target}: Event): Promise<void> => {
-		const field = target as HTMLInputElement;
-		if (field.name === '') {
-			return;
-		}
-
-		try {
-			await this.set(this._parseForm(field.form!));
-		} catch (error) {
-			field.dispatchEvent(new CustomEvent('options-sync:save-error', {
-				bubbles: true,
-				detail: error,
-			}));
-			throw error;
-		}
-
-		field.dispatchEvent(new CustomEvent('options-sync:save-success', {
-			bubbles: true,
-		}));
-
-		// TODO: Deprecated; drop in next major
-		field.form!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
-			bubbles: true,
-		}));
-	});
-
-	private readonly _handleStorageChangeOnForm = (changes: Record<string, chrome.storage.StorageChange>, areaName: string): void => {
-		if (
-			areaName === this.storageType
-			&& Object.hasOwn(changes, this.storageName)
-			&& (!document.hasFocus() || !this._form!.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
-		) {
-			this._updateForm(this._form!, this._decode(changes[this.storageName]!.newValue as string));
-		}
-	};
-
 	storageName: string;
 	storageType: StorageType;
 
@@ -144,44 +106,7 @@ class OptionsSync<UserOptions extends Options> {
 	// eslint-disable-next-line unicorn/prefer-private-class-fields -- Public field, part of the type declarations
 	_form: HTMLFormElement | undefined;
 
-	/**
-	Opens the browser’s file picker to import options from a previously-saved JSON file
-	*/
-	importFromFile = async (): Promise<void> => {
-		const text = await loadFile();
-
-		let options: UserOptions;
-
-		try {
-			options = JSON.parse(text) as UserOptions;
-		} catch {
-			alertAndThrow('The file is not a valid JSON file.');
-		}
-
-		if (!Object.hasOwn(options, this._jsonIdentityHelper)) {
-			alertAndThrow('The file selected is not a valid recognized options file.');
-		}
-
-		delete options[this._jsonIdentityHelper];
-
-		await this.set(options);
-		if (this._form) {
-			this._updateForm(this._form, options);
-		}
-	};
-
-	/**
-	Opens the browser’s "save file" dialog to export options to a JSON file
-	*/
-	exportToFile = async (): Promise<void> => {
-		const extension = chrome.runtime.getManifest();
-		const text = JSON.stringify({
-			[this._jsonIdentityHelper]: extension.name,
-			...await this.getAll(),
-		}, null, '\t');
-
-		await saveFile(text, extension.name + ' options.json');
-	};
+	private readonly _migrations: Promise<void>;
 
 	/**
 	Returns an instance linked to the chosen storage.
@@ -213,102 +138,6 @@ class OptionsSync<UserOptions extends Options> {
 
 	private get storage(): chrome.storage.StorageArea {
 		return chrome.storage[this.storageType];
-	}
-
-	private get _jsonIdentityHelper() {
-		return '__webextOptionsSync';
-	}
-
-	private _log(method: 'log' | 'info', ...arguments_: unknown[]): void {
-		console[method](...arguments_);
-	}
-
-	private async _getAll(): Promise<UserOptions> {
-		const result = await this.storage.get(this.storageName);
-		return this._decode(result[this.storageName] as UserOptions);
-	}
-
-	private async _setAll(newOptions: UserOptions): Promise<void> {
-		this._log('log', 'Saving options', newOptions);
-		await this.storage.set({
-			[this.storageName]: this._encode(newOptions),
-		});
-	}
-
-	private _encode(options: UserOptions): string {
-		const thinnedOptions: Partial<UserOptions> = {...options};
-		for (const [key, value] of Object.entries(thinnedOptions)) {
-			if (isEqual(this.defaults[key], value)) {
-				delete thinnedOptions[key];
-			}
-		}
-
-		this._log('log', 'Without the default values', thinnedOptions);
-
-		return compressToEncodedURIComponent(JSON.stringify(thinnedOptions));
-	}
-
-	private _decode(options: string | UserOptions): UserOptions {
-		const decompressed = typeof options === 'string'
-			? JSON.parse(decompressFromEncodedURIComponent(options)) as UserOptions
-			: options;
-
-		return {...this.defaults, ...decompressed};
-	}
-
-	private async _runMigrations(migrations: Array<Migration<UserOptions>>): Promise<void> {
-		if (migrations.length === 0 || !isBackground() || !await shouldRunMigrations()) {
-			return;
-		}
-
-		const options = await this._getAll();
-		const initial = JSON.stringify(options);
-
-		this._log('log', 'Found these stored options', {...options});
-		this._log('info', 'Will run', migrations.length, migrations.length === 1 ? 'migration' : ' migrations');
-		for (const migrate of migrations) {
-			// eslint-disable-next-line no-await-in-loop -- Must be done in order
-			await migrate(options, this.defaults);
-		}
-
-		// Only save to storage if there were any changes
-		if (initial !== JSON.stringify(options)) {
-			await this._setAll(options);
-		}
-	}
-
-	private _handleFormSubmit(event: Event): void {
-		event.preventDefault();
-	}
-
-	private _updateForm(form: HTMLFormElement, options: UserOptions): void {
-		// Reduce changes to only values that have changed
-		const currentFormState = this._parseForm(form);
-		for (const [key, value] of Object.entries(options)) {
-			if (isEqual(currentFormState[key], value)) {
-				delete options[key];
-			}
-		}
-
-		const include = Object.entries(options).map(([key, value]) => Array.isArray(value) ? `${key}[]` : key);
-		if (include.length > 0) {
-			// Limits `deserialize` to only the specified fields. Without it, it will try to set the every field, even if they're missing from the supplied `options`
-			deserialize(form, options, {include});
-		}
-	}
-
-	// Parse form into object, except invalid fields
-	private _parseForm(form: HTMLFormElement): Partial<UserOptions> {
-		const include: string[] = [];
-
-		// Don't serialize disabled and invalid fields
-		for (const field of form.querySelectorAll<HTMLInputElement>('[name]')) {
-			if (field.validity.valid && !field.disabled) {
-				include.push(field.name);
-			}
-		}
-
-		return serialize(form, {include});
 	}
 
 	/**
@@ -393,6 +222,49 @@ class OptionsSync<UserOptions extends Options> {
 		delete this._form;
 	}
 
+	private get _jsonIdentityHelper() {
+		return '__webextOptionsSync';
+	}
+
+	/**
+	Opens the browser’s file picker to import options from a previously-saved JSON file
+	*/
+	importFromFile = async (): Promise<void> => {
+		const text = await loadFile();
+
+		let options: UserOptions;
+
+		try {
+			options = JSON.parse(text) as UserOptions;
+		} catch {
+			alertAndThrow('The file is not a valid JSON file.');
+		}
+
+		if (!Object.hasOwn(options, this._jsonIdentityHelper)) {
+			alertAndThrow('The file selected is not a valid recognized options file.');
+		}
+
+		delete options[this._jsonIdentityHelper];
+
+		await this.set(options);
+		if (this._form) {
+			this._updateForm(this._form, options);
+		}
+	};
+
+	/**
+	Opens the browser’s "save file" dialog to export options to a JSON file
+	*/
+	exportToFile = async (): Promise<void> => {
+		const extension = chrome.runtime.getManifest();
+		const text = JSON.stringify({
+			[this._jsonIdentityHelper]: extension.name,
+			...await this.getAll(),
+		}, null, '\t');
+
+		await saveFile(text, extension.name + ' options.json');
+	};
+
 	onChanged(callback: (options: UserOptions, oldOptions: UserOptions) => void, signal?: AbortSignal): void {
 		const onChanged = (changes: Record<string, chrome.storage.StorageChange>, area: chrome.storage.AreaName) => {
 			const data = changes[this.storageName];
@@ -409,6 +281,134 @@ class OptionsSync<UserOptions extends Options> {
 			chrome.storage.onChanged.removeListener(onChanged);
 		});
 	}
+
+	private _log(method: 'log' | 'info', ...arguments_: unknown[]): void {
+		console[method](...arguments_);
+	}
+
+	private async _getAll(): Promise<UserOptions> {
+		const result = await this.storage.get(this.storageName);
+		return this._decode(result[this.storageName] as UserOptions);
+	}
+
+	private async _setAll(newOptions: UserOptions): Promise<void> {
+		this._log('log', 'Saving options', newOptions);
+		await this.storage.set({
+			[this.storageName]: this._encode(newOptions),
+		});
+	}
+
+	private _encode(options: UserOptions): string {
+		const thinnedOptions: Partial<UserOptions> = {...options};
+		for (const [key, value] of Object.entries(thinnedOptions)) {
+			if (isEqual(this.defaults[key], value)) {
+				delete thinnedOptions[key];
+			}
+		}
+
+		this._log('log', 'Without the default values', thinnedOptions);
+
+		return compressToEncodedURIComponent(JSON.stringify(thinnedOptions));
+	}
+
+	private _decode(options: string | UserOptions): UserOptions {
+		const decompressed = typeof options === 'string'
+			? JSON.parse(decompressFromEncodedURIComponent(options)) as UserOptions
+			: options;
+
+		return {...this.defaults, ...decompressed};
+	}
+
+	private async _runMigrations(migrations: Array<Migration<UserOptions>>): Promise<void> {
+		if (migrations.length === 0 || !isBackground() || !await shouldRunMigrations()) {
+			return;
+		}
+
+		const options = await this._getAll();
+		const initial = JSON.stringify(options);
+
+		this._log('log', 'Found these stored options', {...options});
+		this._log('info', 'Will run', migrations.length, migrations.length === 1 ? 'migration' : ' migrations');
+		for (const migrate of migrations) {
+			// eslint-disable-next-line no-await-in-loop -- Must be done in order
+			await migrate(options, this.defaults);
+		}
+
+		// Only save to storage if there were any changes
+		if (initial !== JSON.stringify(options)) {
+			await this._setAll(options);
+		}
+	}
+
+	private readonly _handleFormInput = debounce(300, async ({target}: Event): Promise<void> => {
+		const field = target as HTMLInputElement;
+		if (field.name === '') {
+			return;
+		}
+
+		try {
+			await this.set(this._parseForm(field.form!));
+		} catch (error) {
+			field.dispatchEvent(new CustomEvent('options-sync:save-error', {
+				bubbles: true,
+				detail: error,
+			}));
+			throw error;
+		}
+
+		field.dispatchEvent(new CustomEvent('options-sync:save-success', {
+			bubbles: true,
+		}));
+
+		// TODO: Deprecated; drop in next major
+		field.form!.dispatchEvent(new CustomEvent('options-sync:form-synced', {
+			bubbles: true,
+		}));
+	});
+
+	private _handleFormSubmit(event: Event): void {
+		event.preventDefault();
+	}
+
+	private _updateForm(form: HTMLFormElement, options: UserOptions): void {
+		// Reduce changes to only values that have changed
+		const currentFormState = this._parseForm(form);
+		for (const [key, value] of Object.entries(options)) {
+			if (isEqual(currentFormState[key], value)) {
+				delete options[key];
+			}
+		}
+
+		const include = Object.entries(options).map(([key, value]) => Array.isArray(value) ? `${key}[]` : key);
+		if (include.length > 0) {
+			// Limits `deserialize` to only the specified fields. Without it, it will try to set the every field, even if they're missing from the supplied `options`
+			deserialize(form, options, {include});
+		}
+	}
+
+	// Parse form into object, except invalid fields
+	private _parseForm(form: HTMLFormElement): Partial<UserOptions> {
+		const include: string[] = [];
+
+		// Don't serialize disabled and invalid fields
+		for (const field of form.querySelectorAll<HTMLInputElement>('[name]')) {
+			if (field.validity.valid && !field.disabled) {
+				include.push(field.name);
+			}
+		}
+
+		return serialize(form, {include});
+	}
+
+	private readonly _handleStorageChangeOnForm = (changes: Record<string, chrome.storage.StorageChange>, areaName: string): void => {
+		if (
+			areaName === this.storageType
+			&& Object.hasOwn(changes, this.storageName)
+			&& (!document.hasFocus() || !this._form!.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
+		) {
+			this._updateForm(this._form!, this._decode(changes[this.storageName]!.newValue as string));
+		}
+	};
 }
 
 export default OptionsSync;
