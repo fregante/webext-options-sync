@@ -2,10 +2,12 @@
 	"extends": "@sindresorhus/tsconfig",
 	"compilerOptions": {
 		"target": "es2022",
-		"outDir": "."
+		"rootDir": "./source",
+		"types": ["chrome", "wicg-file-system-access"],
+		"outDir": "./distribution"
 	},
 	"files": [
-		"globals.d.ts",
-		"index.ts"
+		"source/globals.d.ts",
+		"source/index.ts"
 	]
 }

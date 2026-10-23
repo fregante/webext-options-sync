@@ -3,7 +3,7 @@ import chromeP from 'webext-polyfill-kinda';
 import {isBackground} from 'webext-detect';
 import {serialize, deserialize} from '@fregante/dom-form-serializer/dist/dom-form-serializer.mjs';
 import LZString from 'lz-string';
-import {onContextInvalidated} from 'webext-events';
+import onContextInvalidated from 'webext-events/on-context-invalidated';
 import {loadFile, saveFile} from './file.js';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention -- CJS in ESM imports
@@ -66,7 +66,7 @@ export interface Setup<UserOptions extends Options> {
 	logging?: boolean;
 	defaults?: UserOptions;
 	/**
-	 * A list of functions to call when the extension is updated.
+	 A list of functions to call when the extension is updated.
 	 */
 	migrations?: Array<Migration<UserOptions>>;
 	storageType?: StorageType;
@@ -92,7 +92,7 @@ class OptionsSync<UserOptions extends Options> {
 		*/
 		removeUnused(options: Options, defaults: Options) {
 			for (const key of Object.keys(options)) {
-				if (!(key in defaults)) {
+				if (!Object.hasOwn(defaults, key)) {
 					delete options[key];
 				}
 			}
@@ -104,13 +104,19 @@ class OptionsSync<UserOptions extends Options> {
 
 	defaults: UserOptions;
 
+	// eslint-disable-next-line unicorn/prefer-private-class-fields -- Public field, part of the type declarations
 	_form: HTMLFormElement | undefined;
 
 	private readonly _migrations: Promise<void>;
 
 	/**
-	@constructor Returns an instance linked to the chosen storage.
+	Returns an instance linked to the chosen storage.
 	@param setup - Configuration for `webext-options-sync`
+	@param setup.defaults - Options used when nothing is saved yet
+	@param setup.storageName - Key under which the options are stored
+	@param setup.migrations - Functions that update previously-saved options
+	@param setup.logging - Whether to log to the console
+	@param setup.storageType - Which `chrome.storage` area to use (`sync` or `local`)
 	*/
 	constructor({
 		// `as` reason: https://github.com/fregante/webext-options-sync/pull/21#issuecomment-500314074
@@ -175,7 +181,7 @@ class OptionsSync<UserOptions extends Options> {
 	/**
 	Any defaults or saved options will be loaded into the `<form>` and any change will automatically be saved to storage
 
-	@param selector - The `<form>` that needs to be synchronized or a CSS selector (one element).
+	@param form - The `<form>` that needs to be synchronized or a CSS selector (one element).
 	The form fields' `name` attributes will have to match the option names.
 	*/
 	async syncForm(form: string | HTMLFormElement): Promise<void> {
@@ -189,8 +195,10 @@ class OptionsSync<UserOptions extends Options> {
 		chrome.storage.onChanged.addListener(this._handleStorageChangeOnForm);
 		this._updateForm(this._form, await this.getAll());
 
+		/* eslint-disable @typescript-eslint/strict-void-return -- Public async methods, errors are handled internally */
 		this._form.querySelector('.js-export')?.addEventListener('click', this.exportToFile);
 		this._form.querySelector('.js-import')?.addEventListener('click', this.importFromFile);
+		/* eslint-enable @typescript-eslint/strict-void-return */
 
 		onContextInvalidated.addListener(() => {
 			location.reload();
@@ -201,14 +209,18 @@ class OptionsSync<UserOptions extends Options> {
 	Removes any listeners added by `syncForm`
 	*/
 	stopSyncForm(): void {
-		if (this._form) {
-			this._form.removeEventListener('input', this._handleFormInput);
-			this._form.removeEventListener('submit', this._handleFormSubmit);
-			this._form.querySelector('.js-export')?.removeEventListener('click', this.exportToFile);
-			this._form.querySelector('.js-import')?.removeEventListener('click', this.importFromFile);
-			chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
-			delete this._form;
+		if (!this._form) {
+			return;
 		}
+
+		this._form.removeEventListener('input', this._handleFormInput);
+		this._form.removeEventListener('submit', this._handleFormSubmit);
+		/* eslint-disable @typescript-eslint/strict-void-return -- Public async methods, errors are handled internally */
+		this._form.querySelector('.js-export')?.removeEventListener('click', this.exportToFile);
+		this._form.querySelector('.js-import')?.removeEventListener('click', this.importFromFile);
+		/* eslint-enable @typescript-eslint/strict-void-return */
+		chrome.storage.onChanged.removeListener(this._handleStorageChangeOnForm);
+		delete this._form;
 	}
 
 	private get _jsonIdentityHelper() {
@@ -229,7 +241,7 @@ class OptionsSync<UserOptions extends Options> {
 			alertAndThrow('The file is not a valid JSON file.');
 		}
 
-		if (!(this._jsonIdentityHelper in options)) {
+		if (!Object.hasOwn(options, this._jsonIdentityHelper)) {
 			alertAndThrow('The file selected is not a valid recognized options file.');
 		}
 
@@ -301,12 +313,11 @@ class OptionsSync<UserOptions extends Options> {
 	}
 
 	private _decode(options: string | UserOptions): UserOptions {
-		let decompressed = options;
-		if (typeof options === 'string') {
-			decompressed = JSON.parse(decompressFromEncodedURIComponent(options)) as UserOptions;
-		}
+		const decompressed = typeof options === 'string'
+			? JSON.parse(decompressFromEncodedURIComponent(options)) as UserOptions
+			: options;
 
-		return {...this.defaults, ...decompressed as UserOptions};
+		return {...this.defaults, ...decompressed};
 	}
 
 	private async _runMigrations(migrations: Array<Migration<UserOptions>>): Promise<void> {
@@ -330,10 +341,9 @@ class OptionsSync<UserOptions extends Options> {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/member-ordering -- Needs to be near _handleFormSubmit
 	private readonly _handleFormInput = debounce(300, async ({target}: Event): Promise<void> => {
 		const field = target as HTMLInputElement;
-		if (!field.name) {
+		if (field.name === '') {
 			return;
 		}
 
@@ -394,7 +404,7 @@ class OptionsSync<UserOptions extends Options> {
 	private readonly _handleStorageChangeOnForm = (changes: Record<string, chrome.storage.StorageChange>, areaName: string): void => {
 		if (
 			areaName === this.storageType
-			&& this.storageName in changes
+			&& Object.hasOwn(changes, this.storageName)
 			&& (!document.hasFocus() || !this._form!.contains(document.activeElement)) // Avoid applying changes while the user is editing a field
 		) {
 			this._updateForm(this._form!, this._decode(changes[this.storageName]!.newValue as string));
