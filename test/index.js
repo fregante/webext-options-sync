@@ -36,8 +36,8 @@ test.beforeEach(() => {
 		version: 2,
 		background: {scripts: 'background.js'},
 	});
-	chrome.storage.sync.set.yields(undefined);
-	chrome.management.getSelf.yields({
+	chrome.storage.sync.set.resolves(undefined);
+	chrome.management.getSelf.resolves({
 		installType: 'development',
 	});
 });
@@ -50,7 +50,7 @@ test.serial('basic usage', t => {
 test.serial('getAll returns empty object when storage is empty', async t => {
 	chrome.storage.sync.get
 		.withArgs('options')
-		.yields({});
+		.resolves({});
 
 	const storage = new OptionsSync();
 	t.deepEqual(await storage.getAll(), {});
@@ -59,7 +59,7 @@ test.serial('getAll returns empty object when storage is empty', async t => {
 test.serial('getAll returns defaults when storage is empty', async t => {
 	chrome.storage.sync.get
 		.withArgs('settings')
-		.yields({});
+		.resolves({});
 
 	const storage = new OptionsSync(simpleSetup);
 	t.deepEqual(await storage.getAll(), simpleSetup.defaults);
@@ -73,7 +73,7 @@ test.serial('getAll returns saved options', async t => {
 
 	chrome.storage.sync.get
 		.withArgs('options')
-		.yields({options: compressOptions(previouslySavedOptions)});
+		.resolves({options: compressOptions(previouslySavedOptions)});
 
 	const storage = new OptionsSync();
 	t.deepEqual(await storage.getAll(), previouslySavedOptions);
@@ -87,7 +87,7 @@ test.serial('getAll returns saved legacy options', async t => {
 
 	chrome.storage.sync.get
 		.withArgs('options')
-		.yields({options: previouslySavedOptions});
+		.resolves({options: previouslySavedOptions});
 
 	const storage = new OptionsSync();
 	t.deepEqual(await storage.getAll(), previouslySavedOptions);
@@ -101,7 +101,7 @@ test.serial('getAll merges saved options with defaults', async t => {
 
 	chrome.storage.sync.get
 		.withArgs('settings')
-		.yields({settings: compressOptions(previouslySavedOptions)});
+		.resolves({settings: compressOptions(previouslySavedOptions)});
 
 	const storage = new OptionsSync(simpleSetup);
 	t.deepEqual(await storage.getAll(), {
@@ -187,7 +187,7 @@ test.serial('setAll keeps changed arrays', async t => {
 test.serial('set merges with existing data', async t => {
 	chrome.storage.sync.get
 		.withArgs('options')
-		.yields({options: {size: 30}});
+		.resolves({options: {size: 30}});
 
 	const storage = new OptionsSync();
 	await storage.set({sound: false});
@@ -203,7 +203,7 @@ test.serial('set merges with existing data', async t => {
 test.serial('migrations alter the stored options', async t => {
 	chrome.storage.sync.get
 		.withArgs('options')
-		.yields({options: {size: 30}});
+		.resolves({options: {size: 30}});
 
 	const storage = new OptionsSync({
 		migrations: [
@@ -237,7 +237,7 @@ test.serial('migrations alter the stored options', async t => {
 test.serial('migrations shouldn’t trigger updates if they don’t change anything', async t => {
 	chrome.storage.sync.get
 		.withArgs('options')
-		.yields({});
+		.resolves({});
 
 	const storage = new OptionsSync({
 		migrations: [
@@ -253,7 +253,7 @@ test.serial('migrations shouldn’t trigger updates if they don’t change anyth
 test.serial('migrations are completed before future get/set operations', async t => {
 	chrome.storage.sync.get
 		.withArgs('options')
-		.yields({});
+		.resolves({});
 
 	const storage = new OptionsSync({
 		migrations: [
@@ -261,7 +261,7 @@ test.serial('migrations are completed before future get/set operations', async t
 				savedOptions.foo = 'bar';
 				chrome.storage.sync.get
 					.withArgs('options')
-					.yields({
+					.resolves({
 						options: {
 							foo: 'bar',
 						},
@@ -278,7 +278,7 @@ test.serial('migrations are completed before future get/set operations', async t
 test.serial('removeUnused migration works', async t => {
 	chrome.storage.sync.get
 		.withArgs('settings')
-		.yields({
+		.resolves({
 			settings: {
 				size: 30, // Unused
 				sound: false, // Non-default

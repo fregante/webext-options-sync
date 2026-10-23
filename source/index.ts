@@ -1,5 +1,4 @@
 import {debounce} from 'throttle-debounce';
-import chromeP from 'webext-polyfill-kinda';
 import {isBackground} from 'webext-detect';
 import {serialize, deserialize} from '@fregante/dom-form-serializer/dist/dom-form-serializer.mjs';
 import LZString from 'lz-string';
@@ -23,7 +22,7 @@ function alertAndThrow(message: string): never {
 }
 
 async function shouldRunMigrations(): Promise<boolean> {
-	const self = await chromeP.management?.getSelf();
+	const self = await chrome.management?.getSelf();
 
 	// Always run migrations during development #25
 	if (self?.installType === 'development') {
@@ -138,7 +137,7 @@ class OptionsSync<UserOptions extends Options> {
 	}
 
 	private get storage(): chrome.storage.StorageArea {
-		return chromeP.storage[this.storageType];
+		return chrome.storage[this.storageType];
 	}
 
 	/**
