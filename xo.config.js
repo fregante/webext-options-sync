@@ -12,6 +12,7 @@ const xoConfig = [
 			},
 		},
 		rules: {
+			'unicorn/consistent-class-member-order': 'off', // TODO
 			'@typescript-eslint/no-unsafe-return': 'off',
 			'@typescript-eslint/no-dynamic-delete': 'off',
 			'@typescript-eslint/no-empty-function': 'off',
