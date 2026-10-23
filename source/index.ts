@@ -341,7 +341,6 @@ class OptionsSync<UserOptions extends Options> {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/member-ordering -- Needs to be near _handleFormSubmit
 	private readonly _handleFormInput = debounce(300, async ({target}: Event): Promise<void> => {
 		const field = target as HTMLInputElement;
 		if (field.name === '') {
